@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-base: #080B18;
+  --bg-sidebar: #0A0D1A;
+  --bg-card: #0E1225;
+  --bg-input: #131729;
+  --bg-elevated: #1E2035;
+  --bg-elevated-hover: #1A1F3A;
+  --bg-elevated-soft: #111528;
+  --bg-code: #0D1328;
+  --bg-code-gutter: #101737;
+  --bg-deep: #0D0D1A;
+  --bg-soft: #12121E;
+  --bg-viz: rgba(10,14,40,0.6);
+  --bg-viz-strong: rgba(20,28,61,0.9);
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(99,179,237,0.3);
+  --surface-01: rgba(255,255,255,0.01);
+  --surface-02: rgba(255,255,255,0.02);
+  --surface-03: rgba(255,255,255,0.03);
+  --surface-04: rgba(255,255,255,0.04);
+  --surface-05: rgba(255,255,255,0.05);
+  --surface-06: rgba(255,255,255,0.06);
+  --surface-07: rgba(255,255,255,0.07);
+  --surface-08: rgba(255,255,255,0.08);
+  --surface-09: rgba(255,255,255,0.09);
+  --surface-10: rgba(255,255,255,0.1);
+  --surface-12: rgba(255,255,255,0.12);
+  --surface-15: rgba(255,255,255,0.15);
+  --surface-20: rgba(255,255,255,0.2);
+  --surface-30: rgba(255,255,255,0.3);
+  --purple: #6845A8;
+  --purple-light: #7252AA;
+  --cyan: #00D4AA;
+  --cyan-light: #4EECD4;
+  --text-primary: #F0F2FF;
+  --text-soft: #D0D7E8;
+  --text-viz: #E8EAFF;
+  --text-secondary: #8892B0;
+  --text-muted: #4A5568;
+  --error: #FF6B8A;
+  --success: #00D4AA;
+  --xp: #FFB830;
+}
+
+:root.light-mode {
+  --bg-base: #F8F9FA;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-input: #F0F2F5;
+  --bg-elevated: #E9ECF2;
+  --bg-elevated-hover: #E2E6ED;
+  --bg-elevated-soft: #F1F3F6;
+  --bg-code: #151B2E;
+  --bg-code-gutter: #1B233B;
+  --bg-deep: #F3F4F7;
+  --bg-soft: #F6F7F9;
+  --bg-viz: rgba(241,244,249,0.9);
+  --bg-viz-strong: rgba(231,235,242,0.95);
+  --border: rgba(0,0,0,0.08);
+  --border-accent: rgba(99,179,237,0.4);
+  --surface-01: rgba(15,23,42,0.01);
+  --surface-02: rgba(15,23,42,0.02);
+  --surface-03: rgba(15,23,42,0.03);
+  --surface-04: rgba(15,23,42,0.04);
+  --surface-05: rgba(15,23,42,0.05);
+  --surface-06: rgba(15,23,42,0.06);
+  --surface-07: rgba(15,23,42,0.07);
+  --surface-08: rgba(15,23,42,0.08);
+  --surface-09: rgba(15,23,42,0.09);
+  --surface-10: rgba(15,23,42,0.1);
+  --surface-12: rgba(15,23,42,0.12);
+  --surface-15: rgba(15,23,42,0.15);
+  --surface-20: rgba(15,23,42,0.2);
+  --surface-30: rgba(15,23,42,0.3);
+  --purple: #6845A8;
+  --purple-light: #7252AA;
+  --cyan: #00B896;
+  --cyan-light: #20C997;
+  --text-primary: #1A1D29;
+  --text-soft: #364152;
+  --text-viz: #273449;
+  --text-secondary: #4A5568;
+  --text-muted: #8892B0;
+  --error: #D63401;
+  --success: #00B896;
+  --xp: #E8A500;
+}
+
+/* Box-sizing reset only — no blanket transition on * (causes layout jank on every state change) */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Theme color transition scoped to body only, not every element */
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Syne', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}

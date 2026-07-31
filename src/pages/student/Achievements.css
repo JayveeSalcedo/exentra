@@ -1,0 +1,189 @@
+.ach-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1000px;
+}
+
+.ach-header {
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(255,184,48,0.05));
+  border: 1px solid rgba(255,184,48,0.15);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ach-header-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--xp);
+  margin: 0 0 6px;
+}
+
+.ach-header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.ach-header-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.ach-header-count {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ach-count-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--xp);
+  display: block;
+  line-height: 1;
+}
+
+.ach-count-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ach-overall-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ach-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ach-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--xp), #FF8C00);
+  border-radius: 99px;
+}
+
+.ach-bar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--xp);
+  white-space: nowrap;
+}
+
+.ach-cat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.ach-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-06);
+  border-radius: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ach-card.unlocked {
+  background: var(--surface-01);
+}
+
+.ach-card.locked {
+  opacity: 0.55;
+}
+
+.ach-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ach-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ach-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.ach-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ach-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ach-prog-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ach-prog-track {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ach-prog-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s ease;
+}
+
+.ach-prog-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}

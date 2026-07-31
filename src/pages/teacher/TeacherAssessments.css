@@ -1,0 +1,1221 @@
+/* ── Teacher Assessments Page ────────────────────────────────────────────── */
+
+.ta2-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 960px;
+}
+
+/* Header */
+.ta2-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ta2-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.ta2-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 5px;
+}
+
+.ta2-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.ta2-generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(124,92,191,0.2), rgba(0,212,170,0.1));
+  border: 1px solid rgba(124,92,191,0.4);
+  border-radius: 10px;
+  color: var(--purple-light);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ta2-generate-btn:hover {
+  background: linear-gradient(135deg, rgba(124,92,191,0.3), rgba(0,212,170,0.15));
+  color: var(--text-primary);
+}
+
+/* Stats */
+.ta2-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.ta2-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--surface-06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ta2-stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ta2-stat-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px;
+}
+
+.ta2-stat-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Filters */
+.ta2-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ta2-filter-btn {
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--surface-08);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ta2-filter-btn:hover { background: var(--surface-04); color: var(--text-primary); }
+.ta2-filter-btn.active {
+  background: rgba(124,92,191,0.15);
+  border-color: rgba(124,92,191,0.4);
+  color: var(--text-primary);
+}
+
+.ta2-refresh-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-07);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ta2-refresh-btn:hover { color: var(--text-primary); background: var(--surface-04); }
+
+/* Loading / Empty */
+.ta2-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.ta2-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--surface-06);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: ta2-spin 0.7s linear infinite;
+  display: block;
+}
+@keyframes ta2-spin { to { transform: rotate(360deg); } }
+
+.ta2-spin {
+  animation: ta2-spin 0.7s linear infinite;
+}
+
+.ta2-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.ta2-empty-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.ta2-empty-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* List */
+.ta2-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Card */
+.ta2-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--surface-06);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.ta2-card.published { border-color: rgba(0,212,170,0.1); }
+.ta2-card.draft     { border-color: var(--surface-05); }
+
+.ta2-card-accent {
+  width: 4px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.ta2-card-main {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Top row: badges + actions */
+.ta2-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ta2-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ta2-type-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+
+.ta2-diff-badge {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.ta2-module-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  background: var(--surface-04);
+  border: 1px solid var(--surface-06);
+  border-radius: 99px;
+  padding: 2px 8px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Card actions */
+.ta2-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ta2-publish-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.ta2-publish-btn.publish {
+  background: rgba(0,212,170,0.08);
+  border-color: rgba(0,212,170,0.3);
+  color: var(--cyan);
+}
+.ta2-publish-btn.publish:hover {
+  background: rgba(0,212,170,0.15);
+}
+
+.ta2-publish-btn.unpublish {
+  background: rgba(255,184,48,0.08);
+  border-color: rgba(255,184,48,0.25);
+  color: var(--xp);
+}
+.ta2-publish-btn.unpublish:hover {
+  background: rgba(255,184,48,0.14);
+}
+
+.ta2-publish-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ta2-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-07);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ta2-delete-btn:hover {
+  background: rgba(255,107,138,0.1);
+  border-color: rgba(255,107,138,0.3);
+  color: var(--error);
+}
+
+.ta2-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-07);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ta2-expand-btn:hover { background: var(--surface-04); color: var(--text-primary); }
+
+/* Confirm delete inline */
+.ta2-confirm-delete {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--error);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ta2-confirm-yes {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,107,138,0.4);
+  background: rgba(255,107,138,0.12);
+  color: var(--error);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ta2-confirm-no {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--surface-08);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Title row */
+.ta2-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ta2-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.ta2-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+.ta2-status-badge.pub {
+  color: var(--cyan);
+  border-color: rgba(0,212,170,0.3);
+  background: rgba(0,212,170,0.08);
+}
+.ta2-status-badge.draft {
+  color: var(--text-secondary);
+  border-color: var(--surface-10);
+  background: var(--surface-03);
+}
+
+/* Meta row */
+.ta2-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.ta2-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Expanded questions (legacy, kept for compatibility) */
+.ta2-questions {
+  overflow: hidden;
+}
+
+.ta2-no-questions {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.ta2-q-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ta2-q-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--purple-light);
+  background: rgba(155,126,212,0.1);
+  border: 1px solid rgba(155,126,212,0.2);
+  border-radius: 6px;
+  padding: 3px 8px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ta2-q-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ta2-q-text {
+  font-size: 13px;
+  color: #C8D0E0;
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.ta2-q-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ta2-q-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: var(--surface-02);
+  border: 1px solid var(--surface-05);
+}
+
+.ta2-q-choice.correct {
+  background: rgba(0,212,170,0.07);
+  border-color: rgba(0,212,170,0.2);
+  color: var(--cyan);
+}
+
+.ta2-q-choice-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.ta2-q-explanation {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 8px 12px;
+  background: rgba(155,126,212,0.06);
+  border: 1px solid rgba(155,126,212,0.12);
+  border-radius: 7px;
+}
+.ta2-q-explanation span {
+  color: var(--purple-light);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+/* Overlay (behind confirm dialog) */
+.ta2-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ta2-stats { grid-template-columns: repeat(2, 1fr); }
+  .ta2-card-top { flex-direction: column; align-items: flex-start; }
+  .ta2-card-actions { width: 100%; justify-content: flex-end; }
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+
+.ta2-expanded-panel {
+  overflow: hidden;
+  border-top: 1px solid var(--surface-05);
+  margin-top: 4px;
+  padding-top: 14px;
+}
+
+.ta2-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.ta2-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-07);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ta2-tab:hover { background: var(--surface-04); color: var(--text-primary); }
+.ta2-tab.active {
+  background: rgba(155,126,212,0.12);
+  border-color: rgba(155,126,212,0.35);
+  color: var(--purple-light);
+}
+
+.ta2-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: rgba(255,107,138,0.15);
+  border: 1px solid rgba(255,107,138,0.3);
+  color: var(--error);
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.ta2-questions-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Students Panel ───────────────────────────────────────────────────── */
+
+.ta2-students-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ta2-students-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ta2-students-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.ta2-students-empty p {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.ta2-students-empty span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Summary bar */
+.ta2-students-summary {
+  display: flex;
+  gap: 0;
+  background: var(--bg-base);
+  border: 1px solid var(--surface-06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ta2-students-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 12px;
+  border-right: 1px solid var(--surface-05);
+}
+.ta2-students-summary-item:last-child { border-right: none; }
+
+.ta2-students-summary-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.ta2-students-summary-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+}
+
+/* Student list */
+.ta2-students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ta2-students-list-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  padding: 5px 12px 5px 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.ta2-student-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface-02);
+  border: 1px solid var(--surface-04);
+  border-radius: 9px;
+  transition: background 0.15s;
+}
+.ta2-student-row:hover {
+  background: var(--surface-04);
+  border-color: var(--surface-07);
+}
+
+.ta2-student-rank {
+  width: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.ta2-student-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ta2-student-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(155,126,212,0.2), rgba(0,212,170,0.15));
+  border: 1px solid rgba(155,126,212,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple-light);
+  flex-shrink: 0;
+}
+
+.ta2-student-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ta2-student-username {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.ta2-student-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.ta2-score-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+
+.ta2-score-pending {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ta2-student-raw {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.ta2-student-result {
+  flex-shrink: 0;
+  min-width: 58px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Create Manually button */
+.ta2-create-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: var(--surface-04);
+  border: 1px solid var(--surface-10);
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.ta2-create-btn:hover {
+  color: var(--text-primary);
+  border-color: rgba(124,92,191,0.4);
+  background: rgba(124,92,191,0.08);
+}
+
+.ta2-result-pass,
+.ta2-result-fail,
+.ta2-result-pending {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+
+.ta2-result-pass {
+  color: var(--cyan);
+  border-color: rgba(0,212,170,0.3);
+  background: rgba(0,212,170,0.08);
+}
+.ta2-result-fail {
+  color: var(--error);
+  border-color: rgba(255,107,138,0.3);
+  background: rgba(255,107,138,0.08);
+}
+.ta2-result-pending {
+  color: var(--text-secondary);
+  border-color: var(--surface-10);
+  background: var(--surface-03);
+}
+
+/* ── Assignment / Activity Grading ────────────────────────────────────── */
+
+.ta2-assignment-submissions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ta2-assignment-grade-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ta2-assignment-sub-card {
+  background: var(--bg-base);
+  border: 1px solid var(--surface-06);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+.ta2-assignment-sub-card:hover {
+  border-color: var(--surface-10);
+}
+
+/* Files list */
+.ta2-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ta2-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface-03);
+  border: 1px solid var(--surface-07);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.18s;
+  cursor: pointer;
+}
+.ta2-file-row:hover {
+  background: var(--surface-06);
+  border-color: var(--surface-12);
+}
+
+.ta2-file-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #C8D0E0;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ta2-no-files {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* Grade row */
+.ta2-grade-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--surface-05);
+  flex-wrap: wrap;
+}
+
+.ta2-grade-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.ta2-grade-input {
+  width: 90px;
+  padding: 7px 10px;
+  background: var(--surface-04);
+  border: 1px solid var(--surface-12);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.ta2-grade-input:focus {
+  border-color: rgba(155,126,212,0.5);
+  background: rgba(155,126,212,0.06);
+}
+.ta2-grade-input::-webkit-inner-spin-button,
+.ta2-grade-input::-webkit-outer-spin-button { opacity: 1; }
+
+.ta2-grade-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ta2-grade-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(155,126,212,0.4);
+  background: rgba(155,126,212,0.1);
+  color: var(--purple-light);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.ta2-grade-btn:hover:not(:disabled) {
+  background: rgba(155,126,212,0.2);
+  color: var(--text-primary);
+}
+.ta2-grade-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ta2-grade-btn.saved {
+  background: rgba(0,212,170,0.1);
+  border-color: rgba(0,212,170,0.35);
+  color: var(--cyan);
+}
+
+
+/* ── File row action buttons ────────────────────────────────────────────────── */
+.ta2-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface-02);
+  border: 1px solid var(--surface-06);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ta2-file-row:hover {
+  background: var(--surface-04);
+}
+
+.ta2-file-emoji {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ta2-file-name {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ta2-file-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ta2-file-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,212,170,0.3);
+  background: rgba(0,212,170,0.08);
+  color: var(--cyan);
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.ta2-file-view-btn:hover:not(:disabled) {
+  background: rgba(0,212,170,0.16);
+  border-color: rgba(0,212,170,0.5);
+}
+
+.ta2-file-view-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ta2-file-dl-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--surface-10);
+  background: var(--surface-04);
+  color: var(--text-secondary);
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.ta2-file-dl-btn:hover:not(:disabled) {
+  background: var(--surface-08);
+  color: var(--text-soft);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.ta2-file-dl-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── File Preview Modal ─────────────────────────────────────────────────────── */
+.ta2-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ta2-preview-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--surface-10);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+
+.ta2-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--surface-07);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ta2-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ta2-preview-emoji {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.ta2-preview-filename {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ta2-preview-student {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.ta2-preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ta2-preview-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-10);
+  background: var(--surface-04);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ta2-preview-close:hover {
+  background: rgba(255,107,138,0.1);
+  border-color: rgba(255,107,138,0.3);
+  color: var(--error);
+}
+
+.ta2-preview-body {
+  flex: 1;
+  overflow: hidden;
+  background: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.ta2-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ta2-preview-iframe {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  display: block;
+}

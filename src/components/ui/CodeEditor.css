@@ -1,0 +1,48 @@
+.code-editor {
+  background: var(--bg-code);
+}
+
+.code-editor .cm-editor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  background: var(--bg-code);
+  border-radius: 0 0 14px 14px;
+}
+
+.code-editor .cm-scroller {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-code);
+}
+
+.code-editor .cm-gutters {
+  background: var(--bg-code-gutter);
+  color: #6B75A7;
+  border-right: 1px solid var(--surface-08);
+}
+
+.code-editor .cm-gutterElement {
+  padding: 0 8px 0 6px;
+}
+
+.code-editor .cm-content {
+  padding: 12px 12px 14px;
+}
+
+.code-editor .cm-activeLine {
+  background: var(--surface-04);
+}
+
+.code-editor .cm-activeLineGutter {
+  background: var(--surface-06);
+  color: #B3B9D8;
+}
+
+.code-editor .cm-cursor {
+  border-left-color: var(--cyan);
+}
+
+.code-editor .cm-selectionBackground,
+.code-editor .cm-content ::selection {
+  background: rgba(124, 92, 191, 0.35);
+}
