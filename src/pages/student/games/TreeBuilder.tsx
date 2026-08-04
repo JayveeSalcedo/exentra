@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Users, Zap, AlertTriangle, GitBranch,
+  Timer, Trash2, Users, Zap, AlertTriangle, GitBranch, Volume2, VolumeX,
 } from 'lucide-react'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './TreeBuilder.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -365,6 +366,7 @@ function TimerBar({ seconds, onExpire }: { seconds: number; onExpire: () => void
     const t = setInterval(() => {
       setRem(prev => {
         if (prev <= 1) { clearInterval(t); onExpire(); return 0 }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -479,6 +481,7 @@ function MCGrid({
   const [chosen, setChosen] = useState<string | null>(null)
   function handle(o: MCOption) {
     if (locked || chosen) return
+    sfx.select()
     setChosen(o.label)
     onPick(o)
   }
@@ -536,6 +539,19 @@ export default function TreeBuilder() {
   const [wrongMsg,      setWrongMsg]      = useState<string | null>(null)
   const runStart = useRef(Date.now())
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = correct / TOTAL_ROUNDS
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const cfg         = DIFFICULTY_CONFIG[difficulty]
   const activeValue  = challenge?.stream?.[streamIndex]
 
@@ -582,6 +598,8 @@ export default function TreeBuilder() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0); setCombo(0); setRound(0); setCorrect(0); setOps(0); setBadges([])
     setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
     loadChallenge(0)
@@ -589,6 +607,7 @@ export default function TreeBuilder() {
   }
 
   function completeRound(extra = 0) {
+    sfx.success()
     const elapsed    = (Date.now() - runStart.current) / 1000
     const speedBonus = elapsed < (challenge?.timeLimit ?? cfg.time) * 0.5 ? POINT_SPEED : 0
     const nextCombo  = combo + 1
@@ -613,6 +632,7 @@ export default function TreeBuilder() {
   }
 
   function wrong(msg?: string) {
+    sfx.error()
     setScore(prev => Math.max(0, prev + POINT_WRONG))
     setCombo(0)
     setFeedback('wrong')
@@ -624,6 +644,7 @@ export default function TreeBuilder() {
 
   function useHint() {
     if (hintUsed) return
+    sfx.hint()
     setHintUsed(true)
     setHintVisible(true)
     setScore(prev => Math.max(0, prev + POINT_HINT))
@@ -641,8 +662,16 @@ export default function TreeBuilder() {
   function handleMC(o: MCOption) {
     setMcLocked(true)
     setOps(prev => prev + 1)
-    if (o.correct) setTimeout(() => completeRound(), 650)
-    else wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    if (o.correct) {
+      setTimeout(() => completeRound(), 650)
+      return
+    }
+    wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    const nextRound = round + 1
+    setTimeout(() => {
+      if (nextRound >= TOTAL_ROUNDS) setPhase('result')
+      else { setRound(nextRound); loadChallenge(nextRound) }
+    }, 1400)
   }
 
   /* ── build_bst: drag value, drop on a node's left/right slot ── */
@@ -672,6 +701,7 @@ export default function TreeBuilder() {
     const nextNodes = [...updated, newNode]
     setLiveNodes(nextNodes)
     setOps(prev => prev + 1)
+    sfx.place()
     const nextIndex = streamIndex + 1
     setStreamIndex(nextIndex)
     setDragValue(null)
@@ -684,6 +714,7 @@ export default function TreeBuilder() {
     setLiveNodes([{ id: newId, value: activeValue, left: null, right: null }])
     setLiveRootId(newId)
     setOps(prev => prev + 1)
+    sfx.place()
     const nextIndex = streamIndex + 1
     setStreamIndex(nextIndex)
     setDragValue(null)
@@ -702,6 +733,7 @@ export default function TreeBuilder() {
     const nextClicked = [...clickedIds, nodeId]
     setClickedIds(nextClicked)
     setOps(prev => prev + 1)
+    sfx.place()
     if (nextClicked.length >= challenge.expectedOrder.length) completeRound()
   }
 
@@ -712,9 +744,14 @@ export default function TreeBuilder() {
     return (
       <div className="tb-page">
         <div className="tb-grid-bg" />
-        <button className="tb-back-btn" onClick={() => navigate('/student/games')}>
-          <ArrowLeft size={15} /> Back
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="tb-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}>
+            <ArrowLeft size={15} /> Back
+          </button>
+          <button className="tb-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <section className="tb-lobby">
           <motion.div className="tb-logo-tree" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}>
             <GitBranch size={40} color={ACCENT} />
@@ -816,13 +853,16 @@ export default function TreeBuilder() {
 
       {/* HUD */}
       <div className="tb-hud">
-        <button className="tb-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="tb-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="tb-score"><Zap size={14} /> {score.toLocaleString()}</div>
         <div className="tb-rounds">
           {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
             <span key={i} className={i < round ? 'done' : i === round ? 'active' : ''} />
           ))}
         </div>
+        <button className="tb-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+          {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+        </button>
         <span className="tb-pill" style={{ color: cfg.color, borderColor: `${cfg.color}55` }}>{cfg.label}</span>
         {combo >= 2 && <span className="tb-pill tb-combo">×{combo}</span>}
         {mode === 'multiplayer' && <span className="tb-pill"><Users size={11} /> Race</span>}
@@ -913,7 +953,7 @@ export default function TreeBuilder() {
                       animate={{ x: 0, opacity: 1 }}
                       exit={{ x: -24, opacity: 0 }}
                       draggable
-                      onDragStart={((e: React.DragEvent<HTMLDivElement>) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(activeValue)); setDragValue(activeValue) }) as any}
+                      onDragStart={((e: React.DragEvent<HTMLDivElement>) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(activeValue)); sfx.pick(); setDragValue(activeValue) }) as any}
                     >
                       {activeValue}
                     </motion.div>

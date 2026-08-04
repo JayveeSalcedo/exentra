@@ -4,6 +4,22 @@
    Curved SVG arrows, node boxes, doubly ↔ singly styles.
 ═══════════════════════════════════════════════════════════════════════════ */
 
+.nc-sfx-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.nc-sfx-toggle:hover { color: var(--text-primary); border-color: rgba(155,126,212,0.35); }
+
 @keyframes gridMove {
   from { background-position: 0 0; }
   to   { background-position: 40px 40px; }

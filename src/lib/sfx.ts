@@ -31,54 +31,62 @@ export function setSfxMuted(muted: boolean) {
   localStorage.setItem(MUTE_KEY, muted ? '1' : '0')
 }
 
-/** React hook for a mute toggle button — persists across reloads. */
+// ── Background music ────────────────────────────────────────────────────
+// Each track gets its own singleton looping <audio> element (keyed by src),
+// so assessments and every game can each have their own music without
+// stepping on each other, while all sharing one mute toggle.
+const musicInstances: Record<string, HTMLAudioElement> = {}
+
+function getTrack(src: string, volume: number): HTMLAudioElement | null {
+  if (typeof window === 'undefined') return null
+  if (!musicInstances[src]) {
+    const el = new Audio(src)
+    el.loop = true
+    el.volume = volume
+    el.muted = isSfxMuted()
+    musicInstances[src] = el
+  }
+  return musicInstances[src]
+}
+
+/** Creates a play/stop controller for a looping background track at `src`. */
+export function createMusicController(src: string, volume = 0.16) {
+  return {
+    /** Start (or resume) the loop. Call from a user-gesture handler (e.g. a "Start" button). */
+    play: () => {
+      const el = getTrack(src, volume)
+      if (!el) return
+      el.muted = isSfxMuted()
+      el.play().catch(() => {
+        // Autoplay can still be blocked in rare cases — safe to ignore, SFX still works.
+      })
+    },
+    /** Stop and rewind — use when the attempt/round ends or the page is left. */
+    stop: () => {
+      const el = musicInstances[src]
+      if (!el) return
+      el.pause()
+      el.currentTime = 0
+    },
+  }
+}
+
+/** Assessment (quiz/exam/activity) background music. */
+export const music = createMusicController('/music/quiz-bg.mp3', 0.16)
+
+/** Shared background music for every game (currently one track for all games). */
+export const gameMusic = createMusicController('/music/array.mp3', 0.14)
+
+/** React hook for a mute toggle button — persists across reloads and mutes every active track. */
 export function useSfxToggle() {
   const [muted, setMutedState] = useState<boolean>(() => isSfxMuted())
 
   useEffect(() => {
     setSfxMuted(muted)
-    music.setMuted(muted)
+    Object.values(musicInstances).forEach(el => { el.muted = muted })
   }, [muted])
 
   return { muted, toggle: () => setMutedState(m => !m) }
-}
-
-// ── Background music (public/music/quiz-bg.mp3) ────────────────────────────
-// Single looping <audio> element, lazily created and reused across the
-// lobby → quiz/file-submission flow so it survives phase changes without
-// restarting from zero each time.
-let musicEl: HTMLAudioElement | null = null
-
-function getMusicEl(): HTMLAudioElement | null {
-  if (typeof window === 'undefined') return null
-  if (!musicEl) {
-    musicEl = new Audio('/music/quiz-bg.mp3')
-    musicEl.loop = true
-    musicEl.volume = 0.16
-    musicEl.muted = isSfxMuted()
-  }
-  return musicEl
-}
-
-export const music = {
-  /** Start (or resume) the loop. Call from a user-gesture handler (e.g. "Start Assessment"). */
-  play: () => {
-    const el = getMusicEl()
-    if (!el) return
-    el.muted = isSfxMuted()
-    el.play().catch(() => {
-      // Autoplay can still be blocked in rare cases — safe to ignore, SFX still works.
-    })
-  },
-  /** Stop and rewind — use when the attempt ends (submit) or the page is left. */
-  stop: () => {
-    if (!musicEl) return
-    musicEl.pause()
-    musicEl.currentTime = 0
-  },
-  setMuted: (m: boolean) => {
-    if (musicEl) musicEl.muted = m
-  },
 }
 
 interface ToneOpts {

@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Users, Zap, AlertTriangle, Map,
+  Timer, Trash2, Users, Zap, AlertTriangle, Map, Volume2, VolumeX,
 } from 'lucide-react'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './PathExplorer.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -509,6 +510,7 @@ function TimerBar({ seconds, onExpire }: { seconds: number; onExpire: () => void
     const t = setInterval(() => {
       setRem(prev => {
         if (prev <= 1) { clearInterval(t); onExpire(); return 0 }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -597,6 +599,7 @@ function MCGrid({
   const [chosen, setChosen] = useState<string | null>(null)
   function handle(o: MCOption) {
     if (locked || chosen) return
+    sfx.select()
     setChosen(o.label)
     onPick(o)
   }
@@ -650,6 +653,19 @@ export default function PathExplorer() {
   const [wrongMsg,      setWrongMsg]      = useState<string | null>(null)
   const runStart = useRef(Date.now())
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = correct / TOTAL_ROUNDS
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const cfg = DIFFICULTY_CONFIG[difficulty]
 
   /* ── Hint text ── */
@@ -691,6 +707,8 @@ export default function PathExplorer() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0); setCombo(0); setRound(0); setCorrect(0); setOps(0); setBadges([])
     setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
     loadChallenge(0)
@@ -698,6 +716,7 @@ export default function PathExplorer() {
   }
 
   function completeRound(extra = 0) {
+    sfx.success()
     const elapsed    = (Date.now() - runStart.current) / 1000
     const speedBonus = elapsed < (challenge?.timeLimit ?? cfg.time) * 0.5 ? POINT_SPEED : 0
     const nextCombo  = combo + 1
@@ -722,6 +741,7 @@ export default function PathExplorer() {
   }
 
   function wrong(msg?: string) {
+    sfx.error()
     setScore(prev => Math.max(0, prev + POINT_WRONG))
     setCombo(0)
     setFeedback('wrong')
@@ -733,6 +753,7 @@ export default function PathExplorer() {
 
   function useHint() {
     if (hintUsed) return
+    sfx.hint()
     setHintUsed(true)
     setHintVisible(true)
     setScore(prev => Math.max(0, prev + POINT_HINT))
@@ -766,6 +787,7 @@ export default function PathExplorer() {
     const nextClicked = [...clickedIds, nodeId]
     setClickedIds(nextClicked)
     setOps(prev => prev + 1)
+    sfx.place()
     if (nextClicked.length >= challenge.expectedOrder.length) completeRound()
   }
 
@@ -776,9 +798,14 @@ export default function PathExplorer() {
     return (
       <div className="pe-page">
         <div className="pe-grid-bg" />
-        <button className="pe-back-btn" onClick={() => navigate('/student/games')}>
-          <ArrowLeft size={15} /> Back
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="pe-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}>
+            <ArrowLeft size={15} /> Back
+          </button>
+          <button className="pe-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <section className="pe-lobby">
           <motion.div className="pe-logo-map" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}>
             <Map size={40} color={ACCENT} />
@@ -880,13 +907,16 @@ export default function PathExplorer() {
 
       {/* HUD */}
       <div className="pe-hud">
-        <button className="pe-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="pe-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="pe-score"><Zap size={14} /> {score.toLocaleString()}</div>
         <div className="pe-rounds">
           {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
             <span key={i} className={i < round ? 'done' : i === round ? 'active' : ''} />
           ))}
         </div>
+        <button className="pe-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+          {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+        </button>
         <span className="pe-pill" style={{ color: cfg.color, borderColor: `${cfg.color}55` }}>{cfg.label}</span>
         {combo >= 2 && <span className="pe-pill pe-combo">×{combo}</span>}
         {mode === 'multiplayer' && <span className="pe-pill"><Users size={11} /> Race</span>}

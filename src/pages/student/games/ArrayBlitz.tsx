@@ -7,7 +7,7 @@ import {
   ArrowLeftRight, Trash2, PlusSquare, Target, Sparkles, Undo2, Volume2, VolumeX,
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
-import { sfx, useSfxToggle } from '../../../lib/sfx'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './ArrayBlitz.css'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -321,11 +321,14 @@ export default function ArrayBlitz() {
 
   useEffect(() => {
     if (phase === 'result') {
+      gameMusic.stop()
       const acc = totalQuestions > 0 ? correct / totalQuestions : 0
       if (acc >= 0.6) sfx.success()
       else sfx.needsWork()
     }
   }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
 
   const isCompact = current.length > 7 || (challenge?.goal.length ?? 0) > 7
 
@@ -343,6 +346,7 @@ export default function ArrayBlitz() {
   }
 
   function startGame() {
+    gameMusic.play()
     setScore(0); setCombo(0); setTotalQuestions(0); setCorrect(0); setRoundEfficiencies([])
     setMission(RUN_MISSIONS[randomInt(0, RUN_MISSIONS.length - 1)])
     setMissionPaid(false); setBestStreak(0); setHintsUsedCount(0)
@@ -731,7 +735,7 @@ export default function ArrayBlitz() {
       <div className="ab-blueprint-bg" />
 
       <div className="ab-hud">
-        <button className="ab-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="ab-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
 
         <div className="ab-hud-score-wrap">
           <div className="ab-hud-score">

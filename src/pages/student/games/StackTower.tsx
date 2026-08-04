@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Undo2, Users, Zap, AlertTriangle,
+  Timer, Trash2, Undo2, Users, Zap, AlertTriangle, Volume2, VolumeX,
 } from 'lucide-react'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './StackTower.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -230,6 +231,7 @@ function TimerBar({ seconds, onWindowClosed }: { seconds: number; onWindowClosed
     const t = setInterval(() => {
       setRem(prev => {
         if (prev <= 1) { clearInterval(t); closedRef.current?.(); return 0 }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -377,6 +379,19 @@ export default function StackTower() {
   const [wrongMsg,      setWrongMsg]      = useState<string | null>(null)
   const runStart = useRef(Date.now())
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = correct / TOTAL_ROUNDS
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const cfg       = DIFFICULTY_CONFIG[difficulty]
   const activeToken = challenge?.stream?.[streamIndex]
 
@@ -421,6 +436,8 @@ export default function StackTower() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0); setCombo(0); setRound(0); setCorrect(0); setOps(0); setBadges([])
     setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
     loadChallenge(0)
@@ -428,6 +445,7 @@ export default function StackTower() {
   }
 
   function completeRound(extra = 0) {
+    sfx.success()
     const elapsed    = (Date.now() - runStart.current) / 1000
     const speedBonus = elapsed < (challenge?.timeLimit ?? cfg.time) * 0.5 ? POINT_SPEED : 0
     const nextCombo  = combo + 1
@@ -452,6 +470,7 @@ export default function StackTower() {
   }
 
   function wrong(msg?: string) {
+    sfx.error()
     setScore(prev => Math.max(0, prev + POINT_WRONG))
     setCombo(0)
     setFeedback('wrong')
@@ -463,6 +482,7 @@ export default function StackTower() {
 
   function useHint() {
     if (hintUsed) return
+    sfx.hint()
     setHintUsed(true)
     setHintVisible(true)
     setScore(prev => Math.max(0, prev + POINT_HINT))
@@ -487,6 +507,7 @@ export default function StackTower() {
     const next = [...stack, value]
     setStack(next)
     setOps(prev => prev + 1)
+    sfx.place()
     if (challenge.target && stackEq(next, challenge.target)) completeRound()
   }
 
@@ -496,6 +517,7 @@ export default function StackTower() {
     const next = stack.slice(0, -1)
     setStack(next)
     setOps(prev => prev + 1)
+    sfx.place()
     if (challenge.target && stackEq(next, challenge.target)) completeRound()
   }
 
@@ -509,6 +531,7 @@ export default function StackTower() {
     setStack(prev => [...prev, tok])
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
     if (streamIndex + 1 >= challenge.stream.length) setBracketDone(true)
   }
 
@@ -529,6 +552,7 @@ export default function StackTower() {
     setStack(prev => prev.slice(0, -1))
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
     if (streamIndex + 1 >= challenge.stream.length) setBracketDone(true)
   }
 
@@ -547,6 +571,7 @@ export default function StackTower() {
     setStack(prev => [...prev, challenge.stream![origIndex]])
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
   }
 
   function handleReversePop() {
@@ -559,6 +584,7 @@ export default function StackTower() {
     setStack(next)
     setOutput(nextOut)
     setOps(prev => prev + 1)
+    sfx.place()
     if (nextOut.join('') === challenge.answer) completeRound()
   }
 
@@ -571,6 +597,7 @@ export default function StackTower() {
     setStack(prev => [...prev, activeToken])
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
   }
 
   function handlePostfixOperate() {
@@ -585,6 +612,7 @@ export default function StackTower() {
     setStack(next)
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
     if (streamIndex + 1 >= (challenge.stream?.length ?? 0) && next[0] === challenge.answer) completeRound()
   }
 
@@ -595,9 +623,14 @@ export default function StackTower() {
     return (
       <div className="st-page">
         <div className="st-grid-bg" />
-        <button className="st-back-btn" onClick={() => navigate('/student/games')}>
-          <ArrowLeft size={15} /> Back
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="st-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}>
+            <ArrowLeft size={15} /> Back
+          </button>
+          <button className="st-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <section className="st-lobby">
           <motion.div className="st-logo-tower" animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}>
             <span /><span /><span /><span />
@@ -699,13 +732,16 @@ export default function StackTower() {
 
       {/* HUD */}
       <div className="st-hud">
-        <button className="st-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="st-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="st-score"><Zap size={14} /> {score.toLocaleString()}</div>
         <div className="st-rounds">
           {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
             <span key={i} className={i < round ? 'done' : i === round ? 'active' : ''} />
           ))}
         </div>
+        <button className="st-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+          {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+        </button>
         <span className="st-pill" style={{ color: cfg.color, borderColor: `${cfg.color}55` }}>{cfg.label}</span>
         {combo >= 2 && <span className="st-pill st-combo">×{combo}</span>}
         {mode === 'multiplayer' && <span className="st-pill"><Users size={11} /> Race</span>}
@@ -782,6 +818,7 @@ export default function StackTower() {
                       onDragStart={e => {
                         e.dataTransfer.effectAllowed = 'move'
                         e.dataTransfer.setData('text/plain', v)
+                        sfx.pick()
                         setDragToken(v)
                       }}
                     >
@@ -805,6 +842,7 @@ export default function StackTower() {
                         onDragStart={!done ? e => {
                           e.dataTransfer.effectAllowed = 'move'
                           e.dataTransfer.setData('text/plain', String(origIndex))
+                          sfx.pick()
                           setDragToken(String(origIndex))
                         } : undefined}
                       >
@@ -828,7 +866,7 @@ export default function StackTower() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 24, opacity: 0 }}
                         draggable
-                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); setDragToken(activeToken) }}
+                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); sfx.pick(); setDragToken(activeToken) }}
                       >
                         {activeToken}
                       </motion.div>
@@ -860,6 +898,7 @@ export default function StackTower() {
                   constrained={challenge!.constrained}
                   onTopDragStart={(challenge!.type === 'build_target' || challenge!.type === 'reverse_string') && stack.length > 0 ? () => {
                     // mark that the next drop is a pop
+                    sfx.pick()
                     setDragToken('__pop__')
                   } : undefined}
                 />
@@ -903,14 +942,14 @@ export default function StackTower() {
                       <div
                         className="st-verdict-chip valid"
                         draggable
-                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragToken('valid') }}
+                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; sfx.pick(); setDragToken('valid') }}
                       >
                         ✓ Valid
                       </div>
                       <div
                         className="st-verdict-chip invalid"
                         draggable
-                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragToken('invalid') }}
+                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; sfx.pick(); setDragToken('invalid') }}
                       >
                         ✗ Invalid
                       </div>

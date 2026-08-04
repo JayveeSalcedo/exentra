@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Users, Zap, AlertTriangle, ArrowRightLeft,
+  Timer, Trash2, Users, Zap, AlertTriangle, ArrowRightLeft, Volume2, VolumeX,
 } from 'lucide-react'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './QueueRush.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -340,6 +341,7 @@ function TimerBar({ seconds, onExpire }: { seconds: number; onExpire: () => void
     const t = setInterval(() => {
       setRem(prev => {
         if (prev <= 1) { clearInterval(t); onExpire(); return 0 }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -414,6 +416,7 @@ function MCGrid({
   const [chosen, setChosen] = useState<string | null>(null)
   function handle(o: MCOption) {
     if (locked || chosen) return
+    sfx.select()
     setChosen(o.label)
     onPick(o)
   }
@@ -497,6 +500,19 @@ export default function QueueRush() {
   const [wrongMsg,      setWrongMsg]      = useState<string | null>(null)
   const runStart = useRef(Date.now())
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = correct / TOTAL_ROUNDS
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const cfg         = DIFFICULTY_CONFIG[difficulty]
   const activeToken  = challenge?.stream?.[streamIndex]
 
@@ -539,6 +555,8 @@ export default function QueueRush() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0); setCombo(0); setRound(0); setCorrect(0); setOps(0); setBadges([])
     setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
     loadChallenge(0)
@@ -546,6 +564,7 @@ export default function QueueRush() {
   }
 
   function completeRound(extra = 0) {
+    sfx.success()
     const elapsed    = (Date.now() - runStart.current) / 1000
     const speedBonus = elapsed < (challenge?.timeLimit ?? cfg.time) * 0.5 ? POINT_SPEED : 0
     const nextCombo  = combo + 1
@@ -570,6 +589,7 @@ export default function QueueRush() {
   }
 
   function wrong(msg?: string) {
+    sfx.error()
     setScore(prev => Math.max(0, prev + POINT_WRONG))
     setCombo(0)
     setFeedback('wrong')
@@ -581,6 +601,7 @@ export default function QueueRush() {
 
   function useHint() {
     if (hintUsed) return
+    sfx.hint()
     setHintUsed(true)
     setHintVisible(true)
     setScore(prev => Math.max(0, prev + POINT_HINT))
@@ -598,8 +619,16 @@ export default function QueueRush() {
   function handleMC(o: MCOption) {
     setMcLocked(true)
     setOps(prev => prev + 1)
-    if (o.correct) setTimeout(() => completeRound(), 650)
-    else wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    if (o.correct) {
+      setTimeout(() => completeRound(), 650)
+      return
+    }
+    wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    const nextRound = round + 1
+    setTimeout(() => {
+      if (nextRound >= TOTAL_ROUNDS) setPhase('result')
+      else { setRound(nextRound); loadChallenge(nextRound) }
+    }, 1400)
   }
 
   /* ── build_target: enqueue a specific value (rear), dequeue front ── */
@@ -612,6 +641,7 @@ export default function QueueRush() {
     const next = [...queue, value]
     setQueue(next)
     setOps(prev => prev + 1)
+    sfx.place()
     if (challenge.target && queueEq(next, challenge.target)) completeRound()
   }
 
@@ -621,6 +651,7 @@ export default function QueueRush() {
     const next = queue.slice(1)
     setQueue(next)
     setOps(prev => prev + 1)
+    sfx.place()
     if (challenge.target && queueEq(next, challenge.target)) completeRound()
   }
 
@@ -631,6 +662,7 @@ export default function QueueRush() {
     setQueue(prev => [...prev, activeToken])
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
   }
 
   function handleTicketServe() {
@@ -642,6 +674,7 @@ export default function QueueRush() {
     setQueue(next)
     setOutput(nextOut)
     setOps(prev => prev + 1)
+    sfx.place()
     const allArrived = streamIndex >= (challenge.stream?.length ?? 0)
     if (allArrived && next.length === 0) {
       if (nextOut.join('') === challenge.answer) completeRound()
@@ -656,6 +689,7 @@ export default function QueueRush() {
     setQueue(prev => [...prev, activeToken])
     setStreamIndex(prev => prev + 1)
     setOps(prev => prev + 1)
+    sfx.place()
   }
 
   function handleBfsVisit() {
@@ -667,6 +701,7 @@ export default function QueueRush() {
     setQueue(next)
     setOutput(nextOut)
     setOps(prev => prev + 1)
+    sfx.place()
     const allArrived = streamIndex >= (challenge.stream?.length ?? 0)
     if (allArrived && next.length === 0) {
       if (nextOut.join('') === challenge.answer) completeRound()
@@ -681,9 +716,14 @@ export default function QueueRush() {
     return (
       <div className="qr-page">
         <div className="qr-grid-bg" />
-        <button className="qr-back-btn" onClick={() => navigate('/student/games')}>
-          <ArrowLeft size={15} /> Back
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="qr-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}>
+            <ArrowLeft size={15} /> Back
+          </button>
+          <button className="qr-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <section className="qr-lobby">
           <motion.div className="qr-logo-pipe" animate={{ x: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 2.5 }}>
             <span /><span /><span /><span />
@@ -785,13 +825,16 @@ export default function QueueRush() {
 
       {/* HUD */}
       <div className="qr-hud">
-        <button className="qr-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="qr-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="qr-score"><Zap size={14} /> {score.toLocaleString()}</div>
         <div className="qr-rounds">
           {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
             <span key={i} className={i < round ? 'done' : i === round ? 'active' : ''} />
           ))}
         </div>
+        <button className="qr-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+          {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+        </button>
         <span className="qr-pill" style={{ color: cfg.color, borderColor: `${cfg.color}55` }}>{cfg.label}</span>
         {combo >= 2 && <span className="qr-pill qr-combo">×{combo}</span>}
         {mode === 'multiplayer' && <span className="qr-pill"><Users size={11} /> Race</span>}
@@ -903,6 +946,7 @@ export default function QueueRush() {
                       onDragStart={e => {
                         e.dataTransfer.effectAllowed = 'move'
                         e.dataTransfer.setData('text/plain', v)
+                        sfx.pick()
                         setDragToken(v)
                       }}
                     >
@@ -925,7 +969,7 @@ export default function QueueRush() {
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -24, opacity: 0 }}
                         draggable
-                        onDragStart={((e: React.DragEvent<HTMLDivElement>) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); setDragToken(activeToken) }) as any}
+                        onDragStart={((e: React.DragEvent<HTMLDivElement>) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); sfx.pick(); setDragToken(activeToken) }) as any}
                       >
                         {activeToken}
                       </motion.div>
@@ -955,6 +999,7 @@ export default function QueueRush() {
                   hot={combo >= 3}
                   invalid={shake}
                   onFrontDragStart={queue.length > 0 ? () => {
+                    sfx.pick()
                     setDragToken('__deq__')
                   } : undefined}
                 />

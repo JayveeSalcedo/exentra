@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, AlertCircle, Bot, CheckCircle, Flame, HelpCircle,
-  RotateCcw, Search, Swords, Timer, Trophy, User, Users, Zap,
+  RotateCcw, Search, Swords, Timer, Trophy, User, Users, Zap, Volume2, VolumeX,
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './ArrayBlitz.css'
 import './SortArena.css'
 
@@ -252,6 +253,7 @@ function TimerBar({ timeLimit, onExpire }: { timeLimit: number; onExpire: () => 
           onExpire()
           return 0
         }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -357,6 +359,19 @@ export default function SortArena() {
   const [badges, setBadges] = useState<Set<string>>(new Set())
   const timers = useRef<ReturnType<typeof setInterval>[]>([])
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = round > 0 ? correct / round : 0
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const compact = (challenge?.array.length ?? 0) > 8
 
   function spawnFloating(value: number) {
@@ -388,6 +403,8 @@ export default function SortArena() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0)
     setCombo(0)
     setRound(0)
@@ -430,6 +447,7 @@ export default function SortArena() {
 
   function scoreCorrect() {
     if (!challenge) return
+    sfx.success()
     const elapsed = (Date.now() - roundStart) / 1000
     const nextCombo = combo + 1
     const multiplier = nextCombo >= 3 ? 3 : nextCombo >= 2 ? 2 : 1
@@ -451,21 +469,29 @@ export default function SortArena() {
   }
 
   function scoreWrong(index?: number) {
+    if (!challenge || feedback) return
+    sfx.error()
     setScore(s => Math.max(0, s + POINT_WRONG))
     setCombo(0)
     setFeedback('wrong')
     if (index !== undefined) setWrong(prev => [...prev, index])
     spawnFloating(POINT_WRONG)
-    setTimeout(() => setFeedback(null), 750)
+    timers.current.forEach(clearInterval)
+    const nextRound = round + 1
+    setRound(nextRound)
+    setTimeout(() => nextRound >= TOTAL_ROUNDS ? setPhase('result') : loadChallenge(nextRound), 1200)
   }
 
   function handleChoice(choice: Choice) {
+    if (feedback || selectedChoice) return
+    sfx.select()
     setSelectedChoice(choice.value)
     choice.correct ? scoreCorrect() : scoreWrong()
   }
 
   function handleTrackClick(index: number) {
-    if (!challenge || feedback === 'correct') return
+    if (!challenge || feedback) return
+    sfx.pick()
     if (challenge.type === 'predict_next_swap') {
       const next = selected.includes(index) ? selected.filter(i => i !== index) : [...selected, index].slice(-2)
       setSelected(next)
@@ -509,7 +535,8 @@ export default function SortArena() {
   }
 
   function markPartition(index: number, side: 'left' | 'right') {
-    if (!challenge || challenge.pivotIndex === index) return
+    if (!challenge || feedback || challenge.pivotIndex === index) return
+    sfx.pick()
     const next = { ...partition, [index]: side }
     setPartition(next)
     const required = challenge.array.length - 1
@@ -524,6 +551,7 @@ export default function SortArena() {
 
   function useHint() {
     if (!challenge || hintUsed) return
+    sfx.hint()
     setHintUsed(true)
     setHintVisible(true)
     setScore(s => Math.max(0, s + POINT_HINT))
@@ -606,7 +634,12 @@ export default function SortArena() {
     return (
       <div className="ab-page ab-page--lobby sa-page">
         <div className="ab-grid-bg sa-grid-bg" />
-        <button className="ab-back-btn" onClick={() => navigate('/student/games')}><ArrowLeft size={15} /> Back</button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="ab-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}><ArrowLeft size={15} /> Back</button>
+          <button className="ab-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <div className="ab-lobby">
           <div className="ab-lobby-hero">
             <div className="sa-lobby-glow" />
@@ -702,13 +735,16 @@ export default function SortArena() {
     <div className="ab-page ab-page--playing sa-page">
       <div className="ab-grid-bg sa-grid-bg" />
       <div className="ab-hud">
-        <button className="ab-back-btn" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="ab-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="ab-hud-score-wrap">
           <div className="ab-hud-score sa-score"><Zap size={14} color={ACCENT} /><span className="ab-hud-score-num">{score.toLocaleString()}</span></div>
           <AnimatePresence>{combo >= 2 && <motion.div className="ab-combo-badge" initial={{ scale: 0 }} animate={{ scale: 1 }}>x{combo >= 3 ? 3 : 2} COMBO</motion.div>}</AnimatePresence>
         </div>
         <div className="ab-hud-rounds">{Array.from({ length: TOTAL_ROUNDS }).map((_, i) => <div key={i} className={`ab-round-pip ${i < round ? 'done' : ''} ${i === round ? 'current' : ''}`} />)}</div>
         <div className="ab-hud-right">
+          <button className="ab-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </button>
           <span className="ab-diff-pill" style={{ color: diffCfg.color, borderColor: `${diffCfg.color}50`, background: `${diffCfg.color}10` }}>{diffCfg.label}</span>
           {mode === 'multiplayer' && <span className="ab-diff-pill"><Bot size={10} /> AI Race</span>}
         </div>
@@ -733,12 +769,17 @@ export default function SortArena() {
         <div className="ab-array-container">{renderChallenge()}</div>
         {challenge?.choices && (
           <div className="ab-choices">
-            {challenge.choices.map((choice, i) => (
-              <motion.button key={choice.value} className={`ab-choice ${selectedChoice === choice.value ? choice.correct ? 'correct' : 'wrong' : ''}`}
-                onClick={() => handleChoice(choice)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <span className="ab-choice-letter">{['A', 'B', 'C', 'D'][i]}</span>{choice.label}
-              </motion.button>
-            ))}
+            {challenge.choices.map((choice, i) => {
+              const isSelected = selectedChoice === choice.value
+              const isReveal = !!selectedChoice && choice.correct && !isSelected
+              const cls = `ab-choice ${isSelected ? (choice.correct ? 'correct' : 'wrong') : ''} ${isReveal ? 'reveal' : ''}`.trim()
+              return (
+                <motion.button key={choice.value} className={cls} disabled={!!selectedChoice}
+                  onClick={() => handleChoice(choice)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <span className="ab-choice-letter">{['A', 'B', 'C', 'D'][i]}</span>{choice.label}
+                </motion.button>
+              )
+            })}
           </div>
         )}
         {mode === 'multiplayer' && (

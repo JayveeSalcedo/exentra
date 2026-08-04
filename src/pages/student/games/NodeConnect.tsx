@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Zap, Timer, Star, CheckCircle,
-  User, Users, HelpCircle, RotateCcw, ChevronRight, Swords, Link,
+  User, Users, HelpCircle, RotateCcw, ChevronRight, Swords, Link, Volume2, VolumeX,
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
+import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './NodeConnect.css'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -298,7 +299,7 @@ function PointerHandle({
       className={`nc-fix-handle ${isHint ? 'nc-fix-handle--hint' : ''}`}
       style={{ position: 'absolute', left: handleX - 24, top: handleY - 18, zIndex: 20, touchAction: 'none' }}
       drag dragSnapToOrigin dragElastic={0.1}
-      onDragStart={() => setDragging(true)}
+      onDragStart={() => { sfx.pick(); setDragging(true) }}
       onDrag={(_, info) => {
         const arena = document.querySelector('.nc-arena')
         if (!arena) return
@@ -378,6 +379,7 @@ function TimerBar({ timeLimit, onWindowClosed }: { timeLimit: number; onWindowCl
     ref.current = setInterval(() => {
       setRemaining(prev => {
         if (prev <= 1) { clearInterval(ref.current!); onWindowClosed?.(); return 0 }
+        if (prev - 1 <= 5) sfx.tick()
         return prev - 1
       })
     }, 1000)
@@ -458,6 +460,19 @@ export default function NodeConnect() {
   const [opponentScores, setOpponentScores] = useState<Record<string, number>>({})
   const opTimers = useRef<ReturnType<typeof setInterval>[]>([])
 
+  const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  useEffect(() => {
+    if (phase === 'result') {
+      gameMusic.stop()
+      const acc = totalQ > 0 ? correctCount / totalQ : 0
+      if (acc >= 0.6) sfx.success()
+      else sfx.needsWork()
+    }
+  }, [phase])
+
+  useEffect(() => () => { gameMusic.stop() }, [])
+
   const missionProgress = mission.id === 'streak-3'
     ? Math.min(bestStreak, mission.target)
     : mission.id === 'no-hints'
@@ -496,6 +511,8 @@ export default function NodeConnect() {
   }
 
   function startGame() {
+    sfx.submit()
+    gameMusic.play()
     setScore(0); setCombo(0); setTotalQ(0); setCorrectCount(0)
     setMission(RUN_MISSIONS[rnd(0, RUN_MISSIONS.length - 1)])
     setMissionPaid(false); setBestStreak(0); setHintsUsedCount(0)
@@ -547,6 +564,7 @@ export default function NodeConnect() {
   }
 
   function activatePowerup(powerup: Powerup) {
+    sfx.powerup()
     if (powerup.id === 'time_cache' && challenge) setChallenge({ ...challenge, timeLimit: challenge.timeLimit + 10 })
     if (powerup.id === 'score_surge') setDoubleNext(true)
     if (powerup.id === 'free_hint') doHint(true)
@@ -568,6 +586,7 @@ export default function NodeConnect() {
     setScore(s => s + gained); setCombo(newCombo); setCorrectCount(c => c + 1)
     setDoubleNext(false); setBestStreak(nextBestStreak)
     setFeedback('correct'); setTotalQ(q => q + 1); spawnFloating(gained)
+    sfx.success()
     offerPowerups(nextRound)
     awardMissionIfComplete(nextRound, nextCorrect, nextBestStreak, hintsUsedCount)
     opTimers.current.forEach(clearInterval)
@@ -578,6 +597,7 @@ export default function NodeConnect() {
   }
 
   function scoreWrong() {
+    sfx.error()
     setScore(s => Math.max(0, s + POINT_WRONG)); setCombo(0)
     spawnFloating(POINT_WRONG)
   }
@@ -588,6 +608,7 @@ export default function NodeConnect() {
     if (!remaining) return
     setHintTaskId(remaining.id)
     setHintUsed(true); setHintsUsedCount(c => c + 1)
+    sfx.hint()
     if (!free) { setScore(s => Math.max(0, s + POINT_HINT)); spawnFloating(POINT_HINT) }
   }
 
@@ -596,6 +617,7 @@ export default function NodeConnect() {
     if (!challenge || feedback === 'correct') return
 
     if (droppedId !== undefined && droppedId === task.correctTargetId) {
+      sfx.place()
       setPointerState(prev => ({ ...prev, [task.nodeId]: { ...prev[task.nodeId], [task.field]: droppedId } }))
       const next = new Set(completedTaskIds); next.add(task.id)
       setCompletedTaskIds(next)
@@ -623,9 +645,14 @@ export default function NodeConnect() {
     return (
       <div className="nc-page">
         <div className="nc-grid-bg" />
-        <button className="nc-back-btn" onClick={() => navigate('/student/games')}>
-          <ArrowLeft size={15} /> Back
-        </button>
+        <div className="nc-lobby-topbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <button className="nc-back-btn" style={{ marginBottom: 0 }} onClick={() => navigate('/student/games')}>
+            <ArrowLeft size={15} /> Back
+          </button>
+          <button className="nc-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
         <div className="nc-lobby">
           <div className="nc-lobby-hero">
             <div className="nc-lobby-glow" />
@@ -767,7 +794,7 @@ export default function NodeConnect() {
       <div className="nc-grid-bg" />
 
       <div className="nc-hud">
-        <button className="nc-back-btn small" onClick={() => setPhase('lobby')}><ArrowLeft size={14} /></button>
+        <button className="nc-back-btn small" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="nc-hud-score-wrap">
           <div className="nc-hud-score"><Zap size={14} color="#FFB830" /><span className="nc-hud-score-num">{score.toLocaleString()}</span></div>
           <AnimatePresence>
@@ -786,6 +813,9 @@ export default function NodeConnect() {
           ))}
         </div>
         <div className="nc-hud-right">
+          <button className="nc-sfx-toggle" onClick={toggleSfx} title={sfxMuted ? 'Unmute sound' : 'Mute sound'}>
+            {sfxMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          </button>
           <span className="nc-list-type-pill">{challenge?.listType === 'doubly' ? '⟷ DOUBLY' : '→ SINGLY'}</span>
           <span className="nc-diff-pill" style={{ color: diffCfg.color, borderColor: `${diffCfg.color}50`, background: `${diffCfg.color}10` }}>{diffCfg.label}</span>
         </div>

@@ -1,5 +1,21 @@
 :root { --pe-purple: #9B7ED4; }
 
+.pe-sfx-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.pe-sfx-toggle:hover { color: var(--text-primary); border-color: rgba(155,126,212,0.35); }
+
 /* ── Animations ─────────────────────────────────────────────────────────── */
 
 @keyframes peGrid {

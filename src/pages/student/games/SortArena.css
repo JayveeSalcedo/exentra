@@ -230,6 +230,83 @@
   font-size: 11px;
 }
 
+.ab-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.ab-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.ab-choice:hover:not(:disabled) {
+  border-color: var(--sa-accent);
+  background: rgba(255,184,48,0.07);
+  transform: translateY(-1px);
+}
+
+.ab-choice:disabled {
+  cursor: default;
+}
+
+.ab-choice-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.55);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ab-choice.correct {
+  border-color: #00D4AA;
+  background: rgba(0,212,170,0.12);
+  color: #00D4AA;
+  box-shadow: 0 0 20px rgba(0,212,170,0.2);
+}
+
+.ab-choice.correct .ab-choice-letter {
+  background: #00D4AA;
+  color: #080B18;
+}
+
+.ab-choice.wrong {
+  border-color: #FF6B8A;
+  background: rgba(255,107,138,0.1);
+  color: #FF6B8A;
+}
+
+.ab-choice.wrong .ab-choice-letter {
+  background: #FF6B8A;
+  color: #080B18;
+}
+
+.ab-choice.reveal {
+  border-color: rgba(0,212,170,0.4);
+  background: rgba(0,212,170,0.06);
+}
+
 @media (max-width: 700px) {
   .sa-page .ab-diff-row {
     grid-template-columns: repeat(2, 1fr);
