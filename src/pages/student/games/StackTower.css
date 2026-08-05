@@ -1007,6 +1007,40 @@
   color: #15100a;
 }
 
+/* ── Real multiplayer room lobby ────────────────────────────────────────── */
+
+.st-mp-room-actions { display: flex; flex-direction: column; gap: 12px; width: min(520px, 100%); }
+.st-mp-join-row { display: flex; gap: 10px; }
+.st-mp-code-input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.st-mp-code-input:focus { outline: none; border-color: rgba(255,184,48,0.4); }
+.st-mp-room-players { display: flex; flex-direction: column; gap: 8px; width: min(520px, 100%); }
+.st-mp-room-players > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.st-start-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
 @media (max-width: 860px) {

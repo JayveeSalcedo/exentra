@@ -663,3 +663,12 @@
 .nc-result-btn.secondary:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
 .nc-result-btn.primary { background: linear-gradient(135deg, #9B7ED4, #7C5CBF); border: none; color: #fff; box-shadow: 0 4px 20px rgba(155,126,212,0.35); }
 .nc-result-btn.primary:hover { box-shadow: 0 4px 32px rgba(155,126,212,0.55); transform: translateY(-1px); }
+
+/* Real multiplayer room lobby */
+.nc-mp-room-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.nc-mp-join-row { display: flex; gap: 10px; }
+.nc-mp-code-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 15px; letter-spacing: 4px; color: var(--text-primary); text-transform: uppercase; text-align: center; }
+.nc-mp-code-input:focus { outline: none; border-color: #9B7ED450; }
+.nc-mp-room-players { display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 12px 0; }
+.nc-start-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.nc-result-win-msg { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #FFB830; text-align: center; letter-spacing: 1px; text-shadow: 0 0 12px rgba(255,184,48,0.5); }

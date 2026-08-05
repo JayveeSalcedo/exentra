@@ -7,6 +7,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
 import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
+import { saveGameSession } from '../../../lib/gameSessions'
+import { useMultiplayerRoom } from '../../../lib/multiplayer'
+import { SeededRandom } from '../../../lib/seededRandom'
 import './NodeConnect.css'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -81,17 +84,21 @@ const WORDS = ['ant','bee','cat','dew','elk','fog','gnu','hex','ivy','jar','koi'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function rnd(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
+function rnd(min: number, max: number, rng?: SeededRandom) { return rng ? rng.int(min, max) : Math.floor(Math.random() * (max - min + 1)) + min }
 function uid() { return Math.random().toString(36).slice(2, 7) }
-function rndVal(): string | number { return Math.random() > 0.45 ? rnd(1, 99) : WORDS[rnd(0, WORDS.length - 1)] }
-function shuffleArr<T>(arr: T[]): T[] {
+function rndVal(rng?: SeededRandom): string | number {
+  const isNum = rng ? rng.bool(0.55) : Math.random() > 0.45
+  return isNum ? rnd(1, 99, rng) : WORDS[rnd(0, WORDS.length - 1, rng)]
+}
+function shuffleArr<T>(arr: T[], rng?: SeededRandom): T[] {
+  if (rng) return rng.shuffle(arr)
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) { const j = rnd(0, i); [a[i], a[j]] = [a[j], a[i]] }
   return a
 }
 
-function makeChain(size: number, listType: ListType): LLNode[] {
-  const nodes: LLNode[] = Array.from({ length: size }, () => ({ id: uid(), value: rndVal(), next: NULL_ID, prev: NULL_ID }))
+function makeChain(size: number, listType: ListType, rng?: SeededRandom): LLNode[] {
+  const nodes: LLNode[] = Array.from({ length: size }, () => ({ id: uid(), value: rndVal(rng), next: NULL_ID, prev: NULL_ID }))
   for (let i = 0; i < nodes.length - 1; i++) {
     nodes[i].next = nodes[i + 1].id
     if (listType === 'doubly') nodes[i + 1].prev = nodes[i].id
@@ -109,10 +116,10 @@ function mirrorPrevTasks(tasks: PointerTask[]): PointerTask[] {
   return [...tasks, ...extra]
 }
 
-function pickKind(difficulty: Difficulty, bossRound: boolean): ChallengeKind {
+function pickKind(difficulty: Difficulty, bossRound: boolean, rng?: SeededRandom): ChallengeKind {
   if (bossRound) return 'fix'
   const pool = KIND_BY_DIFF[difficulty]
-  return pool[rnd(0, pool.length - 1)]
+  return pool[rnd(0, pool.length - 1, rng)]
 }
 function pickListType(kind: ChallengeKind, difficulty: Difficulty, bossRound: boolean): ListType {
   if (kind === 'reverse') return 'singly'
@@ -125,12 +132,12 @@ function breakCountFor(difficulty: Difficulty, bossRound: boolean): number {
   return 1
 }
 
-function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge {
+function generateChallenge(difficulty: Difficulty, bossRound = false, rng?: SeededRandom): Challenge {
   const cfg = DIFF_CONFIG[difficulty]
-  const size = rnd(cfg.size[0], cfg.size[1])
-  const kind = pickKind(difficulty, bossRound)
+  const size = rnd(cfg.size[0], cfg.size[1], rng)
+  const kind = pickKind(difficulty, bossRound, rng)
   const listType = pickListType(kind, difficulty, bossRound)
-  let nodes = makeChain(size, listType)
+  let nodes = makeChain(size, listType, rng)
   const prefix = bossRound ? 'FINAL BOSS: ' : ''
   let tasks: PointerTask[] = []
   let floatingNodeId: string | undefined
@@ -139,11 +146,11 @@ function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge
 
   if (kind === 'fix') {
     const breakCount = Math.min(breakCountFor(difficulty, bossRound), size - 1)
-    const brokenIdxs = shuffleArr(Array.from({ length: size - 1 }, (_, i) => i)).slice(0, breakCount)
+    const brokenIdxs = shuffleArr(Array.from({ length: size - 1 }, (_, i) => i), rng).slice(0, breakCount)
     nodes = nodes.map((n, i) => {
       if (!brokenIdxs.includes(i)) return n
       let wrongIdx: number
-      do { wrongIdx = rnd(0, size - 1) } while (wrongIdx === i + 1 || wrongIdx === i)
+      do { wrongIdx = rnd(0, size - 1, rng) } while (wrongIdx === i + 1 || wrongIdx === i)
       return { ...n, next: nodes[wrongIdx].id }
     })
     tasks = brokenIdxs.map(i => ({ id: `${nodes[i].id}:next`, nodeId: nodes[i].id, field: 'next' as const, correctTargetId: nodes[i + 1].id }))
@@ -162,8 +169,8 @@ function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge
   }
 
   if (kind === 'splice') {
-    const idx = rnd(1, size - 1)
-    const floating: LLNode = { id: uid(), value: rndVal(), next: NULL_ID, prev: NULL_ID }
+    const idx = rnd(1, size - 1, rng)
+    const floating: LLNode = { id: uid(), value: rndVal(rng), next: NULL_ID, prev: NULL_ID }
     floatingNodeId = floating.id
     tasks = [
       { id: `${nodes[idx - 1].id}:next`, nodeId: nodes[idx - 1].id, field: 'next', correctTargetId: floating.id },
@@ -179,7 +186,7 @@ function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge
   }
 
   if (kind === 'delete') {
-    const idx = rnd(1, size - 2)
+    const idx = rnd(1, size - 2, rng)
     deleteTargetId = nodes[idx].id
     const afterId = idx + 1 < size ? nodes[idx + 1].id : NULL_ID
     tasks = [{ id: `${nodes[idx - 1].id}:next`, nodeId: nodes[idx - 1].id, field: 'next', correctTargetId: afterId }]
@@ -423,6 +430,12 @@ export default function NodeConnect() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Player'
+  const avatarColor = '#9B7ED4'
+  const mp = useMultiplayerRoom('node_connect', user?.id, displayName, avatarColor)
+  const [roomCodeInput, setRoomCodeInput] = useState('')
+  const seededRngRef = useRef<SeededRandom | null>(null)
+
   const [phase, setPhase] = useState<Phase>('lobby')
   const [mode, setMode] = useState<Mode>('solo')
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -459,8 +472,30 @@ export default function NodeConnect() {
 
   const [opponentScores, setOpponentScores] = useState<Record<string, number>>({})
   const opTimers = useRef<ReturnType<typeof setInterval>[]>([])
+  const sessionSaved = useRef(false)
 
   const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  const isRealMultiplayer = mode === 'multiplayer' && mp.available
+
+  useEffect(() => {
+    if (mp.roomDifficulty) setDifficulty(mp.roomDifficulty as Difficulty)
+  }, [mp.roomDifficulty])
+
+  useEffect(() => {
+    if (isRealMultiplayer && mp.status === 'playing' && mp.start && phase === 'lobby') {
+      startGame(mp.start.seed)
+    }
+  }, [mp.status])
+
+  useEffect(() => {
+    return () => { if (mp.roomCode) mp.leaveRoom() }
+  }, [])
+
+  function selectMode(next: Mode) {
+    if (next !== mode && mp.roomCode) mp.leaveRoom()
+    setMode(next)
+  }
 
   useEffect(() => {
     if (phase === 'result') {
@@ -468,6 +503,27 @@ export default function NodeConnect() {
       const acc = totalQ > 0 ? correctCount / totalQ : 0
       if (acc >= 0.6) sfx.success()
       else sfx.needsWork()
+
+      if (!sessionSaved.current && user?.id) {
+        sessionSaved.current = true
+        const rank = acc >= 0.9 ? 'S' : acc >= 0.75 ? 'A' : acc >= 0.6 ? 'B' : acc >= 0.4 ? 'C' : 'D'
+        const sessionInput = {
+          gameId: 'node_connect' as const,
+          mode,
+          difficulty,
+          score,
+          correct: correctCount,
+          totalRounds: totalQ,
+          bestCombo: bestStreak,
+          rankLetter: rank,
+          meta: {
+            accuracy: acc,
+            opponentScores: mode === 'multiplayer' && !isRealMultiplayer ? opponentScores : undefined,
+          },
+        }
+        saveGameSession(user.id, sessionInput)
+        if (isRealMultiplayer) mp.sendFinish(sessionInput)
+      }
     }
   }, [phase])
 
@@ -510,14 +566,16 @@ export default function NodeConnect() {
     setTimeout(() => setFloatingScores(prev => prev.filter(f => f.id !== id)), 1000)
   }
 
-  function startGame() {
+  function startGame(seed?: string) {
     sfx.submit()
     gameMusic.play()
+    sessionSaved.current = false
+    seededRngRef.current = seed ? new SeededRandom(seed) : null
     setScore(0); setCombo(0); setTotalQ(0); setCorrectCount(0)
     setMission(RUN_MISSIONS[rnd(0, RUN_MISSIONS.length - 1)])
     setMissionPaid(false); setBestStreak(0); setHintsUsedCount(0)
     setPowerupChoices([]); setDoubleNext(false)
-    if (mode === 'multiplayer') {
+    if (mode === 'multiplayer' && !seed) {
       const init: Record<string, number> = {}
       FAKE_OPPONENTS.forEach(o => { init[o.id] = 0 })
       setOpponentScores(init)
@@ -526,7 +584,7 @@ export default function NodeConnect() {
   }
 
   const loadNext = useCallback((roundIndex = 0) => {
-    const ch = generateChallenge(difficulty, roundIndex === TOTAL_ROUNDS - 1)
+    const ch = generateChallenge(difficulty, roundIndex === TOTAL_ROUNDS - 1, seededRngRef.current ?? undefined)
     const initState: Record<string, { next: string; prev: string }> = {}
     ch.nodes.forEach(n => { initState[n.id] = { next: n.next, prev: n.prev } })
     setChallenge(ch)
@@ -536,7 +594,8 @@ export default function NodeConnect() {
     setHintUsed(false); setHintTaskId(null); setFeedback(null)
     setDragArrowFrom(null); setDragArrowTo(null); setWrongPulse(null); setBonusClosed(false)
     setRoundStart(Date.now()); nodeEls.current = {}
-    if (mode === 'multiplayer') {
+    const botPractice = mode === 'multiplayer' && !seededRngRef.current
+    if (botPractice) {
       opTimers.current.forEach(clearInterval)
       opTimers.current = FAKE_OPPONENTS.map(op =>
         setInterval(() => {
@@ -587,6 +646,7 @@ export default function NodeConnect() {
     setDoubleNext(false); setBestStreak(nextBestStreak)
     setFeedback('correct'); setTotalQ(q => q + 1); spawnFloating(gained)
     sfx.success()
+    if (isRealMultiplayer) mp.sendRoundDone(nextRound - 1, score + gained, true)
     offerPowerups(nextRound)
     awardMissionIfComplete(nextRound, nextCorrect, nextBestStreak, hintsUsedCount)
     opTimers.current.forEach(clearInterval)
@@ -671,44 +731,116 @@ export default function NodeConnect() {
           <div className="nc-lobby-section">
             <p className="nc-section-label">// GAME MODE</p>
             <div className="nc-mode-row">
-              <button className={`nc-mode-card ${mode === 'solo' ? 'active' : ''}`} onClick={() => setMode('solo')}>
+              <button className={`nc-mode-card ${mode === 'solo' ? 'active' : ''}`} onClick={() => selectMode('solo')}>
                 <User size={22} /><span className="nc-mode-title">SOLO</span>
                 <span className="nc-mode-sub">Practice at your own pace</span>
               </button>
-              <button className={`nc-mode-card ${mode === 'multiplayer' ? 'active multi' : ''}`} onClick={() => setMode('multiplayer')}>
+              <button className={`nc-mode-card ${mode === 'multiplayer' ? 'active multi' : ''}`} onClick={() => selectMode('multiplayer')}>
                 <Users size={22} /><span className="nc-mode-title">MULTIPLAYER</span>
-                <span className="nc-mode-sub">Race against 3 AI bots</span>
-                <span className="nc-mode-badge-bot">AI Bots · Real multiplayer coming soon</span>
+                <span className="nc-mode-sub">{mp.available ? 'Race a real classmate' : 'Race against 3 AI bots'}</span>
+                <span className="nc-mode-badge-bot">{mp.available ? 'Live rooms · no bots' : 'AI Bots · Live multiplayer server offline'}</span>
               </button>
             </div>
           </div>
 
-          <div className="nc-lobby-section">
-            <p className="nc-section-label">// DIFFICULTY</p>
-            <div className="nc-diff-row">
-              {(Object.entries(DIFF_CONFIG) as [Difficulty, typeof DIFF_CONFIG['easy']][]).map(([d, cfg]) => (
-                <button key={d}
-                  className={`nc-diff-card ${difficulty === d ? 'active' : ''}`}
-                  style={difficulty === d ? { borderColor: cfg.color, boxShadow: `0 0 20px ${cfg.color}30` } : {}}
-                  onClick={() => setDifficulty(d)}>
-                  <span className="nc-diff-icon">{cfg.icon}</span>
-                  <span className="nc-diff-name" style={difficulty === d ? { color: cfg.color } : {}}>{cfg.label}</span>
-                  <span className="nc-diff-desc">{cfg.desc}</span>
-                  <div className="nc-diff-meta">
-                    <span>{cfg.size[0]}–{cfg.size[1]} nodes</span>
-                    <span style={{ color: cfg.color }}>{cfg.time}s</span>
-                  </div>
-                </button>
-              ))}
+          {(!isRealMultiplayer || mp.status === 'idle' || mp.status === 'error') && (
+            <div className="nc-lobby-section">
+              <p className="nc-section-label">// DIFFICULTY</p>
+              <div className="nc-diff-row">
+                {(Object.entries(DIFF_CONFIG) as [Difficulty, typeof DIFF_CONFIG['easy']][]).map(([d, cfg]) => (
+                  <button key={d}
+                    className={`nc-diff-card ${difficulty === d ? 'active' : ''}`}
+                    style={difficulty === d ? { borderColor: cfg.color, boxShadow: `0 0 20px ${cfg.color}30` } : {}}
+                    onClick={() => setDifficulty(d)}>
+                    <span className="nc-diff-icon">{cfg.icon}</span>
+                    <span className="nc-diff-name" style={difficulty === d ? { color: cfg.color } : {}}>{cfg.label}</span>
+                    <span className="nc-diff-desc">{cfg.desc}</span>
+                    <div className="nc-diff-meta">
+                      <span>{cfg.size[0]}–{cfg.size[1]} nodes</span>
+                      <span style={{ color: cfg.color }}>{cfg.time}s</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <motion.button className="nc-start-btn" onClick={startGame}
-            whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(155,126,212,0.5)' }}
-            whileTap={{ scale: 0.97 }}>
-            <Link size={18} /> START GAME
-            <span className="nc-start-rounds">{TOTAL_ROUNDS} ROUNDS</span>
-          </motion.button>
+          {!isRealMultiplayer && (
+            <motion.button className="nc-start-btn" onClick={() => startGame()}
+              whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(155,126,212,0.5)' }}
+              whileTap={{ scale: 0.97 }}>
+              <Link size={18} /> START GAME
+              <span className="nc-start-rounds">{TOTAL_ROUNDS} ROUNDS</span>
+            </motion.button>
+          )}
+
+          {isRealMultiplayer && mp.status === 'idle' && (
+            <div className="nc-lobby-section">
+              <p className="nc-section-label">// MULTIPLAYER ROOM</p>
+              <div className="nc-mp-room-actions">
+                <motion.button className="nc-start-btn" onClick={() => { sfx.submit(); mp.createRoom(difficulty) }}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Users size={18} /> CREATE ROOM
+                </motion.button>
+                <div className="nc-mp-join-row">
+                  <input className="nc-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                    value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                  <button className="nc-result-btn secondary" disabled={roomCodeInput.length < 5}
+                    onClick={() => { sfx.submit(); mp.joinRoom(roomCodeInput) }}>
+                    Join Room
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'error' && (
+            <div className="nc-lobby-section">
+              <p className="nc-run-reward" style={{ color: '#FF6B8A' }}>{mp.errorMessage}</p>
+              <div className="nc-mp-join-row">
+                <input className="nc-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                  value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                <button className="nc-result-btn secondary" disabled={roomCodeInput.length < 5}
+                  onClick={() => mp.joinRoom(roomCodeInput)}>Try Again</button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'lobby' && (
+            <div className="nc-lobby-section">
+              <p className="nc-section-label">// ROOM {mp.roomCode}</p>
+              <p className="nc-lobby-desc">
+                Share this code with a classmate. Waiting for {Math.max(0, mp.minPlayers - mp.players.length)} more player(s) — no bots, real race only.
+              </p>
+              <div className="nc-mp-room-players">
+                {mp.players.map(p => (
+                  <div key={p.userId} className="nc-mp-row">
+                    <div className="nc-mp-avatar" style={{ background: `${p.avatarColor}20`, borderColor: p.avatarColor }}>
+                      {p.name.charAt(0)}
+                    </div>
+                    <span className="nc-mp-name">{p.name}{p.userId === user?.id ? ' (You)' : ''}</span>
+                    <span className="nc-diff-pill" style={p.ready ? { color: '#00D4AA', borderColor: '#00D4AA50', background: '#00D4AA10' } : {}}>
+                      {p.ready ? 'READY' : 'NOT READY'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="nc-mp-room-actions">
+                <motion.button className="nc-start-btn" disabled={!!mp.players.find(p => p.userId === user?.id)?.ready}
+                  onClick={() => { sfx.submit(); mp.setReady() }}>
+                  <CheckCircle size={18} /> {mp.players.find(p => p.userId === user?.id)?.ready ? 'WAITING FOR OTHERS' : 'READY UP'}
+                </motion.button>
+                <button className="nc-result-btn secondary" onClick={() => mp.leaveRoom()}>Leave Room</button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'starting' && (
+            <div className="nc-lobby-section">
+              <p className="nc-lobby-title" style={{ fontSize: '1.4rem' }}>STARTING…</p>
+              <p className="nc-lobby-desc">Everyone's ready. Get set!</p>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -721,11 +853,15 @@ export default function NodeConnect() {
     const rank = accuracy >= 90 ? 'S' : accuracy >= 75 ? 'A' : accuracy >= 60 ? 'B' : accuracy >= 40 ? 'C' : 'D'
     const rankColor = { S: '#FFB830', A: '#00D4AA', B: '#9B7ED4', C: '#63B3ED', D: '#FF6B8A' }[rank]
     const allScores = mode === 'multiplayer'
-      ? [
-          { name: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'You', score, isMe: true, color: '#9B7ED4' },
-          ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, isMe: false, color: o.color })),
-        ].sort((a, b) => b.score - a.score)
+      ? (isRealMultiplayer
+          ? (mp.results ? mp.results.map(r => ({ name: r.name, score: r.score, isMe: r.userId === user?.id, color: r.userId === user?.id ? '#9B7ED4' : '#63B3ED' })) : null)
+          : [
+              { name: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'You', score, isMe: true, color: '#9B7ED4' },
+              ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, isMe: false, color: o.color })),
+            ].sort((a, b) => b.score - a.score))
       : null
+    const waitingForOpponents = isRealMultiplayer && !mp.results
+    const myRank = allScores?.findIndex(s => s.isMe) ?? -1
 
     return (
       <div className="nc-page nc-page--result">
@@ -754,6 +890,12 @@ export default function NodeConnect() {
             <div className="nc-result-stat"><Star size={15} color="#FFB830" /><span>{accuracy}%</span><span className="nc-stat-label">ACCURACY</span></div>
             <div className="nc-result-stat"><Zap size={15} color="#9B7ED4" /><span>×{bestStreak >= 3 ? 3 : bestStreak >= 2 ? 2 : 1}</span><span className="nc-stat-label">BEST COMBO</span></div>
           </motion.div>
+          {waitingForOpponents && (
+            <motion.div className="nc-result-leaderboard" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+              <p className="nc-section-label">// MATCH RESULTS</p>
+              <p className="nc-lobby-desc">Waiting for the other player to finish…</p>
+            </motion.div>
+          )}
           {allScores && (
             <motion.div className="nc-result-leaderboard" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
               <p className="nc-section-label">// MATCH RESULTS</p>
@@ -770,10 +912,11 @@ export default function NodeConnect() {
                   <span className="nc-lb-score">{s.score.toLocaleString()}</span>
                 </div>
               ))}
+              {myRank === 0 && <p className="nc-result-win-msg">🏆 {isRealMultiplayer ? 'You won the race!' : 'You beat the AI bots!'}</p>}
             </motion.div>
           )}
           <motion.div className="nc-result-actions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
-            <button className="nc-result-btn secondary" onClick={() => setPhase('lobby')}><RotateCcw size={15} /> Play Again</button>
+            <button className="nc-result-btn secondary" onClick={() => { if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}><RotateCcw size={15} /> Play Again</button>
             <button className="nc-result-btn primary" onClick={() => navigate('/student/games')}>Games Lobby <ChevronRight size={15} /></button>
           </motion.div>
         </div>
@@ -794,7 +937,7 @@ export default function NodeConnect() {
       <div className="nc-grid-bg" />
 
       <div className="nc-hud">
-        <button className="nc-back-btn small" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
+        <button className="nc-back-btn small" onClick={() => { gameMusic.stop(); if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="nc-hud-score-wrap">
           <div className="nc-hud-score"><Zap size={14} color="#FFB830" /><span className="nc-hud-score-num">{score.toLocaleString()}</span></div>
           <AnimatePresence>
@@ -929,12 +1072,20 @@ export default function NodeConnect() {
 
         {mode === 'multiplayer' && (
           <div className="nc-mp-panel">
-            <p className="nc-mp-title"><Swords size={12} /> LIVE RACE vs AI BOTS</p>
-            {[
-              { name: 'You', score, color: '#9B7ED4', isMe: true },
-              ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, color: o.color, isMe: false })),
-            ].sort((a, b) => b.score - a.score).map((p, i) => (
-              <div key={p.name} className="nc-mp-row">
+            <p className="nc-mp-title"><Swords size={12} /> {isRealMultiplayer ? 'LIVE RACE' : 'LIVE RACE vs AI BOTS'}</p>
+            {(isRealMultiplayer
+              ? mp.players.map(p => ({
+                  name: p.userId === user?.id ? 'You' : p.name,
+                  score: p.userId === user?.id ? score : (mp.opponentProgress[p.userId]?.value ?? 0),
+                  color: p.userId === user?.id ? '#9B7ED4' : p.avatarColor,
+                  isMe: p.userId === user?.id,
+                }))
+              : [
+                  { name: 'You', score, color: '#9B7ED4', isMe: true },
+                  ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, color: o.color, isMe: false })),
+                ]
+            ).sort((a, b) => b.score - a.score).map((p, i) => (
+              <div key={`${p.name}-${i}`} className="nc-mp-row">
                 <span className="nc-mp-pos">#{i + 1}</span>
                 <div className="nc-mp-avatar" style={{ background: `${p.color}20`, borderColor: p.color }}>{p.name[0]}</div>
                 <span className="nc-mp-name" style={{ color: p.isMe ? '#9B7ED4' : 'var(--text-secondary)' }}>{p.name}</span>

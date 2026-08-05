@@ -5,7 +5,11 @@ import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
   Timer, Trash2, Undo2, Users, Zap, AlertTriangle, Volume2, VolumeX,
 } from 'lucide-react'
+import { useAuth } from '../../../store/AuthContext'
 import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
+import { saveGameSession } from '../../../lib/gameSessions'
+import { useMultiplayerRoom } from '../../../lib/multiplayer'
+import { SeededRandom } from '../../../lib/seededRandom'
 import './StackTower.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -85,10 +89,13 @@ const FAKE_OPPONENTS = [
 /* ── Utilities ─────────────────────────────────────────────────────────── */
 
 function uid()  { return Math.random().toString(36).slice(2, 9) }
-function rng(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
-function pick<T>(arr: T[]) { return arr[rng(0, arr.length - 1)] }
-function shuffle<T>(arr: T[]) { return [...arr].sort(() => Math.random() - 0.5) }
-function makeVals(n: number) { return Array.from({ length: n }, () => pick(VALUES)) }
+// `seededRng` is only passed in real multiplayer runs (seeded from the room's
+// shared seed) so every player generates identical rounds. Named separately
+// from this file's own `rng(min,max)` int-helper to avoid a naming collision.
+function rng(min: number, max: number, seededRng?: SeededRandom) { return seededRng ? seededRng.int(min, max) : Math.floor(Math.random() * (max - min + 1)) + min }
+function pick<T>(arr: T[], seededRng?: SeededRandom) { return arr[rng(0, arr.length - 1, seededRng)] }
+function shuffle<T>(arr: T[], seededRng?: SeededRandom) { return seededRng ? seededRng.shuffle(arr) : [...arr].sort(() => Math.random() - 0.5) }
+function makeVals(n: number, seededRng?: SeededRandom) { return Array.from({ length: n }, () => pick(VALUES, seededRng)) }
 function stackEq(a: string[], b: string[]) {
   return a.length === b.length && a.every((v, i) => v === b[i])
 }
@@ -101,14 +108,14 @@ function evalPostfix(a: number, b: number, op: string) {
 
 /* ── Challenge generator ───────────────────────────────────────────────── */
 
-function buildBracketStream(): { stream: string[]; valid: boolean } {
+function buildBracketStream(seededRng?: SeededRandom): { stream: string[]; valid: boolean } {
   const valid = pick([
     '{[()]}', '([{}])', '(([]))', '{[()]}()', '[({})]',
-  ])
+  ], seededRng)
   const invalid = pick([
     '{[(])}', '([)]', '{[}]', '({)}', '[{(]',
-  ])
-  const useValid = Math.random() > 0.5
+  ], seededRng)
+  const useValid = seededRng ? seededRng.bool(0.5) : Math.random() > 0.5
   return { stream: (useValid ? valid : invalid).split(''), valid: useValid }
 }
 
@@ -120,30 +127,33 @@ const POSTFIX_POOL = [
   { stream: ['2','3','*','4','+'], answer: '10' },
 ]
 
-function generateChallenge(difficulty: Difficulty, round: number): Challenge {
+function generateChallenge(difficulty: Difficulty, round: number, seededRng?: SeededRandom, forcedType?: ChallengeType): Challenge {
   const cfg = DIFFICULTY_CONFIG[difficulty]
-  // Force a specific type in the final round to end with substance
+  // Force a specific type in the final round to end with substance — but a
+  // room-wide forced type (real multiplayer, so every round + every player
+  // matches) always wins over that.
   const forcedFinal: Partial<Record<Difficulty, ChallengeType>> = {
     hard: 'bracket_matcher', expert: 'postfix',
   }
   const type: ChallengeType =
-    round === TOTAL_ROUNDS - 1 && forcedFinal[difficulty]
+    forcedType ??
+    (round === TOTAL_ROUNDS - 1 && forcedFinal[difficulty]
       ? forcedFinal[difficulty]!
-      : pick(TYPES_BY_DIFF[difficulty])
+      : pick(TYPES_BY_DIFF[difficulty], seededRng))
 
   /* ── build_target ────────────────────────────────────────────────────── */
   if (type === 'build_target') {
-    const constrained = Math.random() < CONSTRAINT_CHANCE[difficulty]
+    const constrained = (seededRng ? seededRng.next() : Math.random()) < CONSTRAINT_CHANCE[difficulty]
 
     if (constrained) {
       // Disks are unique sizes. A valid tower is always biggest-at-bottom,
       // smallest-at-top — the target is a descending subset, but the player
       // has to discover that order themselves; the game never states it.
-      const poolSize = Math.min(8, rng(5, 7))
+      const poolSize = Math.min(8, rng(5, 7, seededRng))
       const sizes = Array.from({ length: poolSize }, (_, i) => String(i + 1))
-      const targetCount = rng(3, Math.min(poolSize - 1, cfg.maxSize))
-      const target = shuffle(sizes).slice(0, targetCount).sort((a, b) => Number(b) - Number(a))
-      const shuffledSource = shuffle(sizes)
+      const targetCount = rng(3, Math.min(poolSize - 1, cfg.maxSize), seededRng)
+      const target = shuffle(sizes, seededRng).slice(0, targetCount).sort((a, b) => Number(b) - Number(a))
+      const shuffledSource = shuffle(sizes, seededRng)
       return {
         type, title: 'Stack the Disks', constrained,
         scenario: 'Match the ghost stack. A bigger disk can never rest on a smaller one — the tower itself will tell you when a move is illegal. No other hints.',
@@ -152,9 +162,9 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
       }
     }
 
-    const source = makeVals(rng(4, 6))
-    const target = source.slice(0, rng(2, Math.min(source.length - 1, cfg.maxSize)))
-    const shuffledSource = shuffle(source)
+    const source = makeVals(rng(4, 6, seededRng), seededRng)
+    const target = source.slice(0, rng(2, Math.min(source.length - 1, cfg.maxSize), seededRng))
+    const shuffledSource = shuffle(source, seededRng)
     return {
       type, title: 'Build the Tower', constrained: false,
       scenario: 'Match the ghost stack. Any chip can be dragged to PUSH. Drag the top tower block to POP. No indicators — figure it out.',
@@ -165,31 +175,31 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
 
   /* ── bracket_matcher ─────────────────────────────────────────────────── */
   if (type === 'bracket_matcher') {
-    const { stream, valid } = buildBracketStream()
+    const { stream, valid } = buildBracketStream(seededRng)
     return {
       type, title: 'Bracket Matcher',
       scenario: 'Every token is shuffled on screen and all of them are draggable at once. Drag the one you think comes first in the string to PUSH (if it opens) or POP (if it closes) — pick the wrong one and it bounces back. When done, drag your verdict to ✓ (valid) or ✗ (invalid).',
       timeLimit: cfg.time, maxSize: cfg.maxSize,
       initialStack: [], stream, answer: valid ? 'valid' : 'invalid',
-      displayOrder: shuffle(stream.map((_, i) => i)),
+      displayOrder: shuffle(stream.map((_, i) => i), seededRng),
     }
   }
 
   /* ── reverse_string ──────────────────────────────────────────────────── */
   if (type === 'reverse_string') {
-    const word = pick(['CODE', 'LIFO', 'PUSH', 'HEAP', 'NODE'])
+    const word = pick(['CODE', 'LIFO', 'PUSH', 'HEAP', 'NODE'], seededRng)
     const stream = word.split('')
     return {
       type, title: 'Reverse It',
       scenario: `The word "${word}" needs to be reversed using a stack. Every letter is shuffled on screen and all are draggable — drag whichever you think comes first in the word to PUSH. Pick the wrong one and it bounces back. Push all letters first, then pop them into output.`,
       timeLimit: cfg.time, maxSize: cfg.maxSize,
       initialStack: [], stream, answer: stream.slice().reverse().join(''),
-      displayOrder: shuffle(stream.map((_, i) => i)),
+      displayOrder: shuffle(stream.map((_, i) => i), seededRng),
     }
   }
 
   /* ── postfix ─────────────────────────────────────────────────────────── */
-  const expr = pick(POSTFIX_POOL)
+  const expr = pick(POSTFIX_POOL, seededRng)
   return {
     type: 'postfix', title: 'Postfix Evaluation',
     scenario: 'Tokens appear one at a time. Drag each to the STACK zone or the OPERATE zone. You decide which — no labels. When the final result is the only item on the stack, you\'re done.',
@@ -345,6 +355,14 @@ function TokenChip({ value, onDragStart }: { value: string; onDragStart: () => v
 
 export default function StackTower() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+
+  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Player'
+  const avatarColor = '#FFB830'
+  const mp = useMultiplayerRoom('stack_tower', user?.id, displayName, avatarColor)
+  const [roomCodeInput, setRoomCodeInput] = useState('')
+  const seededRngRef = useRef<SeededRandom | null>(null)
+  const forcedTypeRef = useRef<ChallengeType | null>(null)
 
   /* Global state */
   const [phase,      setPhase]      = useState<Phase>('lobby')
@@ -378,8 +396,30 @@ export default function StackTower() {
   const [floatingScores,setFloatingScores]= useState<FloatingScore[]>([])
   const [wrongMsg,      setWrongMsg]      = useState<string | null>(null)
   const runStart = useRef(Date.now())
+  const sessionSaved = useRef(false)
 
   const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  const isRealMultiplayer = mode === 'multiplayer' && mp.available
+
+  useEffect(() => {
+    if (mp.roomDifficulty) setDifficulty(mp.roomDifficulty as Difficulty)
+  }, [mp.roomDifficulty])
+
+  useEffect(() => {
+    if (isRealMultiplayer && mp.status === 'playing' && mp.start && phase === 'lobby') {
+      startGame(mp.start.seed, mp.start.stackTowerChallengeType)
+    }
+  }, [mp.status])
+
+  useEffect(() => {
+    return () => { if (mp.roomCode) mp.leaveRoom() }
+  }, [])
+
+  function selectMode(next: Mode) {
+    if (next !== mode && mp.roomCode) mp.leaveRoom()
+    setMode(next)
+  }
 
   useEffect(() => {
     if (phase === 'result') {
@@ -387,6 +427,29 @@ export default function StackTower() {
       const acc = correct / TOTAL_ROUNDS
       if (acc >= 0.6) sfx.success()
       else sfx.needsWork()
+
+      if (!sessionSaved.current && user?.id) {
+        sessionSaved.current = true
+        const rank = acc >= 0.8 ? 'S' : acc >= 0.6 ? 'A' : acc >= 0.4 ? 'B' : 'C'
+        const sessionInput = {
+          gameId: 'stack_tower' as const,
+          mode,
+          difficulty,
+          score,
+          correct,
+          totalRounds: TOTAL_ROUNDS,
+          bestCombo: combo,
+          rankLetter: rank,
+          badges,
+          meta: {
+            ops,
+            accuracy: acc,
+            opponents: mode === 'multiplayer' && !isRealMultiplayer ? opponents : undefined,
+          },
+        }
+        saveGameSession(user.id, sessionInput)
+        if (isRealMultiplayer) mp.sendFinish(sessionInput)
+      }
     }
   }, [phase])
 
@@ -419,7 +482,7 @@ export default function StackTower() {
   }
 
   function loadChallenge(r: number) {
-    const c = generateChallenge(difficulty, r)
+    const c = generateChallenge(difficulty, r, seededRngRef.current ?? undefined, forcedTypeRef.current ?? undefined)
     setChallenge(c)
     setStack(c.initialStack)
     setSourceIndex(0)
@@ -435,11 +498,16 @@ export default function StackTower() {
     runStart.current = Date.now()
   }
 
-  function startGame() {
+  function startGame(seed?: string, forcedType?: ChallengeType) {
     sfx.submit()
     gameMusic.play()
+    sessionSaved.current = false
+    seededRngRef.current = seed ? new SeededRandom(seed) : null
+    forcedTypeRef.current = forcedType ?? null
     setScore(0); setCombo(0); setRound(0); setCorrect(0); setOps(0); setBadges([])
-    setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
+    if (mode === 'multiplayer' && !seed) {
+      setOpponents(FAKE_OPPONENTS.map(o => ({ ...o, ops: rng(8, 18) })))
+    }
     loadChallenge(0)
     setPhase('playing')
   }
@@ -462,6 +530,7 @@ export default function StackTower() {
     if (challenge?.type === 'build_target' && challenge.constrained)  earned.add('Rule Keeper')
     if (nextCombo >= 3)                                               earned.add('On Fire 🔥')
     setBadges([...earned])
+    if (isRealMultiplayer) mp.sendRoundDone(round, ops, true)
     const nextRound = round + 1
     setTimeout(() => {
       if (nextRound >= TOTAL_ROUNDS) setPhase('result')
@@ -644,32 +713,96 @@ export default function StackTower() {
           </p>
 
           <div className="st-selector">
-            <button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>
+            <button className={mode === 'solo' ? 'active' : ''} onClick={() => selectMode('solo')}>
               <Zap size={18} /> Solo
             </button>
-            <button className={mode === 'multiplayer' ? 'active' : ''} onClick={() => setMode('multiplayer')}>
-              <Users size={18} /> Multiplayer
+            <button className={mode === 'multiplayer' ? 'active' : ''} onClick={() => selectMode('multiplayer')}>
+              <Users size={18} /> {mp.available ? 'Multiplayer' : 'Multiplayer (AI bots)'}
             </button>
           </div>
 
-          <div className="st-diff-grid">
-            {(Object.entries(DIFFICULTY_CONFIG) as [Difficulty, typeof DIFFICULTY_CONFIG.easy][]).map(([key, d]) => (
-              <button
-                key={key}
-                className={difficulty === key ? 'active' : ''}
-                style={{ '--diff-color': d.color } as React.CSSProperties}
-                onClick={() => setDifficulty(key)}
-              >
-                <strong>{d.label}</strong>
-                <span>{d.desc}</span>
-                <small>{d.time}s · max {d.maxSize}</small>
-              </button>
-            ))}
-          </div>
+          {(!isRealMultiplayer || mp.status === 'idle' || mp.status === 'error') && (
+            <div className="st-diff-grid">
+              {(Object.entries(DIFFICULTY_CONFIG) as [Difficulty, typeof DIFFICULTY_CONFIG.easy][]).map(([key, d]) => (
+                <button
+                  key={key}
+                  className={difficulty === key ? 'active' : ''}
+                  style={{ '--diff-color': d.color } as React.CSSProperties}
+                  onClick={() => setDifficulty(key)}
+                >
+                  <strong>{d.label}</strong>
+                  <span>{d.desc}</span>
+                  <small>{d.time}s · max {d.maxSize}</small>
+                </button>
+              ))}
+            </div>
+          )}
 
-          <motion.button className="st-start-btn" onClick={startGame} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Flame size={20} /> Start Tower Run
-          </motion.button>
+          {!isRealMultiplayer && (
+            <motion.button className="st-start-btn" onClick={() => startGame()} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Flame size={20} /> Start Tower Run
+            </motion.button>
+          )}
+
+          {isRealMultiplayer && mp.status === 'idle' && (
+            <div className="st-mp-room-actions">
+              <motion.button className="st-start-btn" onClick={() => { sfx.submit(); mp.createRoom(difficulty) }}
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Users size={18} /> Create Room
+              </motion.button>
+              <div className="st-mp-join-row">
+                <input className="st-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                  value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                <button onClick={() => { sfx.submit(); mp.joinRoom(roomCodeInput) }} disabled={roomCodeInput.length < 5}
+                  style={{ padding: '0 20px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontFamily: 'Orbitron, sans-serif', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                  Join Room
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'error' && (
+            <div className="st-mp-room-actions">
+              <p style={{ color: '#FF6B8A', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{mp.errorMessage}</p>
+              <div className="st-mp-join-row">
+                <input className="st-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                  value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                <button onClick={() => mp.joinRoom(roomCodeInput)} disabled={roomCodeInput.length < 5}
+                  style={{ padding: '0 20px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontFamily: 'Orbitron, sans-serif', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'lobby' && (
+            <div className="st-mp-room-actions">
+              <p className="st-lobby-sub">ROOM {mp.roomCode}</p>
+              <p className="st-lobby-desc">
+                Share this code with a classmate. Waiting for {Math.max(0, mp.minPlayers - mp.players.length)} more player(s) — no bots, real race only. Everyone gets the same challenge type this run.
+              </p>
+              <div className="st-mp-room-players">
+                {mp.players.map(p => (
+                  <div key={p.userId}>
+                    <b>{p.name}{p.userId === user?.id ? ' (You)' : ''}</b>
+                    <em style={p.ready ? { color: '#00D4AA' } : {}}>{p.ready ? 'READY' : 'NOT READY'}</em>
+                  </div>
+                ))}
+              </div>
+              <motion.button className="st-start-btn" disabled={!!mp.players.find(p => p.userId === user?.id)?.ready}
+                onClick={() => { sfx.submit(); mp.setReady() }}>
+                <CheckCircle size={18} /> {mp.players.find(p => p.userId === user?.id)?.ready ? 'Waiting for others' : 'Ready Up'}
+              </motion.button>
+              <button onClick={() => mp.leaveRoom()}
+                style={{ padding: '12px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontFamily: 'Orbitron, sans-serif', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                Leave Room
+              </button>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'starting' && (
+            <p className="st-lobby-desc">Everyone's ready. Starting…</p>
+          )}
         </section>
       </div>
     )
@@ -682,8 +815,11 @@ export default function StackTower() {
     const accuracy = Math.round((correct / TOTAL_ROUNDS) * 100)
     const rank     = accuracy >= 80 ? 'S' : accuracy >= 60 ? 'A' : accuracy >= 40 ? 'B' : 'C'
     const ranked   = mode === 'multiplayer'
-      ? [{ name: 'You', ops, isMe: true }, ...opponents.map(o => ({ ...o, isMe: false }))].sort((a, b) => a.ops - b.ops)
+      ? (isRealMultiplayer
+          ? (mp.results ? mp.results.map(r => ({ name: r.name, ops: r.score, isMe: r.userId === user?.id })) : [])
+          : [{ name: 'You', ops, isMe: true }, ...opponents.map(o => ({ ...o, isMe: false }))].sort((a, b) => a.ops - b.ops))
       : []
+    const waitingForOpponents = isRealMultiplayer && !mp.results
     return (
       <div className="st-page st-page--result">
         <div className="st-grid-bg" />
@@ -701,6 +837,9 @@ export default function StackTower() {
               {badges.map(b => <span key={b}>{b}</span>)}
             </div>
           )}
+          {waitingForOpponents && (
+            <p className="st-lobby-desc">Waiting for the other player to finish…</p>
+          )}
           {ranked.length > 0 && (
             <div className="st-race-results">
               {ranked.map((p, i) => (
@@ -711,7 +850,7 @@ export default function StackTower() {
             </div>
           )}
           <div className="st-result-actions">
-            <button onClick={() => setPhase('lobby')}><RotateCcw size={15} /> Play Again</button>
+            <button onClick={() => { if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}><RotateCcw size={15} /> Play Again</button>
             <button className="primary" onClick={() => navigate('/student/games')}>Games Lobby</button>
           </div>
         </div>
@@ -732,7 +871,7 @@ export default function StackTower() {
 
       {/* HUD */}
       <div className="st-hud">
-        <button className="st-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
+        <button className="st-back-btn" onClick={() => { gameMusic.stop(); if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
         <div className="st-score"><Zap size={14} /> {score.toLocaleString()}</div>
         <div className="st-rounds">
           {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
@@ -744,7 +883,7 @@ export default function StackTower() {
         </button>
         <span className="st-pill" style={{ color: cfg.color, borderColor: `${cfg.color}55` }}>{cfg.label}</span>
         {combo >= 2 && <span className="st-pill st-combo">×{combo}</span>}
-        {mode === 'multiplayer' && <span className="st-pill"><Users size={11} /> Race</span>}
+        {mode === 'multiplayer' && <span className="st-pill"><Users size={11} /> {isRealMultiplayer ? 'Live Race' : 'AI Race'}</span>}
       </div>
 
       <main className={`st-arena ${shake ? 'st-arena--shake' : ''}`}>
@@ -1016,8 +1155,14 @@ export default function StackTower() {
         {/* Multiplayer race */}
         {mode === 'multiplayer' && (
           <div className="st-mp">
-            <span><Swords size={12} /> Live ops race</span>
-            {[{ name: 'You', ops }, ...opponents].map(p => (
+            <span><Swords size={12} /> {isRealMultiplayer ? 'Live ops race' : 'Live ops race vs AI'}</span>
+            {(isRealMultiplayer
+              ? mp.players.map(p => ({
+                  name: p.userId === user?.id ? 'You' : p.name,
+                  ops: p.userId === user?.id ? ops : (mp.opponentProgress[p.userId]?.value ?? 0),
+                }))
+              : [{ name: 'You', ops }, ...opponents]
+            ).map(p => (
               <div key={p.name}><b>{p.name}</b><em>{p.ops} ops</em></div>
             ))}
           </div>

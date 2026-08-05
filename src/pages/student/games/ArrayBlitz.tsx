@@ -8,6 +8,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
 import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
+import { saveGameSession } from '../../../lib/gameSessions'
+import { useMultiplayerRoom } from '../../../lib/multiplayer'
+import { SeededRandom } from '../../../lib/seededRandom'
 import './ArrayBlitz.css'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -80,17 +83,22 @@ const TOOL_META: Record<OpType, { label: string; icon: typeof ArrowLeftRight }> 
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function randomInt(min: number, max: number) {
+// `rng` is only passed in real multiplayer runs (seeded from the room's shared
+// seed, so every player generates identical rounds). Solo/practice-vs-bots
+// omits it and falls back to Math.random() exactly as before.
+function randomInt(min: number, max: number, rng?: SeededRandom) {
+  if (rng) return rng.int(min, max)
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 function uid() { return Math.random().toString(36).slice(2, 8) }
-function randomValue(): string | number {
-  return Math.random() > 0.5
-    ? randomInt(1, 99)
-    : ['apple','blue','cat','delta','echo','fox','green','hat','ink','java'][randomInt(0, 9)]
+function randomValue(rng?: SeededRandom): string | number {
+  const isNum = rng ? rng.bool(0.5) : Math.random() > 0.5
+  return isNum
+    ? randomInt(1, 99, rng)
+    : ['apple','blue','cat','delta','echo','fox','green','hat','ink','java'][randomInt(0, 9, rng)]
 }
-function makeArray(size: number): ArrayElement[] {
-  return Array.from({ length: size }, () => ({ id: uid(), value: randomValue() }))
+function makeArray(size: number, rng?: SeededRandom): ArrayElement[] {
+  return Array.from({ length: size }, () => ({ id: uid(), value: randomValue(rng) }))
 }
 function cloneArr(arr: ArrayElement[]): ArrayElement[] {
   return arr.map(e => ({ ...e }))
@@ -100,10 +108,10 @@ function cloneArr(arr: ArrayElement[]): ArrayElement[] {
 // Start with a random array, then apply N random ops to derive the goal.
 // This guarantees the goal is reachable in exactly N moves (the "par").
 
-function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge {
+function generateChallenge(difficulty: Difficulty, bossRound = false, rng?: SeededRandom): Challenge {
   const cfg = DIFFICULTY_CONFIG[difficulty]
-  const size = randomInt(cfg.size[0], cfg.size[1])
-  const start = makeArray(size)
+  const size = randomInt(cfg.size[0], cfg.size[1], rng)
+  const start = makeArray(size, rng)
   let working = cloneArr(start)
   const numOps = bossRound ? cfg.par + 2 : cfg.par
   const insertedValues: ArrayElement[] = []
@@ -121,11 +129,11 @@ function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge
       return true
     })
     if (candidates.length === 0) break
-    const op = candidates[randomInt(0, candidates.length - 1)]
+    const op = candidates[randomInt(0, candidates.length - 1, rng)]
 
     if (op === 'swap') {
-      const i = randomInt(0, working.length - 1)
-      let j = randomInt(0, working.length - 1)
+      const i = randomInt(0, working.length - 1, rng)
+      let j = randomInt(0, working.length - 1, rng)
       if (i === j) { opsApplied--; continue }
       const tmp = working[i]; working[i] = working[j]; working[j] = tmp
     } else if (op === 'rotateLeft') {
@@ -133,11 +141,11 @@ function generateChallenge(difficulty: Difficulty, bossRound = false): Challenge
     } else if (op === 'rotateRight') {
       working.unshift(working.pop()!)
     } else if (op === 'delete') {
-      const i = randomInt(0, working.length - 1)
+      const i = randomInt(0, working.length - 1, rng)
       working.splice(i, 1)
     } else if (op === 'insert') {
-      const el: ArrayElement = { id: uid(), value: randomValue() }
-      const i = randomInt(0, working.length)
+      const el: ArrayElement = { id: uid(), value: randomValue(rng) }
+      const i = randomInt(0, working.length, rng)
       working.splice(i, 0, el)
       insertedValues.push(el)
     }
@@ -282,6 +290,12 @@ export default function ArrayBlitz() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Player'
+  const avatarColor = '#00D4AA'
+  const mp = useMultiplayerRoom('array_blitz', user?.id, displayName, avatarColor)
+  const [roomCodeInput, setRoomCodeInput] = useState('')
+  const seededRngRef = useRef<SeededRandom | null>(null)
+
   const [phase,      setPhase]      = useState<Phase>('lobby')
   const [mode,       setMode]       = useState<Mode>('solo')
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -316,8 +330,34 @@ export default function ArrayBlitz() {
 
   const [opponentScores, setOpponentScores] = useState<Record<string, number>>({})
   const opTimers = useRef<ReturnType<typeof setInterval>[]>([])
+  const sessionSaved = useRef(false)
 
   const { muted: sfxMuted, toggle: toggleSfx } = useSfxToggle()
+
+  const isRealMultiplayer = mode === 'multiplayer' && mp.available
+
+  // Joiners inherit the room's actual difficulty (set by whoever created it),
+  // overriding whatever they had locally selected before joining.
+  useEffect(() => {
+    if (mp.roomDifficulty) setDifficulty(mp.roomDifficulty as Difficulty)
+  }, [mp.roomDifficulty])
+
+  // Once every player in the room is ready, the server counts down and flips
+  // status to 'playing' — that's our cue to actually start the seeded run.
+  useEffect(() => {
+    if (isRealMultiplayer && mp.status === 'playing' && mp.start && phase === 'lobby') {
+      startGame(mp.start.seed)
+    }
+  }, [mp.status])
+
+  useEffect(() => {
+    return () => { if (mp.roomCode) mp.leaveRoom() }
+  }, [])
+
+  function selectMode(next: Mode) {
+    if (next !== mode && mp.roomCode) mp.leaveRoom()
+    setMode(next)
+  }
 
   useEffect(() => {
     if (phase === 'result') {
@@ -325,6 +365,30 @@ export default function ArrayBlitz() {
       const acc = totalQuestions > 0 ? correct / totalQuestions : 0
       if (acc >= 0.6) sfx.success()
       else sfx.needsWork()
+
+      if (!sessionSaved.current && user?.id) {
+        sessionSaved.current = true
+        const avgEfficiency = roundEfficiencies.length > 0
+          ? roundEfficiencies.reduce((a, b) => a + b, 0) / roundEfficiencies.length
+          : 0
+        const rank = acc >= 0.9 ? 'S' : acc >= 0.75 ? 'A' : acc >= 0.6 ? 'B' : acc >= 0.4 ? 'C' : 'D'
+        const sessionInput = {
+          gameId: 'array_blitz' as const,
+          mode,
+          difficulty,
+          score,
+          correct,
+          totalRounds: totalQuestions,
+          bestCombo: bestStreak,
+          rankLetter: rank,
+          meta: {
+            avgEfficiency,
+            opponentScores: mode === 'multiplayer' && !isRealMultiplayer ? opponentScores : undefined,
+          },
+        }
+        saveGameSession(user.id, sessionInput)
+        if (isRealMultiplayer) mp.sendFinish(sessionInput)
+      }
     }
   }, [phase])
 
@@ -345,13 +409,15 @@ export default function ArrayBlitz() {
     setTimeout(() => setFloatingScores(prev => prev.filter(f => f.id !== id)), 1000)
   }
 
-  function startGame() {
+  function startGame(seed?: string) {
     gameMusic.play()
+    sessionSaved.current = false
+    seededRngRef.current = seed ? new SeededRandom(seed) : null
     setScore(0); setCombo(0); setTotalQuestions(0); setCorrect(0); setRoundEfficiencies([])
     setMission(RUN_MISSIONS[randomInt(0, RUN_MISSIONS.length - 1)])
     setMissionPaid(false); setBestStreak(0); setHintsUsedCount(0)
     setPowerupChoices([]); setDoubleNext(false)
-    if (mode === 'multiplayer') {
+    if (mode === 'multiplayer' && !seed) {
       const init: Record<string, number> = {}
       FAKE_OPPONENTS.forEach(o => { init[o.id] = 0 })
       setOpponentScores(init)
@@ -361,7 +427,7 @@ export default function ArrayBlitz() {
   }
 
   const loadNextChallenge = useCallback((roundIndex = 0) => {
-    const ch = generateChallenge(difficulty, roundIndex === TOTAL_ROUNDS - 1)
+    const ch = generateChallenge(difficulty, roundIndex === TOTAL_ROUNDS - 1, seededRngRef.current ?? undefined)
     setChallenge(ch)
     setCurrent(cloneArr(ch.start))
     setInsertPool(cloneArr(ch.insertPool))
@@ -371,7 +437,8 @@ export default function ArrayBlitz() {
     setFeedback(null); setHistory([]); setBonusClosed(false)
     setRoundStartTime(Date.now())
 
-    if (mode === 'multiplayer') {
+    const botPractice = mode === 'multiplayer' && !seededRngRef.current
+    if (botPractice) {
       opTimers.current.forEach(clearInterval)
       opTimers.current = FAKE_OPPONENTS.map(op =>
         setInterval(() => {
@@ -442,6 +509,7 @@ export default function ArrayBlitz() {
     setFeedback('solved')
     sfx.success()
     spawnFloating(gained)
+    if (isRealMultiplayer) mp.sendRoundDone(nextRound - 1, score + gained, true)
     advanceRound(nextRound, nextCorrect, nextEfficiencies)
   }
 
@@ -577,46 +645,120 @@ export default function ArrayBlitz() {
           <div className="ab-lobby-section">
             <p className="ab-section-label">// GAME MODE</p>
             <div className="ab-mode-row">
-              <button className={`ab-mode-card ${mode === 'solo' ? 'active' : ''}`} onClick={() => setMode('solo')}>
+              <button className={`ab-mode-card ${mode === 'solo' ? 'active' : ''}`} onClick={() => selectMode('solo')}>
                 <User size={22} />
                 <span className="ab-mode-title">SOLO</span>
                 <span className="ab-mode-sub">Practice at your own pace</span>
               </button>
-              <button className={`ab-mode-card ${mode === 'multiplayer' ? 'active multi' : ''}`} onClick={() => setMode('multiplayer')}>
+              <button className={`ab-mode-card ${mode === 'multiplayer' ? 'active multi' : ''}`} onClick={() => selectMode('multiplayer')}>
                 <Users size={22} />
                 <span className="ab-mode-title">MULTIPLAYER</span>
-                <span className="ab-mode-sub">Race against 3 AI bots</span>
-                <span className="ab-mode-badge-bot"><Bot size={10} /> AI Bots · Real multiplayer coming soon</span>
+                <span className="ab-mode-sub">{mp.available ? 'Race a real classmate' : 'Race against 3 AI bots'}</span>
+                <span className="ab-mode-badge-bot">
+                  {mp.available ? <><Swords size={10} /> Live rooms · no bots</> : <><Bot size={10} /> AI Bots · Live multiplayer server offline</>}
+                </span>
               </button>
             </div>
           </div>
 
-          <div className="ab-lobby-section">
-            <p className="ab-section-label">// DIFFICULTY</p>
-            <div className="ab-diff-row">
-              {(Object.entries(DIFFICULTY_CONFIG) as [Difficulty, typeof DIFFICULTY_CONFIG['easy']][]).map(([d, cfg]) => (
-                <button key={d} className={`ab-diff-card ${difficulty === d ? 'active' : ''}`}
-                  style={difficulty === d ? { borderColor: cfg.color, boxShadow: `0 0 20px ${cfg.color}30, inset 0 0 20px ${cfg.color}08` } : {}}
-                  onClick={() => setDifficulty(d)}>
-                  <span className="ab-diff-icon">{cfg.icon}</span>
-                  <span className="ab-diff-name" style={difficulty === d ? { color: cfg.color } : {}}>{cfg.label}</span>
-                  <span className="ab-diff-desc">{cfg.desc}</span>
-                  <div className="ab-diff-meta">
-                    <span>{cfg.size[0]}–{cfg.size[1]} els</span>
-                    <span style={{ color: cfg.color }}>par {cfg.par}</span>
-                  </div>
-                </button>
-              ))}
+          {(!isRealMultiplayer || mp.status === 'idle' || mp.status === 'error') && (
+            <div className="ab-lobby-section">
+              <p className="ab-section-label">// DIFFICULTY</p>
+              <div className="ab-diff-row">
+                {(Object.entries(DIFFICULTY_CONFIG) as [Difficulty, typeof DIFFICULTY_CONFIG['easy']][]).map(([d, cfg]) => (
+                  <button key={d} className={`ab-diff-card ${difficulty === d ? 'active' : ''}`}
+                    style={difficulty === d ? { borderColor: cfg.color, boxShadow: `0 0 20px ${cfg.color}30, inset 0 0 20px ${cfg.color}08` } : {}}
+                    onClick={() => setDifficulty(d)}>
+                    <span className="ab-diff-icon">{cfg.icon}</span>
+                    <span className="ab-diff-name" style={difficulty === d ? { color: cfg.color } : {}}>{cfg.label}</span>
+                    <span className="ab-diff-desc">{cfg.desc}</span>
+                    <div className="ab-diff-meta">
+                      <span>{cfg.size[0]}–{cfg.size[1]} els</span>
+                      <span style={{ color: cfg.color }}>par {cfg.par}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <motion.button className="ab-start-btn" onClick={() => { sfx.submit(); startGame() }}
-            whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(0,212,170,0.5)' }}
-            whileTap={{ scale: 0.97 }}>
-            <Zap size={20} />
-            START GAME
-            <span className="ab-start-rounds">{TOTAL_ROUNDS} ROUNDS</span>
-          </motion.button>
+          {!isRealMultiplayer && (
+            <motion.button className="ab-start-btn" onClick={() => { sfx.submit(); startGame() }}
+              whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(0,212,170,0.5)' }}
+              whileTap={{ scale: 0.97 }}>
+              <Zap size={20} />
+              START GAME
+              <span className="ab-start-rounds">{TOTAL_ROUNDS} ROUNDS</span>
+            </motion.button>
+          )}
+
+          {isRealMultiplayer && mp.status === 'idle' && (
+            <div className="ab-lobby-section">
+              <p className="ab-section-label">// MULTIPLAYER ROOM</p>
+              <div className="ab-mp-room-actions">
+                <motion.button className="ab-start-btn" onClick={() => { sfx.submit(); mp.createRoom(difficulty) }}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Users size={18} /> CREATE ROOM
+                </motion.button>
+                <div className="ab-mp-join-row">
+                  <input className="ab-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                    value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                  <button className="ab-result-btn secondary" disabled={roomCodeInput.length < 5}
+                    onClick={() => { sfx.submit(); mp.joinRoom(roomCodeInput) }}>
+                    Join Room
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'error' && (
+            <div className="ab-lobby-section">
+              <p className="ab-run-reward" style={{ color: '#FF6B8A' }}>{mp.errorMessage}</p>
+              <div className="ab-mp-join-row">
+                <input className="ab-mp-code-input" placeholder="ROOM CODE" maxLength={5}
+                  value={roomCodeInput} onChange={e => setRoomCodeInput(e.target.value.toUpperCase())} />
+                <button className="ab-result-btn secondary" disabled={roomCodeInput.length < 5}
+                  onClick={() => mp.joinRoom(roomCodeInput)}>Try Again</button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'lobby' && (
+            <div className="ab-lobby-section">
+              <p className="ab-section-label">// ROOM {mp.roomCode}</p>
+              <p className="ab-lobby-desc">
+                Share this code with a classmate. Waiting for {Math.max(0, mp.minPlayers - mp.players.length)} more player(s) — no bots, real race only.
+              </p>
+              <div className="ab-mp-room-players">
+                {mp.players.map(p => (
+                  <div key={p.userId} className="ab-mp-row">
+                    <div className="ab-mp-avatar" style={{ background: `${p.avatarColor}20`, borderColor: p.avatarColor }}>
+                      {p.name.charAt(0)}
+                    </div>
+                    <span className="ab-mp-name">{p.name}{p.userId === user?.id ? ' (You)' : ''}</span>
+                    <span className="ab-diff-pill" style={p.ready ? { color: '#00D4AA', borderColor: '#00D4AA50', background: '#00D4AA10' } : {}}>
+                      {p.ready ? 'READY' : 'NOT READY'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="ab-mp-room-actions">
+                <motion.button className="ab-start-btn" disabled={!!mp.players.find(p => p.userId === user?.id)?.ready}
+                  onClick={() => { sfx.submit(); mp.setReady() }}>
+                  <CheckCircle size={18} /> {mp.players.find(p => p.userId === user?.id)?.ready ? 'WAITING FOR OTHERS' : 'READY UP'}
+                </motion.button>
+                <button className="ab-result-btn secondary" onClick={() => mp.leaveRoom()}>Leave Room</button>
+              </div>
+            </div>
+          )}
+
+          {isRealMultiplayer && mp.status === 'starting' && (
+            <div className="ab-lobby-section">
+              <p className="ab-lobby-title" style={{ fontSize: '1.4rem' }}>STARTING…</p>
+              <p className="ab-lobby-desc">Everyone's ready. Get set!</p>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -633,12 +775,15 @@ export default function ArrayBlitz() {
     const rankColor = { S: '#FFB830', A: '#00D4AA', B: '#9B7ED4', C: '#63B3ED', D: '#FF6B8A' }[rank]
 
     const allScores = mode === 'multiplayer'
-      ? [
-          { name: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'You', score, isMe: true },
-          ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, isMe: false })),
-        ].sort((a, b) => b.score - a.score)
+      ? (isRealMultiplayer
+          ? (mp.results ? mp.results.map(r => ({ name: r.name, score: r.score, isMe: r.userId === user?.id })) : null)
+          : [
+              { name: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'You', score, isMe: true },
+              ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, isMe: false })),
+            ].sort((a, b) => b.score - a.score))
       : null
     const myRank = allScores?.findIndex(s => s.isMe) ?? -1
+    const waitingForOpponents = isRealMultiplayer && !mp.results
 
     return (
       <div className="ab-page ab-page--result">
@@ -686,6 +831,14 @@ export default function ArrayBlitz() {
             </div>
           </motion.div>
 
+          {waitingForOpponents && (
+            <motion.div className="ab-result-leaderboard"
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+              <p className="ab-section-label">// MATCH RESULTS</p>
+              <p className="ab-lobby-desc">Waiting for the other player to finish…</p>
+            </motion.div>
+          )}
+
           {allScores && (
             <motion.div className="ab-result-leaderboard"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
@@ -707,12 +860,12 @@ export default function ArrayBlitz() {
                   </div>
                 )
               })}
-              {myRank === 0 && <p className="ab-result-win-msg">🏆 You beat the AI bots!</p>}
+              {myRank === 0 && <p className="ab-result-win-msg">🏆 {isRealMultiplayer ? 'You won the race!' : 'You beat the AI bots!'}</p>}
             </motion.div>
           )}
 
           <motion.div className="ab-result-actions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
-            <button className="ab-result-btn secondary" onClick={() => setPhase('lobby')}>
+            <button className="ab-result-btn secondary" onClick={() => { if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}>
               <RotateCcw size={15} /> Play Again
             </button>
             <button className="ab-result-btn primary" onClick={() => navigate('/student/games')}>
@@ -735,7 +888,7 @@ export default function ArrayBlitz() {
       <div className="ab-blueprint-bg" />
 
       <div className="ab-hud">
-        <button className="ab-back-btn" onClick={() => { gameMusic.stop(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
+        <button className="ab-back-btn" onClick={() => { gameMusic.stop(); if (mp.roomCode) mp.leaveRoom(); setPhase('lobby') }}><ArrowLeft size={14} /></button>
 
         <div className="ab-hud-score-wrap">
           <div className="ab-hud-score">
@@ -768,7 +921,7 @@ export default function ArrayBlitz() {
           </span>
           {mode === 'multiplayer' && (
             <span className="ab-diff-pill" style={{ color: '#9B7ED4', borderColor: '#9B7ED450', background: '#9B7ED410' }}>
-              <Bot size={10} /> AI Race
+              {isRealMultiplayer ? <><Swords size={10} /> Live Race</> : <><Bot size={10} /> AI Race</>}
             </span>
           )}
         </div>
@@ -951,15 +1104,23 @@ export default function ArrayBlitz() {
 
         {mode === 'multiplayer' && (
           <div className="ab-mp-panel">
-            <p className="ab-mp-title"><Swords size={12} /> LIVE RACE vs AI BOTS</p>
-            {[
-              { name: 'You', score, color: '#00D4AA', isMe: true },
-              ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, color: o.color, isMe: false })),
-            ].sort((a, b) => b.score - a.score).map((p, i) => (
-              <div key={p.name} className="ab-mp-row">
+            <p className="ab-mp-title"><Swords size={12} /> {isRealMultiplayer ? 'LIVE RACE' : 'LIVE RACE vs AI BOTS'}</p>
+            {(isRealMultiplayer
+              ? mp.players.map(p => ({
+                  name: p.userId === user?.id ? 'You' : p.name,
+                  score: p.userId === user?.id ? score : (mp.opponentProgress[p.userId]?.value ?? 0),
+                  color: p.userId === user?.id ? '#00D4AA' : p.avatarColor,
+                  isMe: p.userId === user?.id,
+                }))
+              : [
+                  { name: 'You', score, color: '#00D4AA', isMe: true },
+                  ...FAKE_OPPONENTS.map(o => ({ name: o.name, score: opponentScores[o.id] ?? 0, color: o.color, isMe: false })),
+                ]
+            ).sort((a, b) => b.score - a.score).map((p, i) => (
+              <div key={`${p.name}-${i}`} className="ab-mp-row">
                 <span className="ab-mp-pos">#{i + 1}</span>
                 <div className="ab-mp-avatar" style={{ background: `${p.color}20`, borderColor: p.color }}>
-                  {p.isMe ? 'U' : <Bot size={10} />}
+                  {p.isMe ? 'U' : isRealMultiplayer ? p.name.charAt(0) : <Bot size={10} />}
                 </div>
                 <span className="ab-mp-name" style={{ color: p.isMe ? '#00D4AA' : 'var(--text-secondary)' }}>{p.name}</span>
                 <div className="ab-mp-bar-wrap">
