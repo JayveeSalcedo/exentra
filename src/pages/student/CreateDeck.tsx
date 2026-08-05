@@ -6,7 +6,7 @@ import { useAuth } from '../../store/AuthContext'
 import { groq, MODEL, DSA_TOPICS } from '../../lib/groq'
 import {
   ArrowLeft, Plus, Trash2, Sparkles, Loader2,
-  BookOpen, ChevronDown, ChevronUp, GripVertical,
+  BookOpen, GripVertical,
 } from 'lucide-react'
 import './ProblemBank.css'
 

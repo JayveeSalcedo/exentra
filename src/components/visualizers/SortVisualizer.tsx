@@ -72,7 +72,7 @@ export default function SortVisualizer({ type }: Props) {
     }
     ms(a, 0, a.length - 1)
 
-    steps.forEach((snap, i) => {
+    steps.forEach((snap) => {
       schedule(() => setArr([...snap]), delay)
       delay += 220
     })

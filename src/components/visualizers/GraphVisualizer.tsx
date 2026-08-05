@@ -28,10 +28,6 @@ const DIJKSTRA_EDGES: GEdge[] = [
 ]
 
 export default function GraphVisualizer({ type }: Props) {
-  const edges = type === 'graph-directed' || type === 'bfs-dfs'
-    ? PRESET_EDGES
-    : DIJKSTRA_EDGES
-
   const [visited, setVisited]   = useState<Set<number>>(new Set())
   const [current, setCurrent]   = useState<number | null>(null)
   const [queue_,  setQueue_]    = useState<number[]>([])

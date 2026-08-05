@@ -4,7 +4,7 @@ import type { VisualizerType } from '../../lessons/types'
 
 interface Props { type: VisualizerType; lessonId: string }
 
-const spring = { type: 'spring', stiffness: 360, damping: 28 }
+const spring = { type: 'spring' as const, stiffness: 360, damping: 28 }
 
 export default function QueueVisualizer({ type }: Props) {
   const [queue, setQueue] = useState<string[]>(['10', '20', '30'])

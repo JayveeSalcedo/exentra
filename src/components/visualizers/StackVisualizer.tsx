@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props { lessonId: string }
 
-const spring = { type: 'spring', stiffness: 380, damping: 28 }
+const spring = { type: 'spring' as const, stiffness: 380, damping: 28 }
 
 export default function StackVisualizer({ }: Props) {
   const [stack, setStack] = useState<string[]>(['10', '20', '30'])

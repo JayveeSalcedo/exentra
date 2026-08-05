@@ -8,14 +8,13 @@ import './SignUpPage.css'
 import FormField from '../../components/ui/FormField'
 import TextInput from '../../components/ui/TextInput'
 import PasswordInput from '../../components/ui/PasswordInput'
-import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 const step1Schema = z.object({
   schoolId: z.string().min(1, 'School ID is required'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  studentType: z.enum(['regular', 'irregular'], { required_error: 'Please select a student type' }),
+  studentType: z.enum(['regular', 'irregular'], { message: 'Please select a student type' }),
 })
 
 const step2Schema = z.object({

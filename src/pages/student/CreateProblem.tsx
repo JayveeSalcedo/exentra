@@ -6,7 +6,7 @@ import { useAuth } from '../../store/AuthContext'
 import { DSA_TOPICS, generateStudentProblem, type ProblemChoice } from '../../lib/groq'
 import {
   ArrowLeft, Sparkles, Save, Code2, ListChecks,
-  Loader2, Plus, Trash2, CheckCircle2, AlertCircle,
+  Loader2, CheckCircle2, AlertCircle,
 } from 'lucide-react'
 import './ProblemBank.css'
 
