@@ -4,7 +4,7 @@ import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
   Trophy, Zap, Flame, Search, Crown,
-  TrendingUp, ChevronUp, ChevronDown, Minus,
+  TrendingUp,
   Medal, Star, Shield
 } from 'lucide-react'
 import './Leaderboard.css'

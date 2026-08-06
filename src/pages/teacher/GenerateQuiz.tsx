@@ -7,7 +7,7 @@ import { useAuth } from '../../store/AuthContext'
 import {
   Sparkles, ChevronDown, Trash2, CheckCircle2,
   RefreshCw, Save, ArrowLeft, BookOpen, Clock,
-  Calendar, Zap, Eye, EyeOff, Pencil, X, Check,
+  Calendar, Zap, Eye, Pencil, X, Check,
   AlertCircle, Settings2, Layers
 } from 'lucide-react'
 import './GenerateQuiz.css'
@@ -154,8 +154,8 @@ export default function GenerateQuiz() {
       return {
         ...q,
         question: q._editText,
-        choices: q._editChoices,
-        correct_index: q._editCorrect,
+        choices: q._editChoices as [string, string, string, string],
+        correct_index: q._editCorrect as 0 | 1 | 2 | 3,
         explanation: q._editExplanation,
         _editMode: false,
       }

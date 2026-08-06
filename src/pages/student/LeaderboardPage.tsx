@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
-  Trophy, Zap, Flame, Medal, Crown, Search,
+  Trophy, Zap, Flame, Crown, Search,
   TrendingUp, Users, Star, Loader2,
 } from 'lucide-react'
 import './Leaderboard.css'

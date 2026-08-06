@@ -176,7 +176,6 @@ export default function ProblemBank() {
 
   const solved = problems.filter(p => p.is_solved).length
   const coding = problems.filter(p => p.type === 'coding').length
-  const mc = problems.filter(p => p.type === 'multiple_choice').length
 
   return (
     <div className="pb-root">

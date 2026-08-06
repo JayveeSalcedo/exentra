@@ -5,7 +5,7 @@ import { groq, MODEL } from '../../lib/groq'
 import { useAuth } from '../../store/AuthContext'
 import {
   BarChart2, Brain, Users, TrendingUp, AlertTriangle,
-  Star, RefreshCw, BookOpen, Zap, CheckCircle2,
+  Star, RefreshCw, BookOpen, Zap,
   ChevronDown, ChevronUp, ChevronsUpDown, Layers
 } from 'lucide-react'
 import './TeacherProgress.css'

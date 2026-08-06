@@ -87,7 +87,7 @@ const FAKE_OPPONENTS = [
 
 function uid()  { return Math.random().toString(36).slice(2, 9) }
 function rng(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min }
-function pick<T>(arr: T[]) { return arr[rng(0, arr.length - 1)] }
+function pick<T>(arr: readonly T[]) { return arr[rng(0, arr.length - 1)] }
 function shuffle<T>(arr: T[]) { return [...arr].sort(() => Math.random() - 0.5) }
 function uniqueVals(n: number, lo = 1, hi = 99) {
   const set = new Set<number>()
@@ -96,7 +96,7 @@ function uniqueVals(n: number, lo = 1, hi = 99) {
 }
 
 /** Build a BST from a sequence of values inserted in order. Returns node map + root id. */
-function buildBstFromSequence(values: number[]) {
+function buildBstFromSequence(values: number[]): { nodes: TNode[]; rootId: string | null } {
   const nodes: Record<string, TNode> = {}
   let rootId: string | null = null
 
@@ -237,7 +237,7 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
     const target = pick(vals)
     // trace path
     const path: number[] = []
-    let curId = rootId
+    let curId: string | null = rootId
     while (curId) {
       const cur = findNode(nodes, curId)!
       path.push(cur.value)
@@ -519,7 +519,7 @@ export default function TreeBuilder() {
   const [clickedIds,  setClickedIds]  = useState<string[]>([])
   const [wrongId,     setWrongId]     = useState<string | null>(null)
   const [mcLocked,    setMcLocked]    = useState(false)
-  const [dragValue,   setDragValue]   = useState<number | null>(null)
+  const [,            setDragValue]   = useState<number | null>(null)
 
   /* Score / progress */
   const [score,    setScore]    = useState(0)

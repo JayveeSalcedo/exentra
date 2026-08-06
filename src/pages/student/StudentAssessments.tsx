@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
   ClipboardList, Clock, CheckCircle2, Lock,
-  ChevronRight, Zap, BookOpen, AlertCircle, Trophy, Paperclip, XCircle
+  ChevronRight, Zap, BookOpen, AlertCircle, Paperclip, XCircle
 } from 'lucide-react'
 import './StudentAssessments.css'
 

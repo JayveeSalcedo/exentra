@@ -4,7 +4,7 @@ import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
   User, Zap, Flame, Shield, Star, Edit3, Save, X,
-  CheckCircle2, AlertTriangle, BookOpen, Trophy, Target, Layers
+  CheckCircle2, AlertTriangle, BookOpen, Trophy, Target
 } from 'lucide-react'
 import './StudentProfile.css'
 

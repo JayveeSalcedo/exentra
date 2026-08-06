@@ -152,7 +152,7 @@ function dfsOrder(nodes: GNode[], edges: GEdge[], startId: string, directed: boo
   return order
 }
 
-function hopDistances(nodes: GNode[], edges: GEdge[], startId: string): Record<string, number> {
+function hopDistances(edges: GEdge[], startId: string): Record<string, number> {
   const dist: Record<string, number> = { [startId]: 0 }
   const queue = [startId]
   while (queue.length) {
@@ -347,7 +347,7 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
     const n = rng(6, 8)
     const { nodes, edges } = buildGraph(n, 0.14, false)
     const a = pick(nodes)
-    const dist = hopDistances(nodes, edges, a.id)
+    const dist = hopDistances(edges, a.id)
     const candidates = nodes.filter(x => x.id !== a.id && dist[x.id] > 0)
     const b = pick(candidates)
     const correctHops = dist[b.id]
@@ -376,8 +376,7 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
     const correctCost = dist[b.id]
     const correct = `${correctPath} (cost ${correctCost})`
     // Distractor: shortest by hop count instead of weight (classic trap — fewest edges ≠ cheapest)
-    const hopPath = bfsOrder(nodes, edges, a.id, false)
-    const hopDist = hopDistances(nodes, edges, a.id)
+    const hopDist = hopDistances(edges, a.id)
     let altPath = correctPath
     if (hopDist[b.id] !== undefined) {
       // Re-derive an actual hop-shortest path via BFS parent tracking

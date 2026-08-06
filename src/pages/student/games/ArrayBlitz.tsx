@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ArrowLeft, Zap, Timer, Star, CheckCircle,
+  ArrowLeft, Zap, Timer, CheckCircle,
   User, Users, HelpCircle, RotateCcw, RotateCw, ChevronRight, Swords, Bot,
   ArrowLeftRight, Trash2, PlusSquare, Target, Sparkles, Undo2, Volume2, VolumeX,
 } from 'lucide-react'
@@ -72,14 +72,6 @@ const FAKE_OPPONENTS = [
   { id: 'bot2', name: 'Sam [AI]',  avatar: 'AI', color: '#FFB830' },
   { id: 'bot3', name: 'Rea [AI]',  avatar: 'AI', color: '#FF6B8A' },
 ]
-
-const TOOL_META: Record<OpType, { label: string; icon: typeof ArrowLeftRight }> = {
-  swap:        { label: 'Swap',   icon: ArrowLeftRight },
-  delete:      { label: 'Delete', icon: Trash2 },
-  insert:      { label: 'Insert', icon: PlusSquare },
-  rotateLeft:  { label: 'Rotate L', icon: RotateCcw },
-  rotateRight: { label: 'Rotate R', icon: RotateCw },
-}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -21,12 +21,6 @@ const PRESET_EDGES: GEdge[] = [
   { from: 2, to: 3 }, { from: 3, to: 4 },
 ]
 
-const DIJKSTRA_EDGES: GEdge[] = [
-  { from: 0, to: 1, weight: 4 }, { from: 0, to: 2, weight: 1 },
-  { from: 2, to: 1, weight: 2 }, { from: 2, to: 3, weight: 2 },
-  { from: 1, to: 3, weight: 1 },
-]
-
 export default function GraphVisualizer({ type }: Props) {
   const [visited, setVisited]   = useState<Set<number>>(new Set())
   const [current, setCurrent]   = useState<number | null>(null)

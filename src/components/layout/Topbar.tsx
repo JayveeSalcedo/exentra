@@ -25,7 +25,7 @@ export default function Topbar({ pageTitle, breadcrumb }: TopbarProps) {
         )}
         <h1 className="topbar-title">
           {pageTitle}
-          <span className="topbar-wave"> 👋</span>
+          
         </h1>
       </div>
 

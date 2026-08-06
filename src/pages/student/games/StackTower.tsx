@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Undo2, Users, Zap, AlertTriangle, Volume2, VolumeX,
+  Timer, Trash2, Users, Zap, AlertTriangle, Volume2, VolumeX,
 } from 'lucide-react'
 import { useAuth } from '../../../store/AuthContext'
 import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
@@ -77,7 +77,6 @@ const CONSTRAINT_CHANCE: Record<Difficulty, number> = {
 
 const VALUES   = ['A', 'B', 'C', 'D', 'E', 'F', '7', '13', '21', '42']
 const OPENERS  = ['(', '[', '{']
-const CLOSERS: Record<string,string> = { '(': ')', '[': ']', '{': '}' }
 const PAIRS:   Record<string,string> = { ')': '(', ']': '[', '}': '{' }
 
 const FAKE_OPPONENTS = [
@@ -85,6 +84,19 @@ const FAKE_OPPONENTS = [
   { name: 'Mira', ops: 0 },
   { name: 'Theo', ops: 0 },
 ]
+
+// Translates the shorthand challenge-type names used by the multiplayer room
+// payload into this file's internal ChallengeType names.
+function mapMpChallengeType(t?: 'build_target' | 'brackets' | 'reverse' | 'postfix'): ChallengeType | undefined {
+  if (!t) return undefined
+  const MAP: Record<string, ChallengeType> = {
+    build_target: 'build_target',
+    brackets: 'bracket_matcher',
+    reverse: 'reverse_string',
+    postfix: 'postfix',
+  }
+  return MAP[t]
+}
 
 /* ── Utilities ─────────────────────────────────────────────────────────── */
 
@@ -292,11 +304,11 @@ function TowerView({
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 exit={{ y: -70, opacity: 0, scale: 0.85 }}
                 draggable={isTop && !!onTopDragStart}
-                onDragStart={isTop && onTopDragStart ? e => {
+                onDragStart={(isTop && onTopDragStart ? (e: any) => {
                   e.dataTransfer.effectAllowed = 'move'
                   e.dataTransfer.setData('text/plain', 'pop-top')
                   onTopDragStart()
-                } : undefined}
+                } : undefined) as any}
               >
                 {item}
                 {isTop && onTopDragStart && <span className="st-drag-hint">↓</span>}
@@ -338,19 +350,6 @@ function DropZone({
   )
 }
 
-/** Draggable token chip */
-function TokenChip({ value, onDragStart }: { value: string; onDragStart: () => void }) {
-  return (
-    <div
-      className="st-token-chip"
-      draggable
-      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; onDragStart() }}
-    >
-      {value}
-    </div>
-  )
-}
-
 /* ── Main component ─────────────────────────────────────────────────────── */
 
 export default function StackTower() {
@@ -372,7 +371,7 @@ export default function StackTower() {
   /* Round state */
   const [challenge,    setChallenge]    = useState<Challenge | null>(null)
   const [stack,        setStack]        = useState<string[]>([])
-  const [sourceIndex,  setSourceIndex]  = useState(0)
+  const [,             setSourceIndex]  = useState(0)
   const [streamIndex,  setStreamIndex]  = useState(0)
   const [output,       setOutput]       = useState<string[]>([])
   const [bonusClosed,  setBonusClosed]  = useState(false)
@@ -408,7 +407,7 @@ export default function StackTower() {
 
   useEffect(() => {
     if (isRealMultiplayer && mp.status === 'playing' && mp.start && phase === 'lobby') {
-      startGame(mp.start.seed, mp.start.stackTowerChallengeType)
+      startGame(mp.start.seed, mapMpChallengeType(mp.start.stackTowerChallengeType))
     }
   }, [mp.status])
 
@@ -1005,7 +1004,7 @@ export default function StackTower() {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 24, opacity: 0 }}
                         draggable
-                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); sfx.pick(); setDragToken(activeToken) }}
+                        onDragStart={((e: any) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', activeToken ?? ''); sfx.pick(); setDragToken(activeToken) }) as any}
                       >
                         {activeToken}
                       </motion.div>

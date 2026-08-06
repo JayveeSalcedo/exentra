@@ -82,7 +82,7 @@ function TreeNodeComponent({
   )
 }
 
-export default function TreeVisualizer({ type, lessonId }: Props) {
+export default function TreeVisualizer({ type }: Props) {
   const presetVals = PRESETS[type] ?? PRESETS['bst']
   const [vals, setVals]         = useState<number[]>(presetVals)
   const [input, setInput]       = useState('')

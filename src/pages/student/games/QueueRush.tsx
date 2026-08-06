@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, CheckCircle, Flame, HelpCircle, RotateCcw, Swords,
-  Timer, Trash2, Users, Zap, AlertTriangle, ArrowRightLeft, Volume2, VolumeX,
+  Timer, Trash2, Users, Zap, AlertTriangle, Volume2, VolumeX,
 } from 'lucide-react'
 import { sfx, gameMusic, useSfxToggle } from '../../../lib/sfx'
 import './QueueRush.css'

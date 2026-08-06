@@ -165,11 +165,6 @@ const MOCK_LESSONS_BY_ORDER: Record<number, Lesson[]> = Object.fromEntries(
   MOCK_MODULES.map(m => [m.order_index, m.lessons])
 )
 
-const MOCK_UNLOCK_STATE: Record<string, 'done' | 'active' | 'locked'> = {
-  '1': 'done', '2': 'done', '3': 'active',
-  '4': 'locked', '5': 'locked', '6': 'locked', '7': 'locked', '8': 'locked',
-}
-
 const MODULE_ICONS: Record<number, string> = {
   1: '[ ]', 2: '→', 3: '≡', 4: '⊏', 5: '△', 6: '◈', 7: '⇅', 8: '#',
 }
@@ -184,7 +179,7 @@ export default function LearningMaterials() {
   const [expandedModule, setExpandedModule] = useState<string | null>(MOCK_MODULES[0].id)
   const [activeTab, setActiveTab] = useState<'lessons' | 'materials' | 'videos'>('lessons')
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -297,7 +292,6 @@ export default function LearningMaterials() {
 
   // Derived stats for the summary bar
   const completedModulesCount = modules.filter(m => getModuleState(m) === 'done').length
-  const totalMinutes = modules.reduce((acc, m) => acc + m.lessons.reduce((a, l) => a + l.duration_minutes, 0), 0)
   const completedMinutes = modules.reduce((acc, m) => {
     return acc + m.lessons
       .filter(l => progress.find(p => p.lesson_id === l.id && p.completed))

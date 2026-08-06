@@ -4,9 +4,9 @@ import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { groq, MODEL } from '../../lib/groq'
 import {
-  BarChart2, Zap, CheckCircle2, AlertTriangle,
+  Zap, CheckCircle2, AlertTriangle,
   TrendingUp, Brain, Flame, BookOpen, RefreshCw,
-  ChevronRight, Lock, Star
+  Lock, Star
 } from 'lucide-react'
 import './StudentProgress.css'
 
@@ -42,7 +42,7 @@ export default function StudentProgress() {
   const [totalDone, setTotalDone] = useState(0)
   const [sentiment, setSentiment] = useState<string | null>(null)
   const [sentimentLoading, setSentimentLoading] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
 
   useEffect(() => {
     if (user) fetchAll()

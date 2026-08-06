@@ -309,7 +309,7 @@ export default function TakeAssessment() {
   }
 
   // ── Quiz submit ───────────────────────────────────────────────────────────────
-  const handleSubmit = async (auto = false) => {
+  const handleSubmit = async (_auto = false) => {
     if (timerRef.current) clearInterval(timerRef.current)
     music.stop()
     sfx.submit()

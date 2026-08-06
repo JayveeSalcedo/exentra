@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { Lock, CheckCircle2, Play, Zap, BookOpen, Target, ChevronRight } from 'lucide-react'
+import { Lock, CheckCircle2, Play, Zap, BookOpen } from 'lucide-react'
 import './Quests.css'
 
 const QUESTS = [
@@ -55,7 +55,6 @@ export default function Quests() {
   }
 
   const done = completedOrders.size
-  const active = QUESTS.find(q => getState(q.order) === 'active')
 
   return (
     <div className="qst-root">

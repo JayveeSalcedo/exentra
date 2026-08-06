@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
-  FileText, Download, Clock, CheckCircle2, XCircle,
+  Download, Clock, CheckCircle2,
   Loader2, FolderOpen, ChevronDown, ChevronUp, Award,
-  Paperclip, BarChart2, Eye, X,
+  Paperclip, Eye, X,
 } from 'lucide-react'
 import './MySubmissions.css'
 

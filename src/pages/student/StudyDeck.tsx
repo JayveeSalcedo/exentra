@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import {
-  ArrowLeft, ArrowRight, RotateCcw, Shuffle,
+  ArrowLeft, RotateCcw, Shuffle,
   CheckCircle2, XCircle, BookOpen, Loader2, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import './ProblemBank.css'
@@ -46,10 +46,10 @@ export default function StudyDeck() {
   const [known, setKnown] = useState<Set<number>>(new Set())
   const [unknown, setUnknown] = useState<Set<number>>(new Set())
   const [done, setDone] = useState(false)
-  const [shuffled, setShuffled] = useState(false)
+  const [, setShuffled] = useState(false)
 
   // Flip animation direction
-  const [direction, setDirection] = useState<'left' | 'right'>('right')
+  const [, setDirection] = useState<'left' | 'right'>('right')
 
   useEffect(() => {
     fetchDeck()
