@@ -335,7 +335,7 @@ export default function TeacherAssessments() {
 
       await supabase
         .from('submissions')
-        .update({ score: pts, percentage, xp_earned: xp })
+        .update({ score: pts, percentage, xp_earned: xp, graded_at: new Date().toISOString() })
         .eq('id', sub.id)
 
       const { data: profile } = await supabase

@@ -4,7 +4,17 @@ import { Server } from 'socket.io'
 import cors from 'cors'
 
 const PORT = process.env.PORT || 4000
-const ORIGIN = process.env.CLIENT_ORIGIN || '*'
+// CORS requires a full origin (scheme + host), not a bare hostname. If
+// CLIENT_ORIGIN is set without a scheme (e.g. "exentra.vercel.app" instead of
+// "https://exentra.vercel.app"), the Access-Control-Allow-Origin header comes
+// back invalid and every browser silently blocks the request — this guards
+// against that misconfiguration instead of failing confusingly in prod only.
+function normalizeOrigin(raw) {
+  if (!raw || raw === '*') return raw ?? '*'
+  const trimmed = raw.trim().replace(/\/+$/, '')
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+}
+const ORIGIN = normalizeOrigin(process.env.CLIENT_ORIGIN)
 
 const app = express()
 app.use(cors({ origin: ORIGIN }))

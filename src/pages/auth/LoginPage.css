@@ -13,36 +13,34 @@
   pointer-events: none;
 }
 
-.login-root .orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.18;
-}
-
-.login-root .orb-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, var(--purple), transparent);
-  top: -100px;
-  left: -100px;
-}
-
-.login-root .orb-2 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--cyan), transparent);
-  bottom: -80px;
-  right: -80px;
-}
-
-.login-root .grid-overlay {
+.login-root .graph-bg {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+}
+
+.login-root .graph-edges line,
+.login-root .graph-edges path {
+  fill: none;
+  stroke: var(--surface-10);
+  stroke-width: 1.4;
+}
+
+.login-root .graph-nodes .node-cyan {
+  fill: var(--cyan);
+  opacity: 0.5;
+}
+
+.login-root .graph-nodes .node-purple {
+  fill: var(--purple-light);
+  opacity: 0.45;
+}
+
+.login-root .graph-pulse {
+  fill: var(--cyan-light);
+  filter: drop-shadow(0 0 6px var(--cyan));
 }
 
 .login-root .login-layout {
@@ -102,36 +100,83 @@
   margin-bottom: 60px;
 }
 
-.login-root .brand-stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 60px;
-  flex-wrap: wrap;
-}
-
-.login-root .stat-card {
-  background: var(--surface-03);
+.login-root .brand-terminal {
+  background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 16px 20px;
+  overflow: hidden;
+  margin-bottom: 60px;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.login-root .terminal-chrome {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 100px;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  background: var(--bg-code-gutter);
+  border-bottom: 1px solid var(--border);
 }
 
-.login-root .stat-value {
-  font-family: 'Orbitron', monospace;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--cyan);
+.login-root .terminal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  opacity: 0.85;
 }
 
-.login-root .stat-label {
+.login-root .terminal-dot.dot-red { background: var(--error); }
+.login-root .terminal-dot.dot-amber { background: var(--xp); }
+.login-root .terminal-dot.dot-cyan { background: var(--cyan); }
+
+.login-root .terminal-path {
+  margin-left: 8px;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: var(--text-secondary);
-  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.login-root .terminal-body {
+  padding: 16px 18px 18px;
+}
+
+.login-root .terminal-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--text-soft);
+  white-space: pre;
+}
+
+.login-root .terminal-prefix {
+  color: var(--cyan);
+  margin-right: 2px;
+}
+
+.login-root .terminal-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  margin-top: 4px;
+  background: var(--cyan);
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .login-root .brand-terminal {
+    max-width: 100%;
+  }
+
+  .login-root .terminal-line {
+    font-size: 11.5px;
+  }
 }
 
 .login-root .brand-school {
@@ -542,10 +587,6 @@
   .login-root .login-form-wrap {
     width: 100%;
     padding: 40px 24px;
-  }
-
-  .login-root .brand-stats {
-    gap: 10px;
   }
 }
 
