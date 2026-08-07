@@ -81,6 +81,7 @@ function tryStartRoom(room) {
       CHALLENGE_TYPES[Math.floor(Math.random() * CHALLENGE_TYPES.length)]
   }
   room.seed = payload.seed
+  room.startPayload = payload
 
   io.to(room.roomCode).emit('room:start', payload)
 
@@ -105,7 +106,8 @@ function finishRoomIfReady(room) {
     .sort((a, b) => (isStackTower ? a.score - b.score : b.score - a.score))
     .map((p, i) => ({ ...p, rank: i + 1 }))
 
-  io.to(room.roomCode).emit('room:results', { roomCode: room.roomCode, players: sorted })
+  room.finalResults = { roomCode: room.roomCode, players: sorted }
+  io.to(room.roomCode).emit('room:results', room.finalResults)
 }
 
 function leaveRoom(userId, roomCode, socket) {
@@ -166,6 +168,30 @@ io.on('connection', (socket) => {
 
   socket.on('room:leave', ({ roomCode, userId }) => leaveRoom(userId, roomCode, socket))
 
+  // A reconnected socket has a new id but the same userId. Re-attach it to
+  // its room and resend whatever state it may have missed while dropped,
+  // instead of leaving it orphaned outside the room's broadcast channel.
+  socket.on('room:rejoin', ({ roomCode, userId, gameId }) => {
+    const room = rooms.get(roomCode)
+    if (!room) return
+    if (gameId && room.gameId !== gameId) return
+    const player = room.players.get(userId)
+    if (!player) return // grace window already expired; they'll need to join a new room
+
+    player.socketId = socket.id
+    delete player.disconnectedAt
+    userRoom.set(userId, roomCode)
+    socket.join(roomCode)
+
+    if (room.status === 'lobby') {
+      emitLobby(room)
+    } else if ((room.status === 'starting' || room.status === 'playing') && room.startPayload) {
+      socket.emit('room:start', room.startPayload)
+    } else if (room.status === 'finished' && room.finalResults) {
+      socket.emit('room:results', room.finalResults)
+    }
+  })
+
   socket.on('room:ready', ({ roomCode, userId }) => {
     const room = rooms.get(roomCode)
     if (!room || !room.players.has(userId)) return
@@ -190,12 +216,28 @@ io.on('connection', (socket) => {
     finishRoomIfReady(room)
   })
 
+  // Transient drops (flaky wifi, a free-tier host's proxy hiccup) are common
+  // and shouldn't instantly boot someone from a room — give them a window to
+  // reconnect via room:rejoin before treating it as a real departure.
+  const RECONNECT_GRACE_MS = 45000
+
   socket.on('disconnect', () => {
     for (const [userId, roomCode] of userRoom.entries()) {
       const room = rooms.get(roomCode)
-      if (room && room.players.get(userId)?.socketId === socket.id) {
-        leaveRoom(userId, roomCode, socket)
-      }
+      const player = room?.players.get(userId)
+      if (!room || !player || player.socketId !== socket.id) continue
+
+      player.disconnectedAt = Date.now()
+      setTimeout(() => {
+        const r = rooms.get(roomCode)
+        const p = r?.players.get(userId)
+        // Only actually remove them if they never reconnected (socketId is
+        // still the dead one) — if they rejoined, room:rejoin already
+        // updated socketId and cleared disconnectedAt.
+        if (r && p && p.disconnectedAt && p.socketId === socket.id) {
+          leaveRoom(userId, roomCode, null)
+        }
+      }, RECONNECT_GRACE_MS)
     }
   })
 })

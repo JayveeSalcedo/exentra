@@ -8,7 +8,11 @@ let socket: Socket | null = null
 function getSocket(): Socket | null {
   if (!SOCKET_URL || SOCKET_URL === 'your_socket_server_url') return null
   if (!socket) {
-    socket = io(SOCKET_URL, { transports: ['websocket'], autoConnect: true })
+    // Let socket.io start on polling and upgrade to websocket itself (the
+    // default). Forcing websocket-only has no fallback when a host's proxy
+    // (e.g. Render's) hiccups on the upgrade — the client just retries
+    // indefinitely instead of falling back to a working transport.
+    socket = io(SOCKET_URL, { autoConnect: true, reconnection: true })
   }
   return socket
 }
@@ -62,6 +66,18 @@ export function useMultiplayerRoom(gameId: GameId, userId: string | undefined, n
     const s = getSocket()
     if (!s) return
 
+    // A dropped connection reconnects with a NEW socket id. Without this, the
+    // server's room still points at the old (dead) socket id, so this player
+    // silently stops receiving room:start/opponent_progress/results — looks
+    // like a random multi-minute stall until something else happens to
+    // resync them. Re-announcing on every connect (including the very first)
+    // fixes both the initial join-in-progress case and reconnects.
+    const onConnect = () => {
+      if (roomCodeRef.current && userId) {
+        s.emit('room:rejoin', { roomCode: roomCodeRef.current, userId, gameId })
+      }
+    }
+
     const onLobby = (payload: { roomCode: string; difficulty: string; players: RoomPlayer[]; minPlayers: number }) => {
       roomCodeRef.current = payload.roomCode
       setRoomCode(payload.roomCode)
@@ -94,6 +110,7 @@ export function useMultiplayerRoom(gameId: GameId, userId: string | undefined, n
       setStatus('error')
     }
 
+    s.on('connect', onConnect)
     s.on('room:lobby', onLobby)
     s.on('room:start', onStart)
     s.on('game:opponent_progress', onOpponentProgress)
@@ -101,7 +118,12 @@ export function useMultiplayerRoom(gameId: GameId, userId: string | undefined, n
     s.on('room:results', onResults)
     s.on('room:error', onError)
 
+    // If we're mounting into an already-connected socket (e.g. a fast-
+    // reconnect that beat this effect's registration), fire once immediately.
+    if (s.connected) onConnect()
+
     return () => {
+      s.off('connect', onConnect)
       s.off('room:lobby', onLobby)
       s.off('room:start', onStart)
       s.off('game:opponent_progress', onOpponentProgress)
