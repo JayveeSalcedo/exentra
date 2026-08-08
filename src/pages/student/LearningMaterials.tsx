@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   BookOpen, ChevronDown, Play, Download,
   Lock, CheckCircle2, Clock, FileText, Video, Paperclip,
@@ -174,6 +174,10 @@ const easeOut = [0.16, 1, 0.3, 1] as const
 export default function LearningMaterials() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openMaterialId = searchParams.get('open')
+  const [highlightMaterialId, setHighlightMaterialId] = useState<string | null>(null)
+  const materialRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const [modules, setModules] = useState<Module[]>(MOCK_MODULES)
   const [progress, setProgress] = useState<StudentProgress[]>([])
   const [expandedModule, setExpandedModule] = useState<string | null>(MOCK_MODULES[0].id)
@@ -235,7 +239,29 @@ export default function LearningMaterials() {
             }
           })
           setModules(merged)
-          setExpandedModule(merged[0].id)
+
+          // Deep link from a notification (?open=<material_id>) — expand the
+          // module that contains it and jump straight to the Materials tab.
+          if (openMaterialId) {
+            const owningModule = merged.find((m: Module) =>
+              m.materials.some(mat => mat.id === openMaterialId)
+            )
+            if (owningModule) {
+              setExpandedModule(owningModule.id)
+              setActiveTab('materials')
+              setHighlightMaterialId(openMaterialId)
+              setTimeout(() => {
+                materialRefs.current[openMaterialId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }, 200)
+              setTimeout(() => setHighlightMaterialId(null), 2500)
+            } else {
+              setExpandedModule(merged[0].id)
+            }
+            searchParams.delete('open')
+            setSearchParams(searchParams, { replace: true })
+          } else {
+            setExpandedModule(merged[0].id)
+          }
         }
       } catch (err) {
         console.error('fetchData error:', err)
@@ -667,7 +693,11 @@ export default function LearningMaterials() {
                       </div>
                     ) : (
                       expandedMod.materials.map(mat => (
-                        <div key={mat.id} className="lm-material-item">
+                        <div
+                          key={mat.id}
+                          ref={el => { materialRefs.current[mat.id] = el }}
+                          className={`lm-material-item ${mat.id === highlightMaterialId ? 'lm-material-highlight' : ''}`}
+                        >
                           <div className="lm-material-icon">
                             <FileText size={16} color="#7C5CBF" />
                           </div>

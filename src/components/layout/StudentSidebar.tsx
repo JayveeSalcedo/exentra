@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import { useState, useEffect } from 'react'
+import LogoutModal from '../ui/LogoutModal'
 import './Sidebar.css'
 
 interface NavChild {
@@ -84,7 +85,14 @@ export default function StudentSidebar({ collapsed, onToggle }: SidebarProps) {
     })
   }
 
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false)
+
   const handleLogout = () => {
+    setIsLogoutOpen(true)
+  }
+
+  const confirmLogout = () => {
+    setIsLogoutOpen(false)
     logout()
     navigate('/login')
   }
@@ -321,6 +329,12 @@ export default function StudentSidebar({ collapsed, onToggle }: SidebarProps) {
       >
         <ChevronRight size={14} />
       </motion.button>
+
+      <LogoutModal
+        isOpen={isLogoutOpen}
+        onConfirm={confirmLogout}
+        onCancel={() => setIsLogoutOpen(false)}
+      />
     </motion.aside>
   )
 }

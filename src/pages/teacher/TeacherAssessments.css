@@ -211,6 +211,17 @@
 .ta2-card.published { border-color: rgba(0,212,170,0.1); }
 .ta2-card.draft     { border-color: var(--surface-05); }
 
+.ta2-card-highlight {
+  border-color: rgba(155,126,212,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(155,126,212,0.15), 0 12px 32px rgba(155,126,212,0.12);
+  animation: ta2-highlight-pulse 1.2s ease-in-out 2;
+}
+
+@keyframes ta2-highlight-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(155,126,212,0.15), 0 12px 32px rgba(155,126,212,0.12); }
+  50% { box-shadow: 0 0 0 5px rgba(155,126,212,0.3), 0 12px 32px rgba(155,126,212,0.2); }
+}
+
 .ta2-card-accent {
   width: 4px;
   flex-shrink: 0;

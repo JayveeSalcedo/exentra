@@ -5,6 +5,8 @@ import {
   Users, BarChart2, LogOut, ChevronRight, Zap, Sparkles, ScrollText
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
+import { useState } from 'react'
+import LogoutModal from '../ui/LogoutModal'
 import './Sidebar.css'
 
 const NAV_ITEMS = [
@@ -26,8 +28,14 @@ interface SidebarProps {
 export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false)
 
   const handleLogout = () => {
+    setIsLogoutOpen(true)
+  }
+
+  const confirmLogout = () => {
+    setIsLogoutOpen(false)
     logout()
     navigate('/login')
   }
@@ -193,6 +201,12 @@ export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
       >
         <ChevronRight size={14} />
       </motion.button>
+
+      <LogoutModal
+        isOpen={isLogoutOpen}
+        onConfirm={confirmLogout}
+        onCancel={() => setIsLogoutOpen(false)}
+      />
     </motion.aside>
   )
 }

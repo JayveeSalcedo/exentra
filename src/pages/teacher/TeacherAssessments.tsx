@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
@@ -155,6 +155,10 @@ function renderPreviewContent(p: PreviewState) {
 export default function TeacherAssessments() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const openId = searchParams.get('open')
+  const [highlightId, setHighlightId] = useState<string | null>(null)
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [loading, setLoading]         = useState(true)
@@ -168,6 +172,35 @@ export default function TeacherAssessments() {
   const [downloading, setDownloading] = useState<string | null>(null)
 
   useEffect(() => { if (user) fetchAssessments() }, [user])
+
+  // Deep link from a notification (?open=<assessment_id>) — expand that
+  // card on the Students/Submissions tab and scroll it into view.
+  useEffect(() => {
+    if (!openId || loading || !assessments.length) return
+    const target = assessments.find(a => a.id === openId)
+    if (!target) return
+
+    setAssessments(prev =>
+      prev.map(a => {
+        if (a.id !== openId) return a
+        if (a.submissions?.length) {
+          loadStudentProfiles(a.id, a.submissions, a.type === 'assignment' || a.type === 'activity')
+        }
+        return { ...a, expanded: true, activeTab: 'students' }
+      })
+    )
+
+    setHighlightId(openId)
+    setTimeout(() => {
+      cardRefs.current[openId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 150)
+    setTimeout(() => setHighlightId(null), 2500)
+
+    // Clear the param so refreshing/filtering doesn't keep re-triggering it
+    searchParams.delete('open')
+    setSearchParams(searchParams, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId, loading, assessments.length])
 
   const fetchAssessments = async () => {
     setLoading(true)
@@ -519,7 +552,8 @@ export default function TeacherAssessments() {
               return (
                 <motion.div
                   key={a.id}
-                  className={`ta2-card ${a.is_published ? 'published' : 'draft'}`}
+                  ref={el => { cardRefs.current[a.id] = el }}
+                  className={`ta2-card ${a.is_published ? 'published' : 'draft'} ${a.id === highlightId ? 'ta2-card-highlight' : ''}`}
                   {...stagger(i + 3)}
                   exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                   layout

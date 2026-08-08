@@ -29,6 +29,16 @@ create index if not exists idx_notifications_user_feed
 create index if not exists idx_notifications_user_unread
   on public.notifications (user_id, is_read);
 
+-- The CREATE TABLE above only applies its check constraint on first creation.
+-- Since the table already exists on this project, widen the live constraint
+-- explicitly so 'student_submitted' (and any future type) is accepted.
+alter table public.notifications drop constraint if exists notifications_type_check;
+alter table public.notifications add constraint notifications_type_check
+  check (type in (
+    'assessment_posted', 'material_posted', 'grade_released', 'due_soon',
+    'student_submitted'
+  ));
+
 -- -- 2. RLS -----------------------------------------------------------------------
 alter table public.notifications enable row level security;
 
@@ -53,6 +63,8 @@ create policy "update own notifications"
 -- draft -> published (covers both CreateAssessment's "Save & Publish" and
 -- TeacherAssessments' publish toggle). Fans out to the target block's
 -- enrolled students, or every student if block_id is null ("All Students").
+-- Link points straight at the assessment (TakeAssessment handles both the
+-- "take it" and "already done / review" states).
 create or replace function public.notify_assessment_published()
 returns trigger as $$
 begin
@@ -91,6 +103,8 @@ create trigger trg_notify_assessment_published
   for each row execute function public.notify_assessment_published();
 
 -- -- 4. MATERIAL POSTED ---------------------------------------------------------
+-- Link carries the specific material's id as a query param so
+-- LearningMaterials.tsx can auto-expand the right module/tab and highlight it.
 create or replace function public.notify_material_posted()
 returns trigger as $$
 begin
@@ -99,7 +113,7 @@ begin
     select p.id, 'material_posted',
            'New material posted',
            new.title || ' was just added to Learning Materials.',
-           '/student/materials'
+           '/student/materials?open=' || new.id
     from public.profiles p
     where p.role = 'student';
   else
@@ -107,7 +121,7 @@ begin
     select be.student_id, 'material_posted',
            'New material posted',
            new.title || ' was just added to Learning Materials.',
-           '/student/materials'
+           '/student/materials?open=' || new.id
     from public.block_enrollments be
     where be.block_id = new.block_id;
   end if;
@@ -201,7 +215,9 @@ select cron.schedule(
 -- Fires when a submission flips to is_submitted = true (covers both the
 -- auto-grade path for quiz/exam and the file-upload turn-in path for
 -- activity/assignment). Notifies the assessment's teacher. Body text says
--- whether it needs manual grading or was already auto-scored.
+-- whether it needs manual grading or was already auto-scored. Link carries
+-- the assessment id as a query param so TeacherAssessments.tsx can
+-- auto-expand that exact card on the Students/Submissions tab.
 --
 -- IMPORTANT: assessments.teacher_id is NOT populated by the app today --
 -- CreateAssessment.tsx only sets created_by. So this reads
@@ -247,7 +263,7 @@ begin
       when v_needs_grading then 'Needs grading.'
       else 'Auto-graded: ' || coalesce(round(new.percentage)::text, '0') || '%.'
     end,
-    '/teacher/assessments'
+    '/teacher/assessments?open=' || new.assessment_id
   );
 
   return new;

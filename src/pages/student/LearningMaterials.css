@@ -596,6 +596,17 @@
   border-color: rgba(124, 92, 191, 0.2);
 }
 
+.lm-material-highlight {
+  border-color: rgba(0, 212, 170, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+  animation: lm-material-pulse 1.2s ease-in-out 2;
+}
+
+@keyframes lm-material-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15); }
+  50% { box-shadow: 0 0 0 5px rgba(0, 212, 170, 0.3); }
+}
+
 .lm-material-icon {
   width: 36px;
   height: 36px;
