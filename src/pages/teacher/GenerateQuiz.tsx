@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { generateQuiz, type QuizQuestion, DSA_TOPICS } from '../../lib/groq'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -62,13 +62,14 @@ function toEditable(q: QuizQuestion): EditableQuestion {
 export default function GenerateQuiz() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   // ── Generation config ────────────────────────────────────────────────────
   const [module, setModule] = useState(DSA_TOPICS[0])
   const [numQuestions, setNumQuestions] = useState<NumQ>(10)
   const [difficulty, setDifficulty] = useState<Difficulty>('Mixed')
   const [assessmentType, setAssessmentType] = useState<AssessmentType>('Quiz')
-  const [blockId, setBlockId] = useState('')
+  const [blockId, setBlockId] = useState(() => searchParams.get('block') ?? '')
   const [myBlocks, setMyBlocks] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {

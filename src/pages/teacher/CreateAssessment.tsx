@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
@@ -85,13 +85,6 @@ function emptyQuestion(type: QuestionType = 'multiple_choice'): Question {
   }
 }
 
-const defaultMeta: AssessmentMeta = {
-  title: '', description: '', type: 'quiz', difficulty: 'Mixed',
-  module_topic: DSA_TOPICS[0], time_limit: '', due_date: '',
-  opens_at: '', xp_reward: '100', total_points: '100', is_published: false,
-  block_id: '',
-}
-
 const ease = [0.16, 1, 0.3, 1] as const
 const slide = (i = 0) => ({
   initial: { opacity: 0, y: 14 },
@@ -107,6 +100,14 @@ function toUTC(localDatetime: string): string | null {
 export default function CreateAssessment() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const defaultMeta: AssessmentMeta = {
+    title: '', description: '', type: 'quiz', difficulty: 'Mixed',
+    module_topic: DSA_TOPICS[0], time_limit: '', due_date: '',
+    opens_at: '', xp_reward: '100', total_points: '100', is_published: false,
+    block_id: searchParams.get('block') ?? '',
+  }
 
   const [step, setStep] = useState<1 | 2>(1)
   const [meta, setMeta] = useState<AssessmentMeta>(defaultMeta)

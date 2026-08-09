@@ -1,235 +1,320 @@
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
-import { Sparkles, ClipboardList, Users, BarChart2, BookOpen, Zap, Layers } from 'lucide-react'
+import {
+  Sparkles, ClipboardList, Users, BarChart2, BookOpen, Layers,
+  ArrowRight, FileWarning, Activity, TrendingUp, CheckCircle2, Inbox,
+} from 'lucide-react'
+import './TeacherDashboard.css'
+
+const MODULES = [
+  { topic: 'Arrays',             label: 'Arrays',          color: '#9B7ED4' },
+  { topic: 'Linked Lists',       label: 'Linked Lists',    color: '#00D4AA' },
+  { topic: 'Stacks',             label: 'Stacks',          color: '#FFB830' },
+  { topic: 'Queues',             label: 'Queues',          color: '#FF6B8A' },
+  { topic: 'Trees',              label: 'Trees',           color: '#4FC3F7' },
+  { topic: 'Graphs',             label: 'Graphs',          color: '#81C784' },
+  { topic: 'Sorting Algorithms', label: 'Sorting',         color: '#FFB830' },
+  { topic: 'Hashing',            label: 'Hashing',         color: '#FF6B8A' },
+]
+
+const QUICK_ACTIONS = [
+  {
+    label: 'Generate AI Quiz',
+    sub: 'Create assessments with Llama 3',
+    icon: Sparkles,
+    color: '#9B7ED4',
+    to: '/teacher/assessments/generate',
+    featured: true,
+  },
+  { label: 'Blocks',      sub: 'Manage sections & rosters',     icon: Layers,        color: '#4FC3F7', to: '/teacher/blocks' },
+  { label: 'Assessments', sub: 'View & manage all assessments', icon: ClipboardList, color: '#00D4AA', to: '/teacher/assessments' },
+  { label: 'Students',    sub: 'View student roster',           icon: Users,         color: '#FFB830', to: '/teacher/students' },
+  { label: 'Progress',    sub: 'Class performance overview',    icon: BarChart2,     color: '#FF6B8A', to: '/teacher/progress' },
+  { label: 'Materials',   sub: 'Manage DSA learning content',   icon: BookOpen,      color: '#4FC3F7', to: '/teacher/materials' },
+]
+
+interface SubRow {
+  id: string
+  student_id: string
+  assessment_id: string
+  percentage: number | null
+  submitted_at: string | null
+  assessmentTitle: string
+  moduleTopic: string | null
+  studentName: string
+}
 
 const stagger = (i: number) => ({
-  initial: { opacity: 0, y: 18 },
+  initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] as const },
+  transition: { duration: 0.32, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] as const },
 })
+
+function timeAgo(iso: string | null) {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return 'just now'
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24)
+  if (d < 7) return `${d}d ago`
+  return `${Math.floor(d / 7)}w ago`
+}
 
 export default function TeacherDashboard() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const quickActions = [
-    {
-      label: 'Generate AI Quiz',
-      sub: 'Create assessments with Llama 3',
-      icon: Sparkles,
-      color: '#9B7ED4',
-      to: '/teacher/assessments/generate',
-      highlight: true,
-    },
-    {
-      label: 'Blocks',
-      sub: 'Manage sections & rosters',
-      icon: Layers,
-      color: '#4FC3F7',
-      to: '/teacher/blocks',
-    },
-    {
-      label: 'Assessments',
-      sub: 'View & manage all assessments',
-      icon: ClipboardList,
-      color: '#00D4AA',
-      to: '/teacher/assessments',
-    },
-    {
-      label: 'Students',
-      sub: 'View student roster',
-      icon: Users,
-      color: '#FFB830',
-      to: '/teacher/students',
-    },
-    {
-      label: 'Progress',
-      sub: 'Class performance overview',
-      icon: BarChart2,
-      color: '#FF6B8A',
-      to: '/teacher/progress',
-    },
-    {
-      label: 'Materials',
-      sub: 'Manage DSA learning content',
-      icon: BookOpen,
-      color: '#4FC3F7',
-      to: '/teacher/materials',
-    },
-  ]
+  const [submissions, setSubmissions] = useState<SubRow[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (user) fetchDashboardData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  async function fetchDashboardData() {
+    setLoading(true)
+    try {
+      const { data: myBlocks } = await supabase
+        .from('blocks')
+        .select('id')
+        .eq('teacher_id', user!.id)
+        .eq('is_archived', false)
+
+      const blockIds = (myBlocks ?? []).map(b => b.id)
+      if (blockIds.length === 0) { setSubmissions([]); setLoading(false); return }
+
+      const { data: myAssessments } = await supabase
+        .from('assessments')
+        .select('id, title, module_topic')
+        .in('block_id', blockIds)
+
+      const assessmentMap: Record<string, { title: string; module_topic: string | null }> = {}
+      ;(myAssessments ?? []).forEach(a => { assessmentMap[a.id] = { title: a.title, module_topic: a.module_topic } })
+      const assessmentIds = (myAssessments ?? []).map(a => a.id)
+      if (assessmentIds.length === 0) { setSubmissions([]); setLoading(false); return }
+
+      const { data: subs } = await supabase
+        .from('submissions')
+        .select('id, student_id, assessment_id, percentage, submitted_at')
+        .in('assessment_id', assessmentIds)
+        .eq('is_submitted', true)
+        .order('submitted_at', { ascending: false })
+        .limit(60)
+
+      const studentIds = Array.from(new Set((subs ?? []).map(s => s.student_id)))
+      const profileMap: Record<string, { first_name: string; last_name: string }> = {}
+      if (studentIds.length) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', studentIds)
+        ;(profiles ?? []).forEach(p => { profileMap[p.id] = p })
+      }
+
+      setSubmissions((subs ?? []).map(s => ({
+        id: s.id,
+        student_id: s.student_id,
+        assessment_id: s.assessment_id,
+        percentage: s.percentage,
+        submitted_at: s.submitted_at,
+        assessmentTitle: assessmentMap[s.assessment_id]?.title ?? 'Assessment',
+        moduleTopic: assessmentMap[s.assessment_id]?.module_topic ?? null,
+        studentName: profileMap[s.student_id]
+          ? `${profileMap[s.student_id].first_name} ${profileMap[s.student_id].last_name}`
+          : 'Student',
+      })))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const gradedSubs  = useMemo(() => submissions.filter(s => s.percentage != null), [submissions])
+  const pendingSubs = useMemo(() => submissions.filter(s => s.percentage == null), [submissions])
+  const recentSubs  = useMemo(() => submissions.slice(0, 5), [submissions])
+
+  const topicStats = useMemo(() => {
+    const map: Record<string, number[]> = {}
+    gradedSubs.forEach(s => {
+      if (!s.moduleTopic) return
+      if (!map[s.moduleTopic]) map[s.moduleTopic] = []
+      map[s.moduleTopic].push(s.percentage as number)
+    })
+    return MODULES
+      .map(m => {
+        const scores = map[m.topic]
+        return scores
+          ? { ...m, avg: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length), count: scores.length }
+          : null
+      })
+      .filter((m): m is typeof MODULES[number] & { avg: number; count: number } => m != null)
+  }, [gradedSubs])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1200 }}>
+    <div className="td-root">
       {/* Welcome */}
-      <motion.div
-        style={{
-          background: 'linear-gradient(135deg, var(--bg-card) 60%, rgba(124,92,191,0.08))',
-          border: '1px solid rgba(124,92,191,0.2)',
-          borderRadius: 16,
-          padding: '28px 28px',
-        }}
-        {...stagger(0)}
-      >
-        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, color: '#9B7ED4', margin: '0 0 6px', textTransform: 'uppercase' }}>
-          Welcome back
-        </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-          {user?.firstName} {user?.lastName} 👨‍🏫
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
-          Manage your DSA class, generate AI-powered assessments, and track student progress.
-        </p>
+      <motion.div className="td-welcome" {...stagger(0)}>
+        <p className="td-welcome-label">Welcome back</p>
+        <h1 className="td-welcome-title">{user?.firstName} {user?.lastName} 👨‍🏫</h1>
+        <p className="td-welcome-sub">Manage your DSA class, generate AI-powered assessments, and track student progress.</p>
       </motion.div>
 
       {/* Quick actions */}
       <motion.div {...stagger(1)}>
-        <p style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10,
-          letterSpacing: 2,
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          marginBottom: 12,
-        }}>
-          Quick Actions
-        </p>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: 12,
-        }}>
-          {quickActions.map((action, i) => (
+        <p className="td-section-label">Quick Actions</p>
+        <div className="td-actions-grid">
+          {QUICK_ACTIONS.map((action, i) => (
             <motion.button
               key={action.to}
+              className={`td-action-tile ${action.featured ? 'featured' : ''}`}
               onClick={() => navigate(action.to)}
               whileTap={{ scale: 0.97 }}
               whileHover={{ y: -3 }}
               {...stagger(i + 2)}
-              style={{
-                background: action.highlight
-                  ? 'linear-gradient(135deg, rgba(124,92,191,0.15), rgba(0,212,170,0.06))'
-                  : 'var(--bg-card)',
-                border: action.highlight
-                  ? '1px solid rgba(124,92,191,0.35)'
-                  : '1px solid var(--surface-06)',
-                borderRadius: 14,
-                padding: '18px 16px',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 10,
-                textAlign: 'left',
-                transition: 'border-color 0.2s',
-              }}
             >
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: `${action.color}15`,
-                border: `1px solid ${action.color}30`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <action.icon size={18} color={action.color} />
+              <div className="td-action-icon" style={{ background: `${action.color}18`, border: `1px solid ${action.color}30` }}>
+                <action.icon size={19} color={action.color} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <span style={{
-                  fontFamily: 'Syne, sans-serif',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}>
+              <div className="td-action-text">
+                <span className="td-action-label">
                   {action.label}
-                  {action.highlight && (
-                    <span style={{
-                      fontSize: 9,
-                      fontFamily: 'JetBrains Mono, monospace',
-                      background: 'rgba(155,126,212,0.15)',
-                      border: '1px solid rgba(155,126,212,0.3)',
-                      color: '#9B7ED4',
-                      borderRadius: 99,
-                      padding: '1px 6px',
-                    }}>
-                      AI
-                    </span>
-                  )}
+                  {action.featured && <span className="td-ai-badge">AI</span>}
                 </span>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                  {action.sub}
-                </span>
+                <span className="td-action-sub">{action.sub}</span>
               </div>
+              <ArrowRight size={15} className="td-action-arrow" />
             </motion.button>
           ))}
         </div>
       </motion.div>
 
-      {/* Generate Quiz highlight card */}
-      <motion.div
-        {...stagger(quickActions.length + 2)}
-        style={{
-          background: 'linear-gradient(135deg, var(--bg-card), rgba(0,212,170,0.04))',
-          border: '1px solid rgba(0,212,170,0.15)',
-          borderRadius: 16,
-          padding: '22px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 20,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{
-            width: 48,
-            height: 48,
-            background: 'linear-gradient(135deg, rgba(124,92,191,0.2), rgba(0,212,170,0.1))',
-            border: '1px solid rgba(124,92,191,0.3)',
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Sparkles size={22} color="#9B7ED4" />
+      {/* At-a-glance widgets */}
+      <div className="td-widgets-grid">
+        {/* Class performance */}
+        <motion.div className="td-widget" {...stagger(8)}>
+          <div className="td-widget-header">
+            <h3 className="td-widget-title"><TrendingUp size={14} /> Class Performance</h3>
+            <button className="td-widget-link" onClick={() => navigate('/teacher/progress')}>
+              View all <ArrowRight size={11} />
+            </button>
           </div>
-          <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-              AI Quiz Generator
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>
-              Generate DSA quizzes instantly — pick a module, difficulty, and question count.
-              Powered by <span style={{ color: '#00D4AA' }}>Llama 3 70B</span> via Groq.
-            </p>
+
+          {loading ? (
+            <p className="td-widget-loading">Loading…</p>
+          ) : topicStats.length === 0 ? (
+            <div className="td-widget-empty">
+              <BarChart2 size={22} color="var(--text-muted)" />
+              <p>No graded submissions yet</p>
+            </div>
+          ) : (
+            <div className="td-perf-list">
+              {topicStats.slice(0, 5).map((m, i) => {
+                const scoreColor = m.avg >= 80 ? '#00D4AA' : m.avg >= 60 ? '#FFB830' : '#FF6B8A'
+                return (
+                  <div key={m.topic} className="td-perf-row">
+                    <span className="td-perf-label">{m.label}</span>
+                    <div className="td-perf-bar-track">
+                      <motion.div
+                        className="td-perf-bar-fill"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${m.avg}%` }}
+                        transition={{ duration: 0.7, delay: 0.15 + i * 0.05 }}
+                        style={{ background: `linear-gradient(90deg, ${scoreColor}, ${scoreColor}88)` }}
+                      />
+                    </div>
+                    <span className="td-perf-pct" style={{ color: scoreColor }}>{m.avg}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Pending grading */}
+        <motion.div className="td-widget" {...stagger(9)}>
+          <div className="td-widget-header">
+            <h3 className="td-widget-title"><FileWarning size={14} /> Pending Grading</h3>
+            <button className="td-widget-link" onClick={() => navigate('/teacher/assessments')}>
+              View all <ArrowRight size={11} />
+            </button>
           </div>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => navigate('/teacher/assessments/generate')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'linear-gradient(135deg, #7C5CBF, #00D4AA)',
-            border: 'none',
-            borderRadius: 10,
-            padding: '11px 20px',
-            fontFamily: 'Syne, sans-serif',
-            fontSize: 14,
-            fontWeight: 700,
-            color: 'white',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <Zap size={15} /> Generate Quiz
-        </motion.button>
-      </motion.div>
+
+          {loading ? (
+            <p className="td-widget-loading">Loading…</p>
+          ) : pendingSubs.length === 0 ? (
+            <div className="td-widget-empty">
+              <CheckCircle2 size={22} color="#00D4AA" />
+              <p>All caught up — nothing to grade</p>
+            </div>
+          ) : (
+            <div className="td-list">
+              <p className="td-widget-count">
+                <span style={{ color: '#FFB830' }}>{pendingSubs.length}</span> submission{pendingSubs.length !== 1 ? 's' : ''} awaiting grading
+              </p>
+              {pendingSubs.slice(0, 4).map(s => (
+                <button
+                  key={s.id}
+                  className="td-list-row"
+                  onClick={() => navigate(`/teacher/assessments?open=${s.assessment_id}`)}
+                >
+                  <span className="td-list-avatar">{s.studentName[0]}</span>
+                  <div className="td-list-text">
+                    <span className="td-list-name">{s.studentName}</span>
+                    <span className="td-list-sub">{s.assessmentTitle}</span>
+                  </div>
+                  <span className="td-list-time">{timeAgo(s.submitted_at)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Recent activity */}
+        <motion.div className="td-widget" {...stagger(10)}>
+          <div className="td-widget-header">
+            <h3 className="td-widget-title"><Activity size={14} /> Recent Activity</h3>
+          </div>
+
+          {loading ? (
+            <p className="td-widget-loading">Loading…</p>
+          ) : recentSubs.length === 0 ? (
+            <div className="td-widget-empty">
+              <Inbox size={22} color="var(--text-muted)" />
+              <p>No recent submissions</p>
+            </div>
+          ) : (
+            <div className="td-list">
+              {recentSubs.map(s => {
+                const scoreColor = s.percentage == null ? 'var(--text-muted)' : s.percentage >= 80 ? '#00D4AA' : s.percentage >= 60 ? '#FFB830' : '#FF6B8A'
+                return (
+                  <button
+                    key={s.id}
+                    className="td-list-row"
+                    onClick={() => navigate(`/teacher/assessments?open=${s.assessment_id}`)}
+                  >
+                    <span className="td-list-avatar">{s.studentName[0]}</span>
+                    <div className="td-list-text">
+                      <span className="td-list-name">{s.studentName}</span>
+                      <span className="td-list-sub">submitted {s.assessmentTitle}</span>
+                    </div>
+                    <span className="td-list-score" style={{ color: scoreColor }}>
+                      {s.percentage != null ? `${s.percentage}%` : '—'}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   )
 }

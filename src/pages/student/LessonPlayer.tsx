@@ -34,7 +34,15 @@ export default function LessonPlayer() {
   const savedRef = useRef(false) // prevent double-save
 
   const lesson = LESSONS[lessonId ?? '']
-  const moduleLessons = getLessonsForModule(moduleId ?? '')
+  // `moduleId` from the URL may be the static key ("module1".."module8")
+  // OR a real DB modules.id (uuid) — LearningMaterials.tsx passes whichever
+  // is on the merged Module object it's rendering. The static lesson data
+  // is always keyed by lesson.moduleId ("module1" etc.), so derive from
+  // there for anything that needs to match it (lookups, display), and keep
+  // the raw `moduleId` param only for building URLs / writing to Supabase.
+  const staticModuleId = lesson?.moduleId ?? moduleId ?? ''
+  const moduleNumber = staticModuleId.replace(/^module/i, '') || moduleId
+  const moduleLessons = getLessonsForModule(staticModuleId)
   const lessonIdx = moduleLessons.findIndex(l => l.id === lessonId)
   const prevLesson = lessonIdx > 0 ? moduleLessons[lessonIdx - 1] : null
   const nextLesson = lessonIdx >= 0 && lessonIdx < moduleLessons.length - 1
@@ -138,7 +146,7 @@ export default function LessonPlayer() {
         </button>
 
         <div className="lp-header-center">
-          <span className="lp-module-badge">Module {moduleId}</span>
+          <span className="lp-module-badge">Module {moduleNumber}</span>
           <h1 className="lp-lesson-title">{lesson.title}</h1>
           <p className="lp-lesson-summary">{lesson.summary}</p>
         </div>

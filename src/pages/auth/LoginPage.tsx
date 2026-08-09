@@ -237,7 +237,7 @@ export default function LoginPage() {
                         id="login-school-id"
                         {...register('schoolId')}
                         hasError={Boolean(errors.schoolId)}
-                        placeholder="e.g. 22ur1005"
+                        placeholder="e.g. 23as1000"
                         autoComplete="username"
                       />
                     </FormField>
