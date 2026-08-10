@@ -543,3 +543,5 @@
   .blk-form-row { flex-direction: column; }
   .blk-panel { max-width: 100%; }
 }
+
+select.blk-input option { background: var(--bg-card); color: var(--text-primary); }

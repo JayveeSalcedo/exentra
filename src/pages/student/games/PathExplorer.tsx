@@ -770,17 +770,28 @@ export default function PathExplorer() {
   function handleMC(o: MCOption) {
     setMcLocked(true)
     setOps(prev => prev + 1)
-    if (o.correct) setTimeout(() => completeRound(), 650)
-    else wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    if (o.correct) { setTimeout(() => completeRound(), 650); return }
+    wrong(`Incorrect. The right answer is: ${challenge?.answer}`)
+    const nextRound = round + 1
+    setTimeout(() => {
+      if (nextRound >= TOTAL_ROUNDS) setPhase('result')
+      else { setRound(nextRound); loadChallenge(nextRound) }
+    }, 1400)
   }
 
   /* ── trace_bfs / trace_dfs: click nodes in order ── */
   function handleTraversalClick(nodeId: string) {
-    if (!challenge?.expectedOrder) return
+    if (!challenge?.expectedOrder || mcLocked) return
     const expectedNext = challenge.expectedOrder[clickedIds.length]
     if (nodeId !== expectedNext) {
       setWrongId(nodeId)
+      setMcLocked(true)
       wrong('Wrong order for this traversal type.')
+      const nextRound = round + 1
+      setTimeout(() => {
+        if (nextRound >= TOTAL_ROUNDS) setPhase('result')
+        else { setRound(nextRound); loadChallenge(nextRound) }
+      }, 1400)
       return
     }
     const nextClicked = [...clickedIds, nodeId]
@@ -985,6 +996,7 @@ export default function PathExplorer() {
             <div className="pe-mc-question">
               <span className="pe-panel-label">YOUR ANSWER</span>
               <MCGrid
+                key={round}
                 options={challenge.mcOptions!}
                 onPick={handleMC}
                 locked={mcLocked}

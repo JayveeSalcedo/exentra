@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
   Layers, Plus, Search, Users, Pencil, Archive, ArchiveRestore,
-  X, UserPlus, UserMinus, Calendar, GraduationCap, ArrowRightLeft, Loader2
+  X, UserPlus, UserMinus, Calendar, Clock, GraduationCap, ArrowRightLeft, Loader2
 } from 'lucide-react'
 import './TeacherBlocks.css'
 
@@ -15,6 +15,7 @@ interface Block {
   description: string | null
   school_year: string | null
   semester: string | null
+  schedule: string | null
   is_archived: boolean
   created_at: string
   studentCount: number
@@ -44,9 +45,10 @@ interface BlockForm {
   description: string
   school_year: string
   semester: string
+  schedule: string
 }
 
-const emptyForm: BlockForm = { name: '', description: '', school_year: '', semester: '1st Semester' }
+const emptyForm: BlockForm = { name: '', description: '', school_year: '', semester: '1st Semester', schedule: '' }
 const SEMESTERS = ['1st Semester', '2nd Semester', 'Summer']
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -95,7 +97,7 @@ export default function TeacherBlocks() {
     try {
       const { data: blocksData, error } = await supabase
         .from('blocks')
-        .select('id, name, description, school_year, semester, is_archived, created_at')
+        .select('id, name, description, school_year, semester, schedule, is_archived, created_at')
         .eq('teacher_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -203,7 +205,7 @@ export default function TeacherBlocks() {
   const openCreate = () => { resetForm(); setFormOpen(true) }
   const openEdit = (block: Block) => {
     setEditingBlock(block)
-    setForm({ name: block.name, description: block.description ?? '', school_year: block.school_year ?? '', semester: block.semester ?? SEMESTERS[0] })
+    setForm({ name: block.name, description: block.description ?? '', school_year: block.school_year ?? '', semester: block.semester ?? SEMESTERS[0], schedule: block.schedule ?? '' })
     setFormError('')
     setFormOpen(true)
   }
@@ -222,6 +224,7 @@ export default function TeacherBlocks() {
             description: form.description.trim() || null,
             school_year: form.school_year.trim() || null,
             semester: form.semester || null,
+            schedule: form.schedule.trim() || null,
           })
           .eq('id', editingBlock.id)
         if (error) throw error
@@ -231,6 +234,7 @@ export default function TeacherBlocks() {
           description: form.description.trim() || null,
           school_year: form.school_year.trim() || null,
           semester: form.semester || null,
+          schedule: form.schedule.trim() || null,
           teacher_id: user.id,
         })
         if (error) throw error
@@ -409,6 +413,11 @@ export default function TeacherBlocks() {
                       <Calendar size={11} /> {[block.school_year, block.semester].filter(Boolean).join(' · ')}
                     </span>
                   )}
+                  {block.schedule && (
+                    <span className="blk-meta-item">
+                      <Clock size={11} /> {block.schedule}
+                    </span>
+                  )}
                   {block.is_archived && <span className="blk-archived-badge">Archived</span>}
                 </div>
 
@@ -484,6 +493,16 @@ export default function TeacherBlocks() {
                     {SEMESTERS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="blk-form-group">
+                <label>Schedule (optional)</label>
+                <input
+                  className="blk-input"
+                  value={form.schedule}
+                  onChange={e => setForm(f => ({ ...f, schedule: e.target.value }))}
+                  placeholder="e.g. MWF 9:00-10:30 AM"
+                />
               </div>
 
               {formError && <p className="blk-form-error">{formError}</p>}

@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
   ClipboardList, Clock, CheckCircle2, Lock,
-  ChevronRight, Zap, BookOpen, AlertCircle, Paperclip, XCircle
+  ChevronRight, Zap, BookOpen, AlertCircle, Paperclip, XCircle, Archive
 } from 'lucide-react'
 import './StudentAssessments.css'
 
@@ -25,6 +25,7 @@ type Assessment = {
   module_topic: string | null
   total_questions: number | null
   block_id: string | null
+  blockArchived?: boolean
   submission?: {
     score: number | null
     percentage: number | null
@@ -106,12 +107,13 @@ export default function StudentAssessments() {
     try {
       const { data: myEnrollment } = await supabase
         .from('block_enrollments')
-        .select('block_id')
+        .select('block_id, blocks(is_archived)')
         .eq('student_id', user!.id)
         .eq('status', 'active')
         .maybeSingle()
 
       const myBlockId = myEnrollment?.block_id ?? null
+      const myBlockArchived = !!(myEnrollment as any)?.blocks?.is_archived
 
       let query = supabase
         .from('assessments')
@@ -136,6 +138,7 @@ export default function StudentAssessments() {
       const merged: Assessment[] = (raw ?? []).map(a => ({
         ...a,
         submission: subMap.get(a.id) ?? null,
+        blockArchived: !!a.block_id && a.block_id === myBlockId && myBlockArchived,
       }))
 
       setAssessments(merged)
@@ -287,6 +290,7 @@ export default function StudentAssessments() {
               const typeColor    = TYPE_COLOR[a.type] ?? '#9B7ED4'
               const overdue      = a.due_date && !done && !missed && new Date(a.due_date) < new Date()
               const locked       = !!a.opens_at && new Date(a.opens_at) > new Date()
+              const archivedLocked = !!a.blockArchived && !done
 
               return (
                 <motion.div
@@ -294,8 +298,8 @@ export default function StudentAssessments() {
                   className={`sa-card ${done ? 'done' : ''} ${missed ? 'missed' : ''}`}
                   {...stagger(i + 4)}
                   exit={{ opacity: 0, x: -20 }}
-                  onClick={() => !locked && !missed && navigate(`/student/assessments/${a.id}`)}
-                  style={{ cursor: locked || missed ? 'default' : 'pointer' }}
+                  onClick={() => !locked && !missed && !archivedLocked && navigate(`/student/assessments/${a.id}`)}
+                  style={{ cursor: locked || missed || archivedLocked ? 'default' : 'pointer' }}
                 >
                   {/* Left accent */}
                   <div className="sa-card-accent" style={{ background: missed ? '#FF6B8A' : typeColor }} />
@@ -323,6 +327,10 @@ export default function StudentAssessments() {
                       {missed ? (
                         <span className="sa-status missed">
                           <XCircle size={12} /> Missed
+                        </span>
+                      ) : archivedLocked ? (
+                        <span className="sa-status locked">
+                          <Archive size={12} /> Archived
                         </span>
                       ) : done && pendingGrade ? (
                         <span className="sa-status submitted">
@@ -381,6 +389,14 @@ export default function StudentAssessments() {
                       </div>
                     )}
 
+                    {/* Archived-block notice */}
+                    {archivedLocked && (
+                      <div className="sa-missed-notice">
+                        <Archive size={11} color="#FFB830" />
+                        This section has been archived by your teacher — new submissions are closed.
+                      </div>
+                    )}
+
                     {/* Pending grade notice for file submissions */}
                     {pendingGrade && (
                       <div className="sa-pending-grade">
@@ -414,8 +430,8 @@ export default function StudentAssessments() {
                     )}
                   </div>
 
-                  {/* Arrow — hidden for missed */}
-                  {!locked && !missed && (
+                  {/* Arrow — hidden for missed/archived-locked */}
+                  {!locked && !missed && !archivedLocked && (
                     <div className="sa-card-arrow">
                       <ChevronRight size={16} color="var(--text-muted)" />
                     </div>

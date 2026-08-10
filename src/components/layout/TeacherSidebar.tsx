@@ -1,8 +1,8 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+﻿import { NavLink, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, ClipboardList, Layers,
-  Users, BarChart2, LogOut, ChevronRight, Zap, Sparkles, ScrollText
+  Users, BarChart2, LogOut, ChevronRight, Sparkles, ScrollText
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import { useState } from 'react'
@@ -49,7 +49,7 @@ export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
-          <Zap size={18} color="#00D4AA" strokeWidth={2.5} />
+          <img src="/ex-big.png" alt="Exentra" className="sidebar-logo-img" />
         </div>
         <AnimatePresence>
           {!collapsed && (

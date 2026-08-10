@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
@@ -78,6 +78,7 @@ export default function StudentDashboard() {
   const [completedModules, setCompletedModules] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [blockName, setBlockName] = useState<string | null>(null)
+  const [blockArchived, setBlockArchived] = useState(false)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
 
@@ -134,10 +135,11 @@ export default function StudentDashboard() {
         if (enrollment?.block_id) {
           const { data: block } = await supabase
             .from('blocks')
-            .select('name')
+            .select('name, is_archived')
             .eq('id', enrollment.block_id)
             .single()
           setBlockName(block?.name ?? null)
+          setBlockArchived(!!block?.is_archived)
         }
       }
 
@@ -271,6 +273,7 @@ export default function StudentDashboard() {
       >
         <Layers size={12} />
         {blockName ? blockName : 'No section assigned yet — contact your instructor'}
+        {blockName && blockArchived && <span className="sd-block-archived-badge">Archived</span>}
       </motion.div>
 
       <div className="sd-stats-row">

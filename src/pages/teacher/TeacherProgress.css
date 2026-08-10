@@ -523,3 +523,5 @@
     grid-template-columns: 36px 1fr 90px 90px 1fr;
   }
 }
+
+.tp-block-filter option { background: var(--bg-card); color: var(--text-primary); }

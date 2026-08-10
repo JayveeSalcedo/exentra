@@ -399,3 +399,5 @@
   .ts-table-head :nth-child(7),
   .ts-table-head :nth-child(8) { display: none; }
 }
+
+.ts-block-filter option { background: var(--bg-card); color: var(--text-primary); }

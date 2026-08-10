@@ -1,8 +1,8 @@
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+﻿import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, Gamepad2, Trophy, Star,
-  User, LogOut, ChevronRight, Zap, ClipboardList, FolderOpen, ChevronDown, Brain, BarChart2,
+  User, LogOut, ChevronRight, ClipboardList, FolderOpen, ChevronDown, Brain, BarChart2,
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import { useState, useEffect } from 'react'
@@ -106,7 +106,7 @@ export default function StudentSidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
-          <Zap size={18} color="#00D4AA" strokeWidth={2.5} />
+          <img src="/ex-big.png" alt="Exentra" className="sidebar-logo-img" />
         </div>
         <AnimatePresence>
           {!collapsed && (

@@ -918,6 +918,7 @@ export default function QueueRush() {
             <div className="qr-mc-question">
               <span className="qr-panel-label">YOUR ANSWER</span>
               <MCGrid
+                key={round}
                 options={challenge!.mcOptions!}
                 onPick={handleMC}
                 locked={mcLocked}

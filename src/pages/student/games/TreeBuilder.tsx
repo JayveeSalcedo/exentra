@@ -929,6 +929,7 @@ export default function TreeBuilder() {
             <div className="tb-mc-question">
               <span className="tb-panel-label">YOUR ANSWER</span>
               <MCGrid
+                key={round}
                 options={challenge!.mcOptions!}
                 onPick={handleMC}
                 locked={mcLocked}
