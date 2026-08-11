@@ -156,7 +156,7 @@ export default function SignUpPage({ onRequestClose }: SignUpPageProps) {
                         id="signup-school-id"
                         {...form1.register('schoolId')}
                         hasError={Boolean(form1.formState.errors.schoolId)}
-                        placeholder="e.g. 22ur1005"
+                        placeholder="e.g. 22as1000"
                       />
                     </FormField>
                     <div className="su-name-row">

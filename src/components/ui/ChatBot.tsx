@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, X, Send, Trash2, Bot, Play, ExternalLink } from 'lucide-react'
+import { MessageSquare, X, Send, Trash2, Play, ExternalLink } from 'lucide-react'
 import { chatWithGroq, type ChatMessage } from '../../lib/groq'
 import './ChatBot.css'
 
@@ -125,8 +125,10 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [justDragged, setJustDragged] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const dragBoundsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -169,14 +171,27 @@ export default function ChatBot() {
   const clearChat = () => setMessages([])
 
   return (
-    <>
+    <div className="cb-drag-boundary" ref={dragBoundsRef}>
       {/* Floating bubble */}
       <motion.button
         className="cb-bubble"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (justDragged) { setJustDragged(false); return }
+          setOpen((v) => !v)
+        }}
         whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.06 }}
         aria-label="Open AI Tutor"
+        drag
+        dragMomentum={false}
+        dragElastic={0.08}
+        dragConstraints={dragBoundsRef}
+        onDragEnd={(_, info) => {
+          if (Math.abs(info.offset.x) > 5 || Math.abs(info.offset.y) > 5) {
+            setJustDragged(true)
+          }
+        }}
+        style={{ touchAction: 'none' }}
       >
         <AnimatePresence mode="wait">
           {open ? (
@@ -185,7 +200,7 @@ export default function ChatBot() {
             </motion.span>
           ) : (
             <motion.span key="open" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-              <Bot size={22} />
+              <img src="/alchat.png" alt="AI Tutor" className="cb-bubble-icon" draggable={false} />
             </motion.span>
           )}
         </AnimatePresence>
@@ -215,7 +230,7 @@ export default function ChatBot() {
             <div className="cb-header">
               <div className="cb-header-left">
                 <div className="cb-avatar">
-                  <Bot size={16} />
+                  <img src="/alchat.png" alt="" className="cb-avatar-icon" draggable={false} />
                 </div>
                 <div className="cb-header-info">
                   <span className="cb-header-name">Algie</span>
@@ -280,7 +295,7 @@ export default function ChatBot() {
                 >
                   {msg.role === 'assistant' && (
                     <div className="cb-msg-avatar">
-                      <Bot size={12} />
+                      <img src="/alchat.png" alt="" className="cb-msg-avatar-icon" draggable={false} />
                     </div>
                   )}
                   <div className="cb-msg-bubble">
@@ -300,7 +315,7 @@ export default function ChatBot() {
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <div className="cb-msg-avatar">
-                    <Bot size={12} />
+                    <img src="/alchat.png" alt="" className="cb-msg-avatar-icon" draggable={false} />
                   </div>
                   <div className="cb-msg-bubble cb-typing">
                     <span />
@@ -336,6 +351,6 @@ export default function ChatBot() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }
