@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './store/AuthContext'
 import { ThemeProvider } from './store/ThemeContext'
 import ProtectedRoute from './components/layout/ProtectedRoute'
@@ -38,12 +38,15 @@ import CreateAssessment from './pages/teacher/CreateAssessment'
 import ActivityLog from './pages/teacher/ActivityLog'
 import TeacherStudents from './pages/teacher/TeacherStudents'
 import TeacherProgress from './pages/teacher/TeacherProgress'
+import DevWatermark from './components/ui/DevWatermark'
+import './components/ui/DevWatermark.css'
 import './index.css'
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <DevWatermark />
         <BrowserRouter>
           <Routes>
             {/* Public */}
