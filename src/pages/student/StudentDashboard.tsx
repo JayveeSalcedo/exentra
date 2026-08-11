@@ -7,7 +7,7 @@ import { getTodayChallenge, getTodayAttempt, submitChallengeAttempt, type DailyC
 import {
   Zap, Trophy, Flame, CheckCircle2, ChevronRight,
   BookOpen, Brain, Target, TrendingUp, Star, Play, Lock,
-  Lightbulb, Send, RefreshCw, Layers, XCircle
+  Lightbulb, Send, RefreshCw, Layers, XCircle, Clock
 } from 'lucide-react'
 import './StudentDashboard.css'
 
@@ -79,6 +79,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true)
   const [blockName, setBlockName] = useState<string | null>(null)
   const [blockArchived, setBlockArchived] = useState(false)
+  const [blockSchedule, setBlockSchedule] = useState<string | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
 
@@ -135,11 +136,12 @@ export default function StudentDashboard() {
         if (enrollment?.block_id) {
           const { data: block } = await supabase
             .from('blocks')
-            .select('name, is_archived')
+            .select('name, is_archived, schedule')
             .eq('id', enrollment.block_id)
             .single()
           setBlockName(block?.name ?? null)
           setBlockArchived(!!block?.is_archived)
+          setBlockSchedule(block?.schedule ?? null)
         }
       }
 
@@ -275,6 +277,18 @@ export default function StudentDashboard() {
         {blockName ? blockName : 'No section assigned yet — contact your instructor'}
         {blockName && blockArchived && <span className="sd-block-archived-badge">Archived</span>}
       </motion.div>
+
+      {blockName && blockSchedule && (
+        <motion.div
+          className="sd-block-schedule"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+        >
+          <Clock size={12} />
+          {blockSchedule}
+        </motion.div>
+      )}
 
       <div className="sd-stats-row">
         {stats.map((stat, i) => (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -40,6 +40,7 @@ interface Challenge {
   answer?: string           // For string/value-answer challenges
   mcOptions?: MCOption[]    // For multiple-choice challenges
   violationKind?: string    // For spot_violation, which rule was broken
+  ops?: string              // For predict_output, pseudocode shown in the OPERATIONS box
 }
 
 interface FloatingScore { id: string; value: number; x: number }
@@ -245,7 +246,8 @@ function generateChallenge(difficulty: Difficulty, round: number): Challenge {
     ])
     return {
       type, title: 'Predict the Front',
-      scenario: `After executing the operations below, what value is at the front of the queue?\n\n${p.ops}`,
+      scenario: 'After executing the operations below, what value is at the front of the queue?',
+      ops: p.ops,
       timeLimit: cfg.time, maxSize: cfg.maxSize,
       initialQueue: [], answer: p.front, mcOptions,
     }
@@ -911,7 +913,7 @@ export default function QueueRush() {
             {challenge!.type === 'predict_output' && (
               <div className="qr-pseudocode">
                 <span className="qr-panel-label">OPERATIONS</span>
-                <pre>{challenge!.scenario.split('\n\n')[1]}</pre>
+                <pre>{challenge!.ops}</pre>
               </div>
             )}
 
@@ -1029,7 +1031,9 @@ export default function QueueRush() {
                     }}
                     onFrontDrop={() => {
                       if (!challenge) return
-                      if (challenge.type === 'build_target') handleBuildDequeue()
+                      if (challenge.type === 'build_target')  handleBuildDequeue()
+                      if (challenge.type === 'ticket_drain')  handleTicketServe()
+                      if (challenge.type === 'bfs_trace')     handleBfsVisit()
                       setDragToken(null)
                     }}
                   />

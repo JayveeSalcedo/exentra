@@ -1,4 +1,4 @@
-.sa-page {
+﻿.sa-page {
   --sa-accent: #FFB830;
 }
 
@@ -21,8 +21,10 @@
 }
 
 .sa-lobby-icon {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 16px;
   color: var(--sa-accent);
-  margin-bottom: 16px;
   filter: drop-shadow(0 0 24px rgba(255,184,48,0.5));
 }
 
@@ -123,6 +125,28 @@
 .sa-slot--locked .ab-slot-index {
   color: rgba(0,212,170,0.7);
 }
+
+/* Click-to-select feedback (trace_pass, predict_next_swap, binary_search_steps, merge_step) */
+.ab-slot--correct .ab-slot-inner {
+  border-color: #00D4AA;
+  background: linear-gradient(145deg, #0d2a24, #082018);
+  box-shadow:
+    0 4px 0 rgba(0,0,0,0.4),
+    0 0 0 3px rgba(0,212,170,0.18),
+    0 0 22px rgba(0,212,170,0.4);
+  animation: correctPulse 0.4s ease-out;
+}
+.ab-slot--correct .ab-slot-value { color: #00D4AA; }
+
+.ab-slot--wrong .ab-slot-inner {
+  border-color: #FF6B8A;
+  background: linear-gradient(145deg, #2a0d16, #200810);
+  box-shadow:
+    0 4px 0 rgba(0,0,0,0.4),
+    0 0 0 3px rgba(255,107,138,0.18),
+    0 0 22px rgba(255,107,138,0.4);
+}
+.ab-slot--wrong .ab-slot-value { color: #FF6B8A; }
 
 .sa-track-label {
   display: block;
