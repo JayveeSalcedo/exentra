@@ -33,6 +33,7 @@ interface StudentRow {
   school_id: string
   first_name: string
   last_name: string
+  avatar_url: string | null
   xp: number
   level: number
   modulesCompleted: number
@@ -81,7 +82,7 @@ export default function TeacherProgress() {
       // Students
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, xp, level')
+        .select('id, school_id, first_name, last_name, avatar_url, xp, level')
         .eq('role', 'student')
 
       if (!profiles) { setLoading(false); return }
@@ -183,6 +184,7 @@ export default function TeacherProgress() {
           school_id: p.school_id,
           first_name: p.first_name,
           last_name: p.last_name,
+          avatar_url: p.avatar_url ?? null,
           xp: p.xp ?? 0,
           level: p.level ?? 1,
           modulesCompleted: modByStudent[p.id] ?? 0,
