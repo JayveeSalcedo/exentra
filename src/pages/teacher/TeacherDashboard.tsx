@@ -165,7 +165,7 @@ export default function TeacherDashboard() {
       {/* Welcome */}
       <motion.div className="td-welcome" {...stagger(0)}>
         <p className="td-welcome-label">Welcome back</p>
-        <h1 className="td-welcome-title">{user?.firstName} {user?.lastName} 👨‍🏫</h1>
+        <h1 className="td-welcome-title">{user?.firstName} {user?.lastName} </h1>
         <p className="td-welcome-sub">Manage your DSA class, generate AI-powered assessments, and track student progress.</p>
       </motion.div>
 

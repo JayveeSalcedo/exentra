@@ -144,7 +144,7 @@ export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <span>👨‍🏫 Teacher Account</span>
+            <span> Teacher Account</span>
           </motion.div>
         )}
       </AnimatePresence>

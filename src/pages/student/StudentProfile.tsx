@@ -1,10 +1,10 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
-  User, Zap, Flame, Shield, Star, Edit3, Save, X,
-  CheckCircle2, AlertTriangle, BookOpen, Trophy, Target, Camera, Trash2
+  User, Zap, Flame, Edit3, Save, X,
+  CheckCircle2, AlertTriangle, BookOpen, Target, Camera, Trash2
 } from 'lucide-react'
 import './StudentProfile.css'
 
@@ -17,16 +17,6 @@ function xpToNextLevel(xp: number, level: number) {
   const needed = level * XP_PER_LEVEL
   const current = xp - (level - 1) * XP_PER_LEVEL
   return { current: Math.max(0, current), needed, pct: Math.min(100, Math.round((Math.max(0, current) / needed) * 100)) }
-}
-
-const RANK_LABELS: Record<number, string> = {
-  1: 'Novice', 2: 'Apprentice', 3: 'Explorer', 4: 'Coder',
-  5: 'Analyst', 6: 'Architect', 7: 'Expert', 8: 'Master', 9: 'Legend', 10: 'Grandmaster',
-}
-
-const RANK_COLORS: Record<number, string> = {
-  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
-  5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
 }
 
 const easeOut = [0.16, 1, 0.3, 1] as const
@@ -45,7 +35,6 @@ export default function StudentProfile() {
     lastName: user?.lastName ?? '',
     username: user?.username ?? '',
     yearCourse: '',
-    bio: '',
   })
 
   const [stats, setStats] = useState({
@@ -85,7 +74,7 @@ export default function StudentProfile() {
   const fetchProfile = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('first_name, last_name, username, year_course, bio')
+      .select('first_name, last_name, username, year_course')
       .eq('id', user!.id)
       .single()
     if (data) {
@@ -94,7 +83,6 @@ export default function StudentProfile() {
         lastName: data.last_name ?? '',
         username: data.username ?? '',
         yearCourse: data.year_course ?? '',
-        bio: data.bio ?? '',
       })
     }
   }
@@ -198,7 +186,6 @@ export default function StudentProfile() {
         last_name: form.lastName.trim(),
         username: form.username.trim(),
         year_course: form.yearCourse.trim(),
-        bio: form.bio.trim(),
       }).eq('id', user!.id)
       if (error) throw error
       showToast('Profile updated!')
@@ -214,26 +201,19 @@ export default function StudentProfile() {
   const xp = user?.xp ?? 0
   const streak = user?.streak ?? 0
   const { current: xpCurrent, needed: xpNeeded, pct: xpPct } = xpToNextLevel(xp, level)
-  const rankLabel = RANK_LABELS[Math.min(level, 10)] ?? 'Legend'
-  const rankColor = RANK_COLORS[Math.min(level, 10)] ?? 'var(--text-primary)'
   const initials = `${form.firstName[0] ?? ''}${form.lastName[0] ?? ''}`.toUpperCase()
 
   return (
     <div className="sp-root">
 
-      {/* ── Hero card ── */}
-      <motion.div className="sp-hero"
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: easeOut }}
+      {/* ── Header card ── */}
+      <motion.div className="sp-header"
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: easeOut }}
       >
-        {/* Ambient orbs */}
-        <div className="sp-hero-orb sp-hero-orb-1" />
-        <div className="sp-hero-orb sp-hero-orb-2" />
-
-        <div className="sp-hero-inner">
+        <div className="sp-header-top">
           {/* Avatar */}
           <div className="sp-avatar-wrap">
-            <div className="sp-avatar-ring" style={{ borderColor: rankColor }} />
             <button
               type="button"
               className="sp-avatar sp-avatar-btn"
@@ -245,7 +225,7 @@ export default function StudentProfile() {
                 ? <img src={user.avatarUrl} alt="avatar" className="sp-avatar-img" />
                 : <span className="sp-avatar-initials">{initials}</span>}
               <span className="sp-avatar-overlay">
-                {uploadingAvatar ? <span className="sp-spin" /> : <Camera size={18} />}
+                {uploadingAvatar ? <span className="sp-spin" /> : <Camera size={16} />}
               </span>
             </button>
             <input
@@ -263,101 +243,71 @@ export default function StudentProfile() {
                 disabled={uploadingAvatar}
                 title="Remove profile picture"
               >
-                <Trash2 size={12} />
+                <Trash2 size={11} />
               </button>
             )}
-            <div className="sp-avatar-level" style={{ background: rankColor }}>
-              {level}
-            </div>
+            <div className="sp-avatar-level">Lv {level}</div>
           </div>
 
           {/* Identity */}
-          <div className="sp-hero-info">
-            <div className="sp-hero-name-row">
-              <h1 className="sp-hero-name">{form.firstName} {form.lastName}</h1>
-              <span className="sp-rank-badge" style={{ color: rankColor, borderColor: rankColor }}>
-                <Shield size={11} /> {rankLabel}
-              </span>
-            </div>
-            <p className="sp-hero-id">
-              <span className="sp-mono">@{form.username}</span>
+          <div className="sp-header-info">
+            <h1 className="sp-name">{form.firstName} {form.lastName}</h1>
+            <p className="sp-sub">
+              <span>@{form.username}</span>
               <span className="sp-dot">·</span>
-              <span className="sp-mono">{user?.schoolId}</span>
+              <span>{user?.schoolId}</span>
               <span className="sp-dot">·</span>
-              <span className="sp-mono" style={{ color: blockName ? undefined : 'var(--text-muted)' }}>
-                {blockName ?? 'No section assigned'}
-              </span>
+              <span className={blockName ? '' : 'sp-muted'}>{blockName ?? 'No section assigned'}</span>
             </p>
-            {form.yearCourse && (
-              <p className="sp-hero-course">{form.yearCourse}</p>
-            )}
-            {form.bio && (
-              <p className="sp-hero-bio">"{form.bio}"</p>
-            )}
+            {form.yearCourse && <p className="sp-course">{form.yearCourse}</p>}
           </div>
 
-          {/* Edit button */}
           <button className="sp-edit-btn" onClick={() => setEditing(true)}>
-            <Edit3 size={14} /> Edit Profile
+            <Edit3 size={13} /> Edit
           </button>
         </div>
 
         {/* XP bar */}
-        <div className="sp-xp-section">
-          <div className="sp-xp-labels">
-            <span className="sp-xp-label"><Zap size={12} color="#FFB830" /> Level {level}</span>
-            <span className="sp-xp-pts">{xpCurrent.toLocaleString()} / {xpNeeded.toLocaleString()} XP</span>
-            <span className="sp-xp-label">Level {level + 1}</span>
-          </div>
+        <div className="sp-xp">
           <div className="sp-xp-track">
             <motion.div className="sp-xp-fill"
               initial={{ width: 0 }} animate={{ width: `${xpPct}%` }}
-              transition={{ duration: 1.2, delay: 0.5, ease: easeOut }}
+              transition={{ duration: 1, delay: 0.3, ease: easeOut }}
             />
-            <span className="sp-xp-pct">{xpPct}%</span>
           </div>
-          <p className="sp-xp-sub">{(xpNeeded - xpCurrent).toLocaleString()} XP to reach Level {level + 1}</p>
+          <span className="sp-xp-text">{xpCurrent.toLocaleString()} / {xpNeeded.toLocaleString()} XP to Level {level + 1}</span>
         </div>
       </motion.div>
 
-      {/* ── Stat cards ── */}
+      {/* ── Stats ── */}
       <div className="sp-stats-grid">
         {[
-          { icon: <Zap size={20} color="#FFB830" />, val: xp.toLocaleString(), label: 'Total XP', color: '#FFB830' },
-          { icon: <Flame size={20} color="#FF6B8A" />, val: `${streak}d`, label: 'Streak', color: '#FF6B8A' },
-          { icon: <BookOpen size={20} color="#00D4AA" />, val: stats.lessonsCompleted, label: 'Lessons Done', color: '#00D4AA' },
-          { icon: <Target size={20} color="#3B5BDB" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#3B5BDB' },
-          { icon: <Star size={20} color="#FFB830" />, val: stats.avgScore ? `${stats.avgScore}%` : '—', label: 'Avg Score', color: '#FFB830' },
-          { icon: <Trophy size={20} color="#00D4AA" />, val: stats.rank ? `#${stats.rank}` : '—', label: 'Leaderboard', color: '#00D4AA' },
+          { icon: <Zap size={16} color="#FFB830" />, val: xp.toLocaleString(), label: 'Total XP', color: '#FFB830' },
+          { icon: <Flame size={16} color="#FF6B8A" />, val: `${streak}d`, label: 'Streak', color: '#FF6B8A' },
+          { icon: <BookOpen size={16} color="#00D4AA" />, val: stats.lessonsCompleted, label: 'Lessons', color: '#00D4AA' },
+          { icon: <Target size={16} color="#9B7ED4" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#9B7ED4' },
         ].map((s, i) => (
-          <motion.div key={i} className="sp-stat-card"
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.06, duration: 0.35, ease: easeOut }}
-          >
-            <div className="sp-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>
-              {s.icon}
-            </div>
+          <div key={i} className="sp-stat-card">
+            <div className="sp-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
             <span className="sp-stat-val" style={{ color: s.color }}>{s.val}</span>
             <span className="sp-stat-label">{s.label}</span>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* ── Account info ── */}
       <motion.div className="sp-info-card"
-        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.35, ease: easeOut }}
+        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.3, ease: easeOut }}
       >
-        <h2 className="sp-section-title"><User size={15} /> Account Information</h2>
+        <h2 className="sp-section-title"><User size={14} /> Account Information</h2>
         <div className="sp-info-grid">
           {[
-            { label: 'School ID',    val: user?.schoolId },
-            { label: 'Email',        val: `${user?.schoolId}@psu.edu.ph` },
-            { label: 'Username',     val: `@${form.username}` },
+            { label: 'Email', val: `${user?.schoolId}@psu.edu.ph` },
             { label: 'Year & Course', val: form.yearCourse || '—' },
             { label: 'Block / Section', val: blockName ?? 'Not yet assigned' },
-            { label: 'Role',         val: 'Student' },
-            { label: 'Institution',  val: 'Pangasinan State University' },
+            { label: 'Average Score', val: stats.avgScore ? `${stats.avgScore}%` : '—' },
+            { label: 'Leaderboard Rank', val: stats.rank ? `#${stats.rank}` : '—' },
           ].map((row, i) => (
             <div key={i} className="sp-info-row">
               <span className="sp-info-label">{row.label}</span>
@@ -375,15 +325,15 @@ export default function StudentProfile() {
             onClick={() => setEditing(false)}
           >
             <motion.div className="sp-modal"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.25, ease: easeOut }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.2, ease: easeOut }}
               onClick={e => e.stopPropagation()}
             >
               <div className="sp-modal-header">
-                <h2><Edit3 size={16} /> Edit Profile</h2>
-                <button className="sp-modal-close" onClick={() => setEditing(false)}><X size={16} /></button>
+                <h2><Edit3 size={15} /> Edit Profile</h2>
+                <button className="sp-modal-close" onClick={() => setEditing(false)}><X size={15} /></button>
               </div>
 
               <div className="sp-modal-body">
@@ -404,10 +354,6 @@ export default function StudentProfile() {
                 <div className="sp-field">
                   <label>Year & Course</label>
                   <input value={form.yearCourse} onChange={e => setForm(f => ({ ...f, yearCourse: e.target.value }))} placeholder="e.g. 2nd Year — BSIT" />
-                </div>
-                <div className="sp-field">
-                  <label>Bio <span className="sp-field-opt">(optional)</span></label>
-                  <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} placeholder="Say something about yourself…" rows={3} />
                 </div>
               </div>
 
