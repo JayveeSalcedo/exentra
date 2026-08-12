@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+﻿import { useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -44,7 +44,7 @@ function fmtSize(bytes: number | null) {
 function fileIcon(type: string) {
   if (type === 'pdf') return <FileText size={15} color="#FF6B8A" />
   if (['ppt', 'pptx'].includes(type)) return <File size={15} color="#FFB830" />
-  if (['doc', 'docx'].includes(type)) return <File size={15} color="#9B7ED4" />
+  if (['doc', 'docx'].includes(type)) return <File size={15} color="#6C8EF5" />
   return <Paperclip size={15} color="var(--text-secondary)" />
 }
 
@@ -229,7 +229,7 @@ export default function TeacherMaterials() {
                 onClick={() => openTarget(card)}
               >
                 <div className="tm-block-card-icon">
-                  {card.id === null ? <Users size={16} color="#00D4AA" /> : <Layers size={16} color="#9B7ED4" />}
+                  {card.id === null ? <Users size={16} color="#00D4AA" /> : <Layers size={16} color="#6C8EF5" />}
                 </div>
                 <h3 className="tm-block-card-name">{card.name}</h3>
                 <span className="tm-block-card-count">

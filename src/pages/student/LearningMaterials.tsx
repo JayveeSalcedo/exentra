@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -382,7 +382,7 @@ export default function LearningMaterials() {
       >
         {[
           { label: 'Modules Done',    value: `${completedModulesCount} / ${modules.length}`, color: '#00D4AA' },
-          { label: 'Lessons Done',    value: `${completedLessons || 6} / ${totalLessons}`,    color: '#9B7ED4' },
+          { label: 'Lessons Done',    value: `${completedLessons || 6} / ${totalLessons}`,    color: '#6C8EF5' },
           { label: 'Hours Completed', value: `${hoursCompleted}h`,                            color: '#FFB830' },
           { label: 'Total XP',        value: (user?.xp ?? 0).toLocaleString(),                color: '#FF6B8A' },
         ].map((stat, i) => (
@@ -504,7 +504,7 @@ export default function LearningMaterials() {
                         className="lm-mod-mini-bar-fill"
                         initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                         transition={{ duration: 0.8, delay: 0.2 + i * 0.05 }}
-                        style={{ background: state === 'done' ? '#00D4AA' : 'linear-gradient(90deg,#7C5CBF,#00D4AA)' }}
+                        style={{ background: state === 'done' ? '#00D4AA' : 'linear-gradient(90deg,#3B5BDB,#00D4AA)' }}
                       />
                     </div>
                   )}
@@ -699,7 +699,7 @@ export default function LearningMaterials() {
                           className={`lm-material-item ${mat.id === highlightMaterialId ? 'lm-material-highlight' : ''}`}
                         >
                           <div className="lm-material-icon">
-                            <FileText size={16} color="#7C5CBF" />
+                            <FileText size={16} color="#3B5BDB" />
                           </div>
                           <div className="lm-material-info">
                             <span className="lm-material-title">{mat.title}</span>

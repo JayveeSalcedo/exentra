@@ -56,6 +56,7 @@ interface LeaderboardEntry {
   id: string
   first_name: string
   last_name: string
+  avatar_url?: string | null
   xp: number
   global_rank: number
 }
@@ -122,7 +123,16 @@ export default function StudentDashboard() {
       }
 
       if (mods) setModules(mods)
-      if (lb) setLeaderboard(lb)
+      if (lb && lb.length) {
+        const { data: avatarRows } = await supabase
+          .from('profiles')
+          .select('id, avatar_url')
+          .in('id', lb.map((e: any) => e.id))
+        const avatarMap = new Map((avatarRows ?? []).map((r: any) => [r.id, r.avatar_url]))
+        setLeaderboard(lb.map((e: any) => ({ ...e, avatar_url: avatarMap.get(e.id) ?? null })))
+      } else if (lb) {
+        setLeaderboard(lb)
+      }
 
       // Fetch student's block/section
       if (user) {
@@ -251,7 +261,7 @@ export default function StudentDashboard() {
     { label: 'Total XP',  value: (user?.xp ?? 0).toLocaleString(), sub: `Level ${user?.level ?? 1} Learner`,  icon: Zap,         color: '#FFB830' },
     { label: 'Global Rank', value: `#${myRank}`, sub: 'Class leaderboard', icon: Trophy,      color: '#00D4AA' },
     { label: 'Streak',    value: `${user?.streak ?? 0} days`,       sub: `Best: ${user?.streak ?? 0} days`,   icon: Flame,       color: '#FF6B8A' },
-    { label: 'Completed', value: `${completedCount} / 8`,           sub: 'Modules finished', icon: CheckCircle2, color: '#9B7ED4' },
+    { label: 'Completed', value: `${completedCount} / 8`,           sub: 'Modules finished', icon: CheckCircle2, color: '#6C8EF5' },
   ]
 
   const getModuleState = (mod: Module, index: number) => {
@@ -594,7 +604,7 @@ export default function StudentDashboard() {
                             ? ['🥇','🥈','🥉'][entry.global_rank - 1]
                             : `#${entry.global_rank}`}
                         </span>
-                        <div className="sd-lb-avatar">{initials}</div>
+                        <div className="sd-lb-avatar">{entry.avatar_url ? <img src={entry.avatar_url} alt="avatar" className="sd-lb-avatar-img" /> : initials}</div>
                         <span className="sd-lb-name">
                           {entry.first_name} {entry.last_name}{isYou ? ' (You)' : ''}
                         </span>

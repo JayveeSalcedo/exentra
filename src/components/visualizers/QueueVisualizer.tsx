@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { VisualizerType } from '../../lessons/types'
 
@@ -82,13 +82,13 @@ export default function QueueVisualizer({ type }: Props) {
                     background: isFront
                       ? 'rgba(0,212,170,0.18)'
                       : isRear
-                        ? 'rgba(124,92,191,0.18)'
+                        ? 'rgba(59,91,219,0.18)'
                         : 'rgba(20,28,61,0.9)',
                     borderColor: isFront
                       ? 'rgba(0,212,170,0.6)'
                       : isRear
-                        ? 'rgba(124,92,191,0.5)'
-                        : 'rgba(124,92,191,0.3)',
+                        ? 'rgba(59,91,219,0.5)'
+                        : 'rgba(59,91,219,0.3)',
                   }}
                   exit={{ opacity: 0, x: -30 }}
                   transition={spring}

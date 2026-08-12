@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AuthUser } from '../types/auth'
 
@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (schoolId: string, password: string) => Promise<{ error: string | null }>
   loginWithGoogle: () => Promise<{ error: string | null }>
   logout: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -169,8 +170,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const refreshProfile = async () => {
+    if (!user) return
+    await loadProfile(user.id)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithGoogle, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

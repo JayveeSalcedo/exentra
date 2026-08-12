@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+﻿import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -36,7 +36,7 @@ const NOTIF_ICON: Record<NotificationType, any> = {
 }
 
 const NOTIF_COLOR: Record<NotificationType, string> = {
-  assessment_posted: '#9B7ED4',
+  assessment_posted: '#6C8EF5',
   material_posted: '#00D4AA',
   grade_released: '#FFB830',
   due_soon: '#FF6B8A',
@@ -189,7 +189,7 @@ export default function Topbar({ pageTitle, breadcrumb }: TopbarProps) {
                   ) : (
                     notifications.map(n => {
                       const Icon = NOTIF_ICON[n.type] ?? Bell
-                      const color = NOTIF_COLOR[n.type] ?? '#9B7ED4'
+                      const color = NOTIF_COLOR[n.type] ?? '#6C8EF5'
                       return (
                         <button
                           key={n.id}
@@ -231,7 +231,9 @@ export default function Topbar({ pageTitle, breadcrumb }: TopbarProps) {
           whileHover={{ scale: 1.05 }}
           title={`${user?.firstName} ${user?.lastName}`}
         >
-          {user?.firstName?.[0]}{user?.lastName?.[0]}
+          {user?.avatarUrl
+            ? <img src={user.avatarUrl} alt="avatar" className="topbar-avatar-img" />
+            : <>{user?.firstName?.[0]}{user?.lastName?.[0]}</>}
         </motion.div>
       </div>
     </header>

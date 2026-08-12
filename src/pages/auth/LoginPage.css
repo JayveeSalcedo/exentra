@@ -1,4 +1,4 @@
-.login-root {
+﻿.login-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,7 @@
   justify-content: center;
   padding: 60px 56px;
   border-right: 1px solid var(--border);
-  background: linear-gradient(135deg, rgba(124,92,191,0.05) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(59,91,219,0.05) 0%, transparent 60%);
 }
 
 .login-root .brand-logo {
@@ -375,7 +375,7 @@
 
 .login-root .submit-btn:hover:not(:disabled) {
   opacity: 0.92;
-  box-shadow: 0 4px 20px rgba(124,92,191,0.35);
+  box-shadow: 0 4px 20px rgba(59,91,219,0.35);
 }
 
 .login-root .submit-btn:disabled {
@@ -648,7 +648,7 @@
 }
 
 .login-root .mascot-img {
-  width: 280px;
+  width: 150px;
   height: auto;
   display: block;
   filter: drop-shadow(0 0 20px rgba(0,212,170,0.2));
@@ -660,7 +660,7 @@
   }
 
   .login-root .mascot-img {
-    width: 180px;
+    width: 130px;
   }
 
   .login-root .mascot-bubble {

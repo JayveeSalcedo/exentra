@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -201,7 +201,7 @@ export default function SplashScreen() {
             }
             .splash-orb-1 {
               width: 600px; height: 600px;
-              background: radial-gradient(circle, rgba(124,92,191,0.25), transparent);
+              background: radial-gradient(circle, rgba(59,91,219,0.25), transparent);
               top: -200px; left: -150px;
             }
             .splash-orb-2 {
@@ -211,7 +211,7 @@ export default function SplashScreen() {
             }
             .splash-orb-3 {
               width: 300px; height: 300px;
-              background: radial-gradient(circle, rgba(124,92,191,0.15), transparent);
+              background: radial-gradient(circle, rgba(59,91,219,0.15), transparent);
               bottom: 100px; left: 30%;
             }
             .splash-grid {
@@ -261,13 +261,13 @@ export default function SplashScreen() {
               border-radius: 50%;
               border: 2px solid transparent;
               border-top-color: #00D4AA;
-              border-right-color: rgba(124,92,191,0.5);
+              border-right-color: rgba(59,91,219,0.5);
               display: flex; align-items: center; justify-content: center;
             }
             .splash-logo-inner {
               width: 52px; height: 52px;
               border-radius: 50%;
-              background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(124,92,191,0.15));
+              background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(59,91,219,0.15));
               border: 1px solid rgba(0,212,170,0.2);
             }
             .splash-title-wrap {
@@ -340,7 +340,7 @@ export default function SplashScreen() {
             }
             .splash-bar-fill {
               height: 100%;
-              background: linear-gradient(90deg, #7C5CBF, #00D4AA);
+              background: linear-gradient(90deg, #3B5BDB, #00D4AA);
               border-radius: 999px;
               transition: width 0.1s linear;
             }

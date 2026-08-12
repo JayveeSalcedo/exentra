@@ -120,9 +120,9 @@ export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
                       marginLeft: 6,
                       fontSize: 9,
                       fontFamily: 'JetBrains Mono, monospace',
-                      background: 'rgba(155,126,212,0.15)',
-                      border: '1px solid rgba(155,126,212,0.3)',
-                      color: '#9B7ED4',
+                      background: 'rgba(108,142,245,0.15)',
+                      border: '1px solid rgba(108,142,245,0.3)',
+                      color: '#6C8EF5',
                       borderRadius: 99,
                       padding: '1px 6px',
                       letterSpacing: '0.5px'
@@ -153,7 +153,9 @@ export default function TeacherSidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="sidebar-footer">
         <div className={`sidebar-user ${collapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-avatar">
-            {user?.firstName?.[0]}{user?.lastName?.[0]}
+            {user?.avatarUrl
+              ? <img src={user.avatarUrl} alt="avatar" className="sidebar-avatar-img" />
+              : <>{user?.firstName?.[0]}{user?.lastName?.[0]}</>}
           </div>
           <AnimatePresence>
             {!collapsed && (

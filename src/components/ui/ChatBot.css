@@ -1,4 +1,4 @@
-/* ── Drag boundary (invisible, spans viewport so the bubble can be dragged
+﻿/* ── Drag boundary (invisible, spans viewport so the bubble can be dragged
    anywhere on screen without leaving it) ──────────────────────────────────── */
 .cb-drag-boundary {
   position: fixed;
@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(135deg, rgba(124,92,191,0.15), rgba(0,212,170,0.06));
+  background: linear-gradient(135deg, rgba(59,91,219,0.15), rgba(0,212,170,0.06));
   border-bottom: 1px solid var(--surface-06);
   flex-shrink: 0;
 }
@@ -185,12 +185,12 @@
   flex-direction: column;
   gap: 12px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(124,92,191,0.3) transparent;
+  scrollbar-color: rgba(59,91,219,0.3) transparent;
 }
 
 .cb-messages::-webkit-scrollbar { width: 4px; }
 .cb-messages::-webkit-scrollbar-track { background: transparent; }
-.cb-messages::-webkit-scrollbar-thumb { background: rgba(124,92,191,0.3); border-radius: 99px; }
+.cb-messages::-webkit-scrollbar-thumb { background: rgba(59,91,219,0.3); border-radius: 99px; }
 
 /* ── Welcome ─────────────────────────────────────────────────────────────── */
 .cb-welcome {
@@ -205,8 +205,8 @@
 .cb-welcome-icon {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, rgba(124,92,191,0.2), rgba(0,212,170,0.1));
-  border: 1px solid rgba(124,92,191,0.3);
+  background: linear-gradient(135deg, rgba(59,91,219,0.2), rgba(0,212,170,0.1));
+  border: 1px solid rgba(59,91,219,0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -244,8 +244,8 @@
 }
 
 .cb-suggestion {
-  background: rgba(124,92,191,0.08);
-  border: 1px solid rgba(124,92,191,0.2);
+  background: rgba(59,91,219,0.08);
+  border: 1px solid rgba(59,91,219,0.2);
   border-radius: 8px;
   padding: 8px 12px;
   font-family: 'Syne', sans-serif;
@@ -257,8 +257,8 @@
 }
 
 .cb-suggestion:hover {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.35);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.35);
   color: var(--text-primary);
 }
 
@@ -305,8 +305,8 @@
 }
 
 .cb-msg.assistant .cb-msg-bubble {
-  background: rgba(124,92,191,0.1);
-  border: 1px solid rgba(124,92,191,0.15);
+  background: rgba(59,91,219,0.1);
+  border: 1px solid rgba(59,91,219,0.15);
   color: var(--text-soft);
   border-radius: 4px 14px 14px 14px;
 }
@@ -441,7 +441,7 @@
   gap: 4px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: #FF6B8A;
+  color: var(--error);
   margin-top: auto;
 }
 
@@ -498,7 +498,7 @@
 }
 
 .cb-input::placeholder { color: var(--text-muted); }
-.cb-input:focus { border-color: rgba(124,92,191,0.5); }
+.cb-input:focus { border-color: rgba(59,91,219,0.5); }
 .cb-input:disabled { opacity: 0.5; }
 
 .cb-send {

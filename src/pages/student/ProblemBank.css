@@ -1,4 +1,4 @@
-/* ── Problem Bank shared styles ────────────────────────────────────────────── */
+﻿/* ── Problem Bank shared styles ────────────────────────────────────────────── */
 
 .pb-root {
   display: flex;
@@ -265,8 +265,8 @@
 }
 .pb-type-badge[data-type="multiple_choice"] {
   color: var(--purple-light);
-  background: rgba(155,126,212,0.1);
-  border-color: rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.1);
+  border-color: rgba(108,142,245,0.25);
 }
 
 .pb-diff-badge {
@@ -457,8 +457,8 @@
 }
 .pb-type-btn.active {
   color: var(--purple-light);
-  border-color: rgba(155,126,212,0.4);
-  background: rgba(155,126,212,0.1);
+  border-color: rgba(108,142,245,0.4);
+  background: rgba(108,142,245,0.1);
 }
 
 .pb-divider {
@@ -478,8 +478,8 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  background: linear-gradient(135deg, rgba(155,126,212,0.25), rgba(0,212,170,0.15));
-  border: 1px solid rgba(155,126,212,0.35);
+  background: linear-gradient(135deg, rgba(108,142,245,0.25), rgba(0,212,170,0.15));
+  border: 1px solid rgba(108,142,245,0.35);
   border-radius: 10px;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -695,7 +695,7 @@
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 .pb-mc-option:hover:not(:disabled) { border-color: var(--purple-light); color: var(--text-primary); }
-.pb-mc-option.selected { border-color: var(--purple-light); background: rgba(155,126,212,0.1); color: var(--text-primary); }
+.pb-mc-option.selected { border-color: var(--purple-light); background: rgba(108,142,245,0.1); color: var(--text-primary); }
 .pb-mc-option.correct  { border-color: var(--cyan); background: rgba(0,212,170,0.1); color: var(--cyan); }
 .pb-mc-option.wrong    { border-color: var(--error); background: rgba(255,107,138,0.08); color: var(--error); }
 .pb-mc-option:disabled { cursor: not-allowed; }
@@ -1105,7 +1105,7 @@
 
 .deck-flipcard-front {
   background: var(--bg-card);
-  border: 1px solid rgba(155,126,212,0.25);
+  border: 1px solid rgba(108,142,245,0.25);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 

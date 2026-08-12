@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+﻿import { useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -81,10 +81,10 @@ interface PreviewState {
 type Target = { id: string | null; name: string } // id null = "All Students"
 
 const TYPE_COLOR: Record<string, string> = {
-  quiz: '#9B7ED4', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
+  quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
 }
 const DIFF_COLOR: Record<string, string> = {
-  Easy: '#00D4AA', Medium: '#FFB830', Hard: '#FF6B8A', Mixed: '#9B7ED4',
+  Easy: '#00D4AA', Medium: '#FFB830', Hard: '#FF6B8A', Mixed: '#6C8EF5',
 }
 
 const stagger = (i: number) => ({
@@ -122,7 +122,7 @@ function fileIcon(type: string | null) {
   if (!type) return <FileText size={13} color="var(--text-secondary)" />
   if (type.startsWith('image/')) return <FileText size={13} color="#00D4AA" />
   if (type === 'application/pdf') return <FileText size={13} color="#FF6B8A" />
-  if (type.includes('word')) return <FileText size={13} color="#9B7ED4" />
+  if (type.includes('word')) return <FileText size={13} color="#6C8EF5" />
   if (type.includes('presentation') || type.includes('powerpoint')) return <FileText size={13} color="#FFB830" />
   return <FileText size={13} color="var(--text-secondary)" />
 }
@@ -556,7 +556,7 @@ export default function TeacherAssessments() {
                 onClick={() => openTarget(card)}
               >
                 <div className="ta2-block-card-icon">
-                  {card.id === null ? <Users size={16} color="#00D4AA" /> : <Layers size={16} color="#9B7ED4" />}
+                  {card.id === null ? <Users size={16} color="#00D4AA" /> : <Layers size={16} color="#6C8EF5" />}
                 </div>
                 <h3 className="ta2-block-card-name">{card.name}</h3>
                 <span className="ta2-block-card-count">
@@ -586,7 +586,7 @@ export default function TeacherAssessments() {
           {/* Stats */}
           <motion.div className="ta2-stats" {...stagger(2)}>
             {[
-              { label: 'Total',       value: stats.total,       icon: ClipboardList, color: '#9B7ED4' },
+              { label: 'Total',       value: stats.total,       icon: ClipboardList, color: '#6C8EF5' },
               { label: 'Published',   value: stats.published,   icon: Eye,           color: '#00D4AA' },
               { label: 'Drafts',      value: stats.drafts,      icon: EyeOff,        color: '#FFB830' },
               { label: 'Submissions', value: stats.submissions, icon: Users,         color: '#FF6B8A' },
@@ -646,7 +646,7 @@ export default function TeacherAssessments() {
             <div className="ta2-list">
               <AnimatePresence>
                 {filtered.map((a, i) => {
-                  const color = TYPE_COLOR[a.type] ?? '#9B7ED4'
+                  const color = TYPE_COLOR[a.type] ?? '#6C8EF5'
                   const submittedSubs = (a.submissions ?? []).filter(s => s.is_submitted)
                   const submittedCount = submittedSubs.length
                   const avgScore = (() => {
@@ -675,7 +675,7 @@ export default function TeacherAssessments() {
                               {a.type.toUpperCase()}
                             </span>
                             {a.difficulty && (
-                              <span className="ta2-diff-badge" style={{ color: DIFF_COLOR[a.difficulty] ?? '#9B7ED4' }}>
+                              <span className="ta2-diff-badge" style={{ color: DIFF_COLOR[a.difficulty] ?? '#6C8EF5' }}>
                                 {a.difficulty}
                               </span>
                             )}

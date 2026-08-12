@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -17,7 +17,7 @@ const RANK_LABELS: Record<number, string> = {
 }
 
 const RANK_COLORS: Record<number, string> = {
-  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#7C5CBF',
+  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
   5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
 }
 
@@ -30,6 +30,7 @@ interface LeaderboardEntry {
   last_name: string
   username: string
   school_id: string
+  avatar_url: string | null
   xp: number
   level: number
   streak: number
@@ -46,6 +47,11 @@ function getRankColor(level: number) {
 
 function getInitials(firstName: string, lastName: string) {
   return `${(firstName[0] ?? '').toUpperCase()}${(lastName[0] ?? '').toUpperCase()}`
+}
+
+function AvatarOrInitials({ avatarUrl, firstName, lastName, className }: { avatarUrl: string | null; firstName: string; lastName: string; className?: string }) {
+  if (avatarUrl) return <img src={avatarUrl} alt="avatar" className={`lb-avatar-img ${className ?? ''}`.trim()} />
+  return <>{getInitials(firstName, lastName)}</>
 }
 
 function getMedalIcon(rank: number) {
@@ -77,7 +83,7 @@ export default function Leaderboard() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, username, school_id, xp, level, streak')
+        .select('id, first_name, last_name, username, school_id, avatar_url, xp, level, streak')
         .eq('role', 'student')
         .order('xp', { ascending: false })
 
@@ -93,6 +99,7 @@ export default function Leaderboard() {
           last_name: row.last_name ?? '',
           username: row.username ?? '',
           school_id: row.school_id ?? '',
+          avatar_url: row.avatar_url ?? null,
           xp: row.xp ?? 0,
           level: row.level ?? 1,
           streak: row.streak ?? 0,
@@ -226,7 +233,7 @@ export default function Leaderboard() {
               transition={{ delay: 0.15, duration: 0.5, ease: easeOut }}
             >
               <div className="lb-pod-avatar lb-pod-avatar-2">
-                {getInitials(top3[1].first_name, top3[1].last_name)}
+                <AvatarOrInitials avatarUrl={top3[1].avatar_url} firstName={top3[1].first_name} lastName={top3[1].last_name} />
               </div>
               <div className="lb-pod-medal">🥈</div>
               <p className="lb-pod-name">{top3[1].first_name} {top3[1].last_name}</p>
@@ -249,7 +256,7 @@ export default function Leaderboard() {
             >
               <div className="lb-pod-crown"><Crown size={20} color="#FFB830" /></div>
               <div className="lb-pod-avatar lb-pod-avatar-1">
-                {getInitials(top3[0].first_name, top3[0].last_name)}
+                <AvatarOrInitials avatarUrl={top3[0].avatar_url} firstName={top3[0].first_name} lastName={top3[0].last_name} />
               </div>
               <div className="lb-pod-medal">🥇</div>
               <p className="lb-pod-name lb-pod-name-1">{top3[0].first_name} {top3[0].last_name}</p>
@@ -271,7 +278,7 @@ export default function Leaderboard() {
               transition={{ delay: 0.25, duration: 0.5, ease: easeOut }}
             >
               <div className="lb-pod-avatar lb-pod-avatar-3">
-                {getInitials(top3[2].first_name, top3[2].last_name)}
+                <AvatarOrInitials avatarUrl={top3[2].avatar_url} firstName={top3[2].first_name} lastName={top3[2].last_name} />
               </div>
               <div className="lb-pod-medal">🥉</div>
               <p className="lb-pod-name">{top3[2].first_name} {top3[2].last_name}</p>
@@ -302,7 +309,7 @@ export default function Leaderboard() {
           </div>
           <div className="lb-my-rank-info">
             <div className="lb-my-avatar">
-              {getInitials(myEntry.first_name, myEntry.last_name)}
+              <AvatarOrInitials avatarUrl={myEntry.avatar_url} firstName={myEntry.first_name} lastName={myEntry.last_name} />
             </div>
             <div className="lb-my-details">
               <span className="lb-my-name">{myEntry.first_name} {myEntry.last_name}</span>
@@ -323,8 +330,8 @@ export default function Leaderboard() {
               <span className="lb-my-stat-label">Streak</span>
             </div>
             <div className="lb-my-stat">
-              <Star size={12} color="#9B7ED4" />
-              <span className="lb-my-stat-val" style={{ color: '#9B7ED4' }}>{myEntry.level}</span>
+              <Star size={12} color="#6C8EF5" />
+              <span className="lb-my-stat-val" style={{ color: '#6C8EF5' }}>{myEntry.level}</span>
               <span className="lb-my-stat-label">Level</span>
             </div>
           </div>
@@ -436,7 +443,7 @@ export default function Leaderboard() {
                         className="lb-row-avatar"
                         style={{ background: `linear-gradient(135deg, ${rankColor}40, ${rankColor}20)`, border: `1px solid ${rankColor}40` }}
                       >
-                        <span style={{ color: rankColor }}>{getInitials(entry.first_name, entry.last_name)}</span>
+                        <span style={{ color: rankColor }}><AvatarOrInitials avatarUrl={entry.avatar_url} firstName={entry.first_name} lastName={entry.last_name} /></span>
                       </div>
                       <div className="lb-row-info">
                         <span className="lb-row-name">

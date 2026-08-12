@@ -1,4 +1,4 @@
-.ts-root {
+﻿.ts-root {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -6,8 +6,8 @@
 }
 
 .ts-header {
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(155,126,212,0.06));
-  border: 1px solid rgba(155,126,212,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(108,142,245,0.06));
+  border: 1px solid rgba(108,142,245,0.2);
   border-radius: 16px;
   padding: 24px 28px;
 }
@@ -115,7 +115,7 @@
 .ts-type-tab:hover { color: var(--text-secondary); background: var(--surface-03); }
 
 .ts-type-tab--active {
-  background: rgba(155,126,212,0.15);
+  background: rgba(108,142,245,0.15);
   color: var(--purple-light);
 }
 
@@ -128,7 +128,7 @@
 }
 
 .ts-type-tab--active .ts-type-tab-count {
-  background: rgba(155,126,212,0.2);
+  background: rgba(108,142,245,0.2);
 }
 
 .ts-search-wrap {
@@ -159,7 +159,7 @@
 }
 
 .ts-search::placeholder { color: var(--text-muted); }
-.ts-search:focus { border-color: rgba(155,126,212,0.4); }
+.ts-search:focus { border-color: rgba(108,142,245,0.4); }
 
 .ts-block-filter-wrap {
   display: flex;
@@ -242,12 +242,24 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Syne', sans-serif;
   font-size: 11px;
   font-weight: 700;
+}
+
+.ts-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .ts-school-id {

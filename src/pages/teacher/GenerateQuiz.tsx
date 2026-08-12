@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { generateQuiz, type QuizQuestion, DSA_TOPICS } from '../../lib/groq'
@@ -259,7 +259,7 @@ export default function GenerateQuiz() {
         </button>
         <div className="gq-page-title-group">
           <h1 className="gq-page-title">
-            <Sparkles size={20} color="#9B7ED4" /> AI Quiz Generator
+            <Sparkles size={20} color="#6C8EF5" /> AI Quiz Generator
           </h1>
           <p className="gq-page-sub">Generate DSA assessments instantly with Llama 3 AI</p>
         </div>

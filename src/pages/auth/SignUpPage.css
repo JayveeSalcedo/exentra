@@ -1,4 +1,4 @@
- .signup-root { display: flex; width: 100%; }
+﻿ .signup-root { display: flex; width: 100%; }
  .signup-root .signup-layout { width: 100%; display: flex; justify-content: center; }
  .signup-root .signup-form-wrap { width: 100%; max-width: 520px; display: flex; align-items: center; justify-content: center; }
  .signup-root .signup-card { width: 100%; }
@@ -60,8 +60,8 @@
  }
 .signup-root .su-type-toggle { display: flex; gap: 10px; }
 .signup-root .su-type-option { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--surface-08); background: var(--surface-03); cursor: pointer; transition: all 0.2s; }
-.signup-root .su-type-option:hover { border-color: rgba(155,126,212,0.4); background: rgba(155,126,212,0.06); }
-.signup-root .su-type-active { border-color: var(--purple-light) !important; background: rgba(155,126,212,0.12) !important; }
+.signup-root .su-type-option:hover { border-color: rgba(108,142,245,0.4); background: rgba(108,142,245,0.06); }
+.signup-root .su-type-active { border-color: var(--purple-light) !important; background: rgba(108,142,245,0.12) !important; }
 .signup-root .su-type-radio { display: none; }
 .signup-root .su-type-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-secondary); pointer-events: none; }
 .signup-root .su-type-active .su-type-label { color: var(--purple-light); }

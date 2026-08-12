@@ -1,4 +1,4 @@
-/* ── Root ────────────────────────────────────────────────────────────────── */
+﻿/* ── Root ────────────────────────────────────────────────────────────────── */
 .gq-root {
   display: flex;
   flex-direction: column;
@@ -125,7 +125,7 @@
 }
 
 .gq-input::placeholder { color: var(--text-muted); }
-.gq-input:focus { border-color: rgba(124,92,191,0.45); }
+.gq-input:focus { border-color: rgba(59,91,219,0.45); }
 
 .gq-field-hint {
   font-size: 11px;
@@ -151,7 +151,7 @@
 }
 
 .gq-textarea::placeholder { color: var(--text-muted); }
-.gq-textarea:focus { border-color: rgba(124,92,191,0.45); }
+.gq-textarea:focus { border-color: rgba(59,91,219,0.45); }
 
 /* ── Select ──────────────────────────────────────────────────────────────── */
 .gq-select-wrap {
@@ -173,7 +173,7 @@
   transition: border-color 0.2s;
 }
 
-.gq-select:focus { border-color: rgba(124,92,191,0.45); }
+.gq-select:focus { border-color: rgba(59,91,219,0.45); }
 .gq-select option { background: var(--bg-card); color: var(--text-primary); }
 
 .gq-select-arrow {
@@ -215,15 +215,15 @@
 }
 
 .gq-toggle-btn.active {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.4);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.4);
   color: var(--purple-light);
 }
 
 .gq-toggle-btn.diff-easy.active   { background: rgba(0,212,170,0.1);   border-color: rgba(0,212,170,0.4);   color: var(--cyan); }
 .gq-toggle-btn.diff-medium.active { background: rgba(255,184,48,0.1);  border-color: rgba(255,184,48,0.4);  color: var(--xp); }
 .gq-toggle-btn.diff-hard.active   { background: rgba(255,107,138,0.1); border-color: rgba(255,107,138,0.4); color: var(--error); }
-.gq-toggle-btn.diff-mixed.active  { background: rgba(124,92,191,0.12); border-color: rgba(124,92,191,0.4);  color: var(--purple-light); }
+.gq-toggle-btn.diff-mixed.active  { background: rgba(59,91,219,0.12); border-color: rgba(59,91,219,0.4);  color: var(--purple-light); }
 
 /* ── Generate button ─────────────────────────────────────────────────────── */
 .gq-generate-btn {
@@ -267,8 +267,8 @@
 
 .gq-settings-toggle:hover,
 .gq-settings-toggle.active {
-  background: rgba(124,92,191,0.08);
-  border-color: rgba(124,92,191,0.25);
+  background: rgba(59,91,219,0.08);
+  border-color: rgba(59,91,219,0.25);
   color: var(--purple-light);
 }
 
@@ -290,8 +290,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: rgba(124,92,191,0.04);
-  border: 1px solid rgba(124,92,191,0.12);
+  background: rgba(59,91,219,0.04);
+  border: 1px solid rgba(59,91,219,0.12);
   border-radius: 12px;
   padding: 16px;
 }
@@ -306,7 +306,7 @@
   color: var(--purple-light);
   text-transform: uppercase;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(124,92,191,0.15);
+  border-bottom: 1px solid rgba(59,91,219,0.15);
 }
 
 /* ── Preview panel ───────────────────────────────────────────────────────── */
@@ -347,8 +347,8 @@
 .gq-empty-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, rgba(124,92,191,0.15), rgba(0,212,170,0.08));
-  border: 1px solid rgba(124,92,191,0.2);
+  background: linear-gradient(135deg, rgba(59,91,219,0.15), rgba(0,212,170,0.08));
+  border: 1px solid rgba(59,91,219,0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -381,7 +381,7 @@
   justify-content: center;
   gap: 14px;
   background: var(--bg-card);
-  border: 1px solid rgba(124,92,191,0.15);
+  border: 1px solid rgba(59,91,219,0.15);
   border-radius: 16px;
   padding: 60px 32px;
   text-align: center;
@@ -441,7 +441,7 @@
 .gq-diff-badge.easy   { background: rgba(0,212,170,0.1);   color: var(--cyan);  border: 1px solid rgba(0,212,170,0.2);   }
 .gq-diff-badge.medium { background: rgba(255,184,48,0.1);  color: var(--xp);  border: 1px solid rgba(255,184,48,0.2);  }
 .gq-diff-badge.hard   { background: rgba(255,107,138,0.1); color: var(--error);  border: 1px solid rgba(255,107,138,0.2); }
-.gq-diff-badge.mixed  { background: rgba(124,92,191,0.1);  color: var(--purple-light);  border: 1px solid rgba(124,92,191,0.2);  }
+.gq-diff-badge.mixed  { background: rgba(59,91,219,0.1);  color: var(--purple-light);  border: 1px solid rgba(59,91,219,0.2);  }
 
 .gq-type-badge {
   background: var(--surface-05);
@@ -529,12 +529,12 @@
 }
 
 .gq-question-card:hover {
-  border-color: rgba(124,92,191,0.2);
+  border-color: rgba(59,91,219,0.2);
 }
 
 .gq-question-card.editing {
-  border-color: rgba(124,92,191,0.35);
-  background: rgba(124,92,191,0.03);
+  border-color: rgba(59,91,219,0.35);
+  background: rgba(59,91,219,0.03);
 }
 
 /* ── Question top row ────────────────────────────────────────────────────── */
@@ -549,8 +549,8 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--purple-light);
-  background: rgba(124,92,191,0.1);
-  border: 1px solid rgba(124,92,191,0.2);
+  background: rgba(59,91,219,0.1);
+  border: 1px solid rgba(59,91,219,0.2);
   border-radius: 6px;
   padding: 3px 8px;
 }
@@ -575,12 +575,12 @@
 }
 
 .gq-action-btn.edit {
-  background: rgba(124,92,191,0.08);
-  border-color: rgba(124,92,191,0.18);
+  background: rgba(59,91,219,0.08);
+  border-color: rgba(59,91,219,0.18);
   color: var(--purple-light);
 }
 .gq-action-btn.edit:hover {
-  background: rgba(124,92,191,0.15);
+  background: rgba(59,91,219,0.15);
 }
 
 .gq-action-btn.confirm {
@@ -682,7 +682,7 @@
 .gq-explanation {
   background: var(--surface-02);
   border: 1px solid var(--surface-05);
-  border-left: 2px solid rgba(124,92,191,0.5);
+  border-left: 2px solid rgba(59,91,219,0.5);
   border-radius: 0 8px 8px 0;
   padding: 10px 12px;
   display: flex;

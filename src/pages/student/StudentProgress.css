@@ -1,4 +1,4 @@
-/* ── Root ──────────────────────────────────────────────────────────────────── */
+﻿/* ── Root ──────────────────────────────────────────────────────────────────── */
 .sp-root {
   display: flex;
   flex-direction: column;
@@ -8,8 +8,8 @@
 
 /* ── Header ────────────────────────────────────────────────────────────────── */
 .sp-header {
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(155,126,212,0.06));
-  border: 1px solid rgba(155,126,212,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(108,142,245,0.06));
+  border: 1px solid rgba(108,142,245,0.2);
   border-radius: 16px;
   padding: 24px 28px;
 }
@@ -162,8 +162,8 @@
 }
 
 .sp-module-row.active {
-  border-color: rgba(155,126,212,0.2);
-  background: rgba(155,126,212,0.04);
+  border-color: rgba(108,142,245,0.2);
+  background: rgba(108,142,245,0.04);
 }
 
 .sp-module-row.locked {
@@ -226,8 +226,8 @@
   font-size: 9px;
   letter-spacing: 0.5px;
   color: var(--purple-light);
-  background: rgba(155,126,212,0.1);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.1);
+  border: 1px solid rgba(108,142,245,0.25);
   border-radius: 99px;
   padding: 2px 8px;
   white-space: nowrap;
@@ -330,8 +330,8 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  background: linear-gradient(135deg, rgba(124,92,191,0.15), rgba(0,212,170,0.06));
-  border: 1px solid rgba(124,92,191,0.3);
+  background: linear-gradient(135deg, rgba(59,91,219,0.15), rgba(0,212,170,0.06));
+  border: 1px solid rgba(59,91,219,0.3);
   border-radius: 10px;
   padding: 12px;
   font-family: 'Syne', sans-serif;
@@ -343,7 +343,7 @@
 }
 
 .sp-sentiment-btn:hover {
-  background: linear-gradient(135deg, rgba(124,92,191,0.22), rgba(0,212,170,0.1));
+  background: linear-gradient(135deg, rgba(59,91,219,0.22), rgba(0,212,170,0.1));
 }
 
 .sp-sentiment-loading {
@@ -356,8 +356,8 @@
 }
 
 .sp-sentiment-result {
-  background: rgba(124,92,191,0.06);
-  border: 1px solid rgba(124,92,191,0.18);
+  background: rgba(59,91,219,0.06);
+  border: 1px solid rgba(59,91,219,0.18);
   border-radius: 10px;
   padding: 14px;
 }
@@ -374,7 +374,7 @@
   align-items: center;
   gap: 5px;
   background: none;
-  border: 1px dashed rgba(155,126,212,0.3);
+  border: 1px dashed rgba(108,142,245,0.3);
   border-radius: 6px;
   padding: 5px 10px;
   font-family: 'JetBrains Mono', monospace;
@@ -384,7 +384,7 @@
   transition: all 0.15s;
 }
 
-.sp-rerun-btn:hover { border-color: rgba(155,126,212,0.6); }
+.sp-rerun-btn:hover { border-color: rgba(108,142,245,0.6); }
 
 .sp-spin {
   animation: sp-spin 1s linear infinite;

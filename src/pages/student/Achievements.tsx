@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -40,8 +40,8 @@ const ACHIEVEMENTS: AchievementDef[] = [
   { id: 'str_30',   title: 'Month Master',    description: 'Maintain a 30-day streak',       icon: Flame,     color: '#FF6B8A', streakRequired: 30, category: 'streak'      },
 
   // Module milestones
-  { id: 'mod_1',    title: 'First Module',    description: 'Complete your first DSA module', icon: BookOpen,  color: '#9B7ED4', modulesRequired: 1, category: 'modules'     },
-  { id: 'mod_4',    title: 'Halfway There',   description: 'Complete 4 modules',             icon: BookOpen,  color: '#9B7ED4', modulesRequired: 4, category: 'modules'     },
+  { id: 'mod_1',    title: 'First Module',    description: 'Complete your first DSA module', icon: BookOpen,  color: '#6C8EF5', modulesRequired: 1, category: 'modules'     },
+  { id: 'mod_4',    title: 'Halfway There',   description: 'Complete 4 modules',             icon: BookOpen,  color: '#6C8EF5', modulesRequired: 4, category: 'modules'     },
   { id: 'mod_8',    title: 'DSA Graduate',    description: 'Complete all 8 DSA modules',     icon: Shield,    color: '#00D4AA', modulesRequired: 8, category: 'modules'     },
 
   // Assessment milestones

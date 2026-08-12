@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -54,11 +54,11 @@ const DSA_TOPICS = [
 ]
 
 const TYPE_COLOR: Record<AssessmentType, string> = {
-  quiz: '#9B7ED4', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
+  quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
 }
 
 const QTYPE_META: Record<QuestionType, { label: string; icon: any; color: string; desc: string }> = {
-  multiple_choice: { label: 'Multiple Choice', icon: List,       color: '#9B7ED4', desc: 'One correct answer from options' },
+  multiple_choice: { label: 'Multiple Choice', icon: List,       color: '#6C8EF5', desc: 'One correct answer from options' },
   identification:  { label: 'Identification',  icon: Type,       color: '#00D4AA', desc: 'Student types the exact answer' },
   true_false:      { label: 'True / False',    icon: ToggleLeft, color: '#FFB830', desc: 'Binary correct/incorrect answer' },
   essay:           { label: 'Essay',           icon: AlignLeft,  color: '#FF6B8A', desc: 'Open-ended written response' },

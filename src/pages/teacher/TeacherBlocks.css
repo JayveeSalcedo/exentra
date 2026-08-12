@@ -1,4 +1,4 @@
-.blk-root {
+﻿.blk-root {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -11,8 +11,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(155,126,212,0.06));
-  border: 1px solid rgba(155,126,212,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(108,142,245,0.06));
+  border: 1px solid rgba(108,142,245,0.2);
   border-radius: 16px;
   padding: 24px 28px;
   flex-wrap: wrap;
@@ -45,7 +45,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #7C5CBF, #00D4AA);
+  background: linear-gradient(135deg, #3B5BDB, var(--cyan));
   border: none;
   border-radius: 10px;
   padding: 11px 18px;
@@ -90,7 +90,7 @@
 }
 
 .blk-search::placeholder { color: var(--text-muted); }
-.blk-search:focus { border-color: rgba(155,126,212,0.4); }
+.blk-search:focus { border-color: rgba(108,142,245,0.4); }
 
 .blk-archive-toggle {
   display: flex;
@@ -111,8 +111,8 @@
 
 .blk-archive-toggle:hover { color: var(--text-secondary); }
 .blk-archive-toggle--active {
-  background: rgba(155,126,212,0.15);
-  border-color: rgba(155,126,212,0.3);
+  background: rgba(108,142,245,0.15);
+  border-color: rgba(108,142,245,0.3);
   color: var(--purple-light);
 }
 
@@ -145,8 +145,8 @@
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: rgba(155,126,212,0.12);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.12);
+  border: 1px solid rgba(108,142,245,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,7 +215,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   font-weight: 600;
-  color: #00D4AA;
+  color: var(--cyan);
   cursor: pointer;
   margin-top: auto;
   transition: background 0.15s;
@@ -319,7 +319,7 @@
   transition: border-color 0.2s;
 }
 
-.blk-input:focus { border-color: rgba(155,126,212,0.4); }
+.blk-input:focus { border-color: rgba(108,142,245,0.4); }
 
 .blk-textarea {
   resize: vertical;
@@ -346,7 +346,7 @@
 }
 
 .blk-submit-btn {
-  background: linear-gradient(135deg, #7C5CBF, #00D4AA);
+  background: linear-gradient(135deg, #3B5BDB, var(--cyan));
   border: none;
   border-radius: 10px;
   padding: 12px;
@@ -402,8 +402,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(155,126,212,0.12);
-  border: 1px solid rgba(155,126,212,0.3);
+  background: rgba(108,142,245,0.12);
+  border: 1px solid rgba(108,142,245,0.3);
   border-radius: 10px;
   padding: 10px;
   font-family: 'Syne', sans-serif;
@@ -434,6 +434,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -441,8 +443,17 @@
   font-family: 'Syne', sans-serif;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(155,126,212,0.15);
+  background: rgba(108,142,245,0.15);
   color: var(--purple-light);
+}
+
+.blk-roster-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .blk-roster-info {
@@ -472,7 +483,7 @@
 .blk-remove-btn {
   background: rgba(255,107,138,0.1);
   border: 1px solid rgba(255,107,138,0.25);
-  color: #FF6B8A;
+  color: var(--error);
   border-radius: 8px;
   padding: 7px;
   cursor: pointer;
@@ -487,7 +498,7 @@
 .blk-add-btn {
   background: rgba(0,212,170,0.1);
   border: 1px solid rgba(0,212,170,0.25);
-  color: #00D4AA;
+  color: var(--cyan);
   border-radius: 8px;
   padding: 7px 12px;
   font-family: 'JetBrains Mono', monospace;
@@ -513,12 +524,12 @@
   gap: 4px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: #FFB830;
+  color: var(--xp);
   white-space: nowrap;
 }
 
 .blk-confirm-yes {
-  background: #7C5CBF;
+  background: #3B5BDB;
   border: none;
   color: white;
   border-radius: 7px;

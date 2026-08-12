@@ -1,4 +1,4 @@
-.games-page {
+﻿.games-page {
   padding: 0 0 40px;
   max-width: 1100px;
 }
@@ -125,7 +125,7 @@
   height: 84px;
   border-radius: 18px;
   border: 1px solid;
-  background: rgba(8, 11, 24, 0.55);
+  background: var(--preview-dark-soft);
   display: flex;
   align-items: center;
   justify-content: center;

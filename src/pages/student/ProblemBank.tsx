@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
@@ -63,7 +63,7 @@ function CreatePickerModal({ onClose, onPick }: { onClose: () => void; onPick: (
         </div>
         <div className="deck-picker-options">
           <button className="deck-picker-option" onClick={() => onPick('problem')}>
-            <div className="deck-picker-icon" style={{ background: 'rgba(155,126,212,0.12)', color: '#9B7ED4' }}>
+            <div className="deck-picker-icon" style={{ background: 'rgba(108,142,245,0.12)', color: '#6C8EF5' }}>
               <Code2 size={22} />
             </div>
             <div>
@@ -201,7 +201,7 @@ export default function ProblemBank() {
       {/* Stats */}
       <div className="pb-stats">
         {[
-          { icon: <Brain size={16} />, value: problems.length, label: 'Total Problems', color: '#9B7ED4' },
+          { icon: <Brain size={16} />, value: problems.length, label: 'Total Problems', color: '#6C8EF5' },
           { icon: <CheckCircle2 size={16} />, value: solved, label: 'Solved', color: '#00D4AA' },
           { icon: <Code2 size={16} />, value: coding, label: 'Coding', color: '#FFB830' },
           { icon: <Layers size={16} />, value: decks.length, label: 'Decks', color: '#00D4AA' },

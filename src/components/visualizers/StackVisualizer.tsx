@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props { lessonId: string }
@@ -72,7 +72,7 @@ export default function StackVisualizer({ }: Props) {
                       : 'rgba(20,28,61,0.9)',
                     borderColor: isTop
                       ? 'rgba(0,212,170,0.6)'
-                      : 'rgba(124,92,191,0.3)',
+                      : 'rgba(59,91,219,0.3)',
                   }}
                   exit={{ opacity: 0, x: 40, scale: 0.7 }}
                   transition={spring}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import {
@@ -11,6 +11,7 @@ interface StudentEntry {
   school_id: string
   first_name: string
   last_name: string
+  avatar_url?: string | null
   created_at: string
 }
 
@@ -57,7 +58,7 @@ export default function ActivityLog() {
     if (showRefresh) setRefreshing(true)
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, school_id, first_name, last_name, created_at')
+      .select('id, school_id, first_name, last_name, avatar_url, created_at')
       .eq('role', 'student')
       .order('created_at', { ascending: false })
 
@@ -101,8 +102,8 @@ export default function ActivityLog() {
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown size={12} color="var(--text-muted)" />
     return sortDir === 'asc'
-      ? <ChevronUp size={12} color="#9B7ED4" />
-      : <ChevronDown size={12} color="#9B7ED4" />
+      ? <ChevronUp size={12} color="#6C8EF5" />
+      : <ChevronDown size={12} color="#6C8EF5" />
   }
 
   const colBtn = (key: SortKey, label: string) => (
@@ -112,7 +113,7 @@ export default function ActivityLog() {
         background: 'none', border: 'none', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: 5,
         fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-        color: sortKey === key ? '#9B7ED4' : 'var(--text-muted)',
+        color: sortKey === key ? '#6C8EF5' : 'var(--text-muted)',
         letterSpacing: 1, textTransform: 'uppercase', padding: 0,
         transition: 'color 0.2s',
       }}
@@ -146,13 +147,13 @@ export default function ActivityLog() {
 
       {/* Header */}
       <motion.div {...stagger(0)} style={{
-        background: 'linear-gradient(135deg, var(--bg-card) 60%, rgba(155,126,212,0.06))',
-        border: '1px solid rgba(155,126,212,0.2)',
+        background: 'linear-gradient(135deg, var(--bg-card) 60%, rgba(108,142,245,0.06))',
+        border: '1px solid rgba(108,142,245,0.2)',
         borderRadius: 16, padding: '24px 28px',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
       }}>
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: 2, color: '#9B7ED4', margin: '0 0 6px', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: 2, color: '#6C8EF5', margin: '0 0 6px', textTransform: 'uppercase' }}>
             Teacher View
           </p>
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 6px' }}>
@@ -195,7 +196,7 @@ export default function ActivityLog() {
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
         {[
-          { label: 'Total Students', value: students.length, color: '#9B7ED4', icon: Users },
+          { label: 'Total Students', value: students.length, color: '#6C8EF5', icon: Users },
           { label: 'Registered Today', value: today, color: '#00D4AA', icon: Clock },
         ].map((stat, i) => (
           <motion.div key={stat.label} {...stagger(i + 1)} style={{
@@ -288,13 +289,15 @@ export default function ActivityLog() {
                 {/* Avatar */}
                 <div style={{
                   width: 32, height: 32, borderRadius: '50%',
-                  background: 'rgba(155,126,212,0.12)',
-                  border: '1px solid rgba(155,126,212,0.25)',
+                  background: 'rgba(108,142,245,0.12)',
+                  border: '1px solid rgba(108,142,245,0.25)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'Syne, sans-serif', fontSize: 11, fontWeight: 700,
-                  color: '#9B7ED4',
+                  color: '#6C8EF5', overflow: 'hidden', flexShrink: 0,
                 }}>
-                  {s.first_name[0]}{s.last_name[0]}
+                  {s.avatar_url
+                    ? <img src={s.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    : <>{s.first_name[0]}{s.last_name[0]}</>}
                 </div>
 
                 {/* School ID */}
@@ -344,7 +347,7 @@ export default function ActivityLog() {
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         input::placeholder { color: var(--text-muted); }
-        input:focus { border-color: rgba(155,126,212,0.4) !important; }
+        input:focus { border-color: rgba(108,142,245,0.4) !important; }
       `}</style>
     </div>
   )

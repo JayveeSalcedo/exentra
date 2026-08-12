@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
@@ -7,7 +7,7 @@ import { Lock, CheckCircle2, Play, Zap, BookOpen } from 'lucide-react'
 import './Quests.css'
 
 const QUESTS = [
-  { order: 1, title: 'Arrays & Array Lists',   desc: 'Master static/dynamic arrays, indexing, insertion, and deletion operations.',       icon: '[ ]', color: '#9B7ED4', xp: 200, lessons: 3, tag: 'Fundamentals' },
+  { order: 1, title: 'Arrays & Array Lists',   desc: 'Master static/dynamic arrays, indexing, insertion, and deletion operations.',       icon: '[ ]', color: '#6C8EF5', xp: 200, lessons: 3, tag: 'Fundamentals' },
   { order: 2, title: 'Lists & Linked Lists',   desc: 'Explore singly, doubly, and circular linked lists with pointer manipulation.',       icon: '→',   color: '#00D4AA', xp: 220, lessons: 3, tag: 'Linear'        },
   { order: 3, title: 'Stacks',                 desc: 'Understand LIFO structures, push/pop operations, and real-world stack applications.', icon: '≡',   color: '#FFB830', xp: 180, lessons: 2, tag: 'Linear'        },
   { order: 4, title: 'Queues',                 desc: 'Learn FIFO queues, priority queues, and deques with enqueue/dequeue operations.',    icon: '⊏',   color: '#FF6B8A', xp: 180, lessons: 2, tag: 'Linear'        },
@@ -72,7 +72,7 @@ export default function Quests() {
           </div>
           <div className="qst-header-divider" />
           <div className="qst-header-stat">
-            <span className="qst-header-num" style={{ color: '#9B7ED4' }}>{8 - done}</span>
+            <span className="qst-header-num" style={{ color: '#6C8EF5' }}>{8 - done}</span>
             <span className="qst-header-lbl">Remaining</span>
           </div>
         </div>

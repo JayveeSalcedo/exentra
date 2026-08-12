@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -11,7 +11,7 @@ import {
 import './StudentProgress.css'
 
 const MODULES = [
-  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             icon: '[ ]', color: '#9B7ED4' },
+  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             icon: '[ ]', color: '#6C8EF5' },
   { order: 2, title: 'Lists & Linked Lists',   topic: 'Linked Lists',       icon: '→',   color: '#00D4AA' },
   { order: 3, title: 'Stacks',                 topic: 'Stacks',             icon: '≡',   color: '#FFB830' },
   { order: 4, title: 'Queues',                 topic: 'Queues',             icon: '⊏',   color: '#FF6B8A' },
@@ -193,7 +193,7 @@ Do NOT use bullet points. Just flowing, friendly prose.`
       {/* Top stats */}
       <motion.div className="sp-stats-row" {...stagger(1)}>
         {[
-          { label: 'Modules Done',     value: `${completedModules.size}/8`,               color: '#9B7ED4', icon: BookOpen      },
+          { label: 'Modules Done',     value: `${completedModules.size}/8`,               color: '#6C8EF5', icon: BookOpen      },
           { label: 'Assessments Done', value: `${totalDone}/${totalAssessments}`,          color: '#00D4AA', icon: CheckCircle2  },
           { label: 'Overall Avg',      value: overallAvg != null ? `${overallAvg}%` : '—', color: '#FFB830', icon: TrendingUp    },
           { label: 'Current Streak',   value: `${user?.streak ?? 0}d`,                     color: '#FF6B8A', icon: Flame         },

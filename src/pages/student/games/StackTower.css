@@ -1,4 +1,4 @@
-:root { --st-amber: #FFB830; }
+﻿:root { --st-amber: var(--xp); }
 
 .st-sfx-toggle {
   display: flex;
@@ -254,7 +254,7 @@
 .st-pill.st-combo {
   background: rgba(255,107,138,0.1);
   border-color: rgba(255,107,138,0.35);
-  color: #FF6B8A;
+  color: var(--error);
   font-size: 14px;
   font-weight: 900;
   text-shadow: 0 0 12px rgba(255,107,138,0.6);
@@ -372,7 +372,7 @@
   margin: 0;
   padding: 9px 12px;
   border-left: 2px solid rgba(255,107,138,0.5);
-  color: #FF6B8A;
+  color: var(--error);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   line-height: 1.5;
@@ -395,8 +395,8 @@
   font-size: 16px;
   font-weight: 900;
 }
-.st-floating-wrap .pos { color: #00D4AA; }
-.st-floating-wrap .neg { color: #FF6B8A; }
+.st-floating-wrap .pos { color: var(--cyan); }
+.st-floating-wrap .neg { color: var(--error); }
 
 /* ── Feedback ────────────────────────────────────────────────────────────── */
 
@@ -419,12 +419,12 @@
 .st-feedback.correct {
   border: 1px solid rgba(0,212,170,0.45);
   background: rgba(0,212,170,0.14);
-  color: #00D4AA;
+  color: var(--cyan);
 }
 .st-feedback.wrong {
   border: 1px solid rgba(255,107,138,0.45);
   background: rgba(255,107,138,0.15);
-  color: #FF6B8A;
+  color: var(--error);
 }
 
 /* ── Multiple-choice area ────────────────────────────────────────────────── */
@@ -484,7 +484,7 @@
   border: 1px solid rgba(155,126,212,0.25);
   border-radius: 10px;
   background: rgba(155,126,212,0.06);
-  color: #9B7ED4;
+  color: var(--accent);
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   line-height: 1.8;
@@ -520,15 +520,15 @@
 }
 .st-mc-btn:disabled { cursor: default; }
 .st-mc-btn.correct {
-  border-color: #00D4AA;
+  border-color: var(--cyan);
   background: rgba(0,212,170,0.12);
-  color: #00D4AA;
+  color: var(--cyan);
   box-shadow: 0 0 20px rgba(0,212,170,0.2);
 }
 .st-mc-btn.wrong {
-  border-color: #FF6B8A;
+  border-color: var(--error);
   background: rgba(255,107,138,0.1);
-  color: #FF6B8A;
+  color: var(--error);
 }
 .st-mc-btn.reveal {
   border-color: rgba(0,212,170,0.4);
@@ -636,7 +636,7 @@
   background: rgba(255,184,48,0.05);
 }
 .st-stream span.done {
-  color: #00D4AA;
+  color: var(--cyan);
   border-color: rgba(0,212,170,0.3);
   background: rgba(0,212,170,0.07);
 }
@@ -676,7 +676,7 @@
 .st-postfix-token:active { cursor: grabbing; }
 .st-postfix-token.done {
   font-size: 12px;
-  color: #00D4AA;
+  color: var(--cyan);
   border-color: rgba(0,212,170,0.4);
   background: rgba(0,212,170,0.08);
   box-shadow: none;
@@ -749,15 +749,15 @@
 }
 .st-verdict-chip:active { cursor: grabbing; }
 .st-verdict-chip.valid {
-  border-color: #00D4AA;
+  border-color: var(--cyan);
   background: rgba(0,212,170,0.1);
-  color: #00D4AA;
+  color: var(--cyan);
 }
 .st-verdict-chip.valid:hover { box-shadow: 0 0 20px rgba(0,212,170,0.3); }
 .st-verdict-chip.invalid {
-  border-color: #FF6B8A;
+  border-color: var(--error);
   background: rgba(255,107,138,0.1);
-  color: #FF6B8A;
+  color: var(--error);
 }
 .st-verdict-chip.invalid:hover { box-shadow: 0 0 20px rgba(255,107,138,0.3); }
 

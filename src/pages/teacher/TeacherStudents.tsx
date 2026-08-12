@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -14,6 +14,7 @@ interface Student {
   school_id: string
   first_name: string
   last_name: string
+  avatar_url?: string | null
   username: string
   xp: number
   level: number
@@ -38,7 +39,7 @@ const RANK_LABELS: Record<number, string> = {
   5: 'Analyst', 6: 'Architect', 7: 'Expert', 8: 'Master', 9: 'Legend', 10: 'Grandmaster',
 }
 const RANK_COLORS: Record<number, string> = {
-  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#7C5CBF',
+  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
   5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
 }
 
@@ -70,7 +71,7 @@ export default function TeacherStudents() {
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, username, xp, level, streak, created_at, student_type')
+        .select('id, school_id, first_name, last_name, username, avatar_url, xp, level, streak, created_at, student_type')
         .eq('role', 'student')
         .order('xp', { ascending: false })
 
@@ -187,11 +188,11 @@ export default function TeacherStudents() {
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ChevronsUpDown size={11} color="var(--text-muted)" />
-    return sortDir === 'asc' ? <ChevronUp size={11} color="#9B7ED4" /> : <ChevronDown size={11} color="#9B7ED4" />
+    return sortDir === 'asc' ? <ChevronUp size={11} color="#6C8EF5" /> : <ChevronDown size={11} color="#6C8EF5" />
   }
 
   const colBtn = (key: SortKey, label: string) => (
-    <button className="ts-col-btn" onClick={() => toggleSort(key)} style={{ color: sortKey === key ? '#9B7ED4' : 'var(--text-muted)' }}>
+    <button className="ts-col-btn" onClick={() => toggleSort(key)} style={{ color: sortKey === key ? '#6C8EF5' : 'var(--text-muted)' }}>
       {label} <SortIcon col={key} />
     </button>
   )
@@ -225,7 +226,7 @@ export default function TeacherStudents() {
       {/* Stats */}
       <motion.div className="ts-stats-row" {...stagger(1)}>
         {[
-          { label: 'Total Students',  value: students.length,                                                                                                      color: '#9B7ED4', icon: Users      },
+          { label: 'Total Students',  value: students.length,                                                                                                      color: '#6C8EF5', icon: Users      },
           { label: 'Regular',         value: regularCount,                                                                                                          color: '#00D4AA', icon: UserCheck  },
           { label: 'Irregular',       value: irregularCount,                                                                                                        color: '#FFB830', icon: UserX      },
           { label: 'Class Avg Score', value: avgClassScore != null ? `${avgClassScore}%` : '—',                                                                    color: '#FF6B8A', icon: TrendingUp  },
@@ -322,7 +323,7 @@ export default function TeacherStudents() {
                 >
                   {/* Avatar */}
                   <div className="ts-avatar" style={{ background: `${color}18`, border: `1px solid ${color}30`, color }}>
-                    {s.first_name[0]}{s.last_name[0]}
+                    {s.avatar_url ? <img src={s.avatar_url} alt="avatar" className="ts-avatar-img" /> : `${s.first_name[0]}${s.last_name[0]}`}
                   </div>
 
                   {/* School ID */}
@@ -359,7 +360,7 @@ export default function TeacherStudents() {
                   <span className="ts-streak"><Flame size={11} color="#FF6B8A" /> {s.streak}d</span>
 
                   {/* Modules */}
-                  <span className="ts-modules"><BookOpen size={11} color="#9B7ED4" /> {s.modulesCompleted}/8</span>
+                  <span className="ts-modules"><BookOpen size={11} color="#6C8EF5" /> {s.modulesCompleted}/8</span>
 
                   {/* Avg score */}
                   <span className="ts-avg-score" style={{ color: scoreColor }}>

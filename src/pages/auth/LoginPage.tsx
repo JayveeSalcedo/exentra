@@ -377,7 +377,7 @@ export default function LoginPage() {
         </motion.div>
 
         <motion.img
-          src="/algie.svg"
+          src="/mascot.png"
           alt="Algie mascot"
           className="mascot-img"
           animate={{

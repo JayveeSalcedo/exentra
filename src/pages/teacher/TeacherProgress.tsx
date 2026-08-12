@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { groq, MODEL } from '../../lib/groq'
@@ -11,7 +11,7 @@ import {
 import './TeacherProgress.css'
 
 const MODULES = [
-  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             color: '#9B7ED4', icon: '[ ]' },
+  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             color: '#6C8EF5', icon: '[ ]' },
   { order: 2, title: 'Lists & Linked Lists',   topic: 'Linked Lists',       color: '#00D4AA', icon: '→'   },
   { order: 3, title: 'Stacks',                 topic: 'Stacks',             color: '#FFB830', icon: '≡'   },
   { order: 4, title: 'Queues',                 topic: 'Queues',             color: '#FF6B8A', icon: '⊏'   },
@@ -255,11 +255,11 @@ Write in a professional but approachable tone. No bullet points — flowing pros
     sortKey !== col
       ? <ChevronsUpDown size={11} color="var(--text-muted)" />
       : sortDir === 'asc'
-        ? <ChevronUp size={11} color="#9B7ED4" />
-        : <ChevronDown size={11} color="#9B7ED4" />
+        ? <ChevronUp size={11} color="#6C8EF5" />
+        : <ChevronDown size={11} color="#6C8EF5" />
 
   const colBtn = (key: SortKey, label: string) => (
-    <button className="tp-col-btn" onClick={() => toggleSort(key)} style={{ color: sortKey === key ? '#9B7ED4' : 'var(--text-muted)' }}>
+    <button className="tp-col-btn" onClick={() => toggleSort(key)} style={{ color: sortKey === key ? '#6C8EF5' : 'var(--text-muted)' }}>
       {label} <SortIcon col={key} />
     </button>
   )
@@ -296,7 +296,7 @@ Write in a professional but approachable tone. No bullet points — flowing pros
       {/* Top stats */}
       <motion.div className="tp-stats-row" {...stagger(1)}>
         {[
-          { label: 'Total Students',  value: totalStudents,                                    color: '#9B7ED4', icon: Users         },
+          { label: 'Total Students',  value: totalStudents,                                    color: '#6C8EF5', icon: Users         },
           { label: 'Class Avg Score', value: classAvg != null ? `${classAvg}%` : '—',          color: '#00D4AA', icon: TrendingUp    },
           { label: 'Weak Topics',     value: weakTopics.length,                                 color: '#FF6B8A', icon: AlertTriangle },
           { label: 'Strong Topics',   value: strongTopics.length,                               color: '#FFB830', icon: Star          },
@@ -470,15 +470,13 @@ Write in a professional but approachable tone. No bullet points — flowing pros
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-02)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                <div className="tp-s-avatar">
-                  {s.first_name[0]}{s.last_name[0]}
-                </div>
+                <div className="tp-s-avatar">{s.avatar_url ? <img src={s.avatar_url} alt="avatar" className="tp-s-avatar-img" /> : `${s.first_name[0]}${s.last_name[0]}`}</div>
                 <div className="tp-s-name-col">
                   <span className="tp-s-name">{s.first_name} {s.last_name}</span>
                   <span className="tp-s-id">{s.school_id}</span>
                 </div>
                 <span className="tp-s-xp"><Zap size={10} color="#FFB830" /> {s.xp.toLocaleString()}</span>
-                <span className="tp-s-modules"><BookOpen size={10} color="#9B7ED4" /> {s.modulesCompleted}/8</span>
+                <span className="tp-s-modules"><BookOpen size={10} color="#6C8EF5" /> {s.modulesCompleted}/8</span>
                 <span className="tp-s-score" style={{ color: scoreColor }}>
                   {s.avgScore != null ? `${s.avgScore}%` : '—'}
                 </span>

@@ -1,4 +1,4 @@
-/* ── Student Assessments Page ─────────────────────────────────────────────── */
+﻿/* ── Student Assessments Page ─────────────────────────────────────────────── */
 
 .sa-root {
   display: flex;
@@ -98,7 +98,7 @@
   border: 1px solid rgba(255,107,138,0.25);
   border-radius: 12px;
   font-size: 13px;
-  color: #FF6B8A;
+  color: var(--error);
   font-family: 'JetBrains Mono', monospace;
   line-height: 1.5;
 }
@@ -138,15 +138,15 @@
 }
 
 .sa-filter-btn.active {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.4);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.4);
   color: var(--text-primary);
 }
 
 /* Missed filter btn */
 .sa-filter-btn--missed {
   border-color: rgba(255,107,138,0.3) !important;
-  color: #FF6B8A !important;
+  color: var(--error) !important;
 }
 
 /* Loading */
@@ -230,7 +230,7 @@
 }
 
 .sa-card:hover {
-  border-color: rgba(124,92,191,0.3);
+  border-color: rgba(59,91,219,0.3);
   background: var(--bg-elevated-soft);
   transform: translateY(-1px);
 }
@@ -338,11 +338,11 @@
 }
 
 .sa-status.done       { color: var(--cyan); border-color: rgba(0,212,170,0.3);  background: rgba(0,212,170,0.08); }
-.sa-status.submitted  { color: var(--purple-light); border-color: rgba(155,126,212,0.3); background: rgba(155,126,212,0.08); }
+.sa-status.submitted  { color: var(--purple-light); border-color: rgba(108,142,245,0.3); background: rgba(108,142,245,0.08); }
 .sa-status.pending    { color: var(--xp); border-color: rgba(255,184,48,0.3);  background: rgba(255,184,48,0.08); }
 .sa-status.overdue    { color: var(--error); border-color: rgba(255,107,138,0.3); background: rgba(255,107,138,0.08); }
 .sa-status.locked     { color: var(--text-secondary); border-color: rgba(136,146,176,0.2); background: rgba(136,146,176,0.06); }
-.sa-status.missed     { color: #FF6B8A; border-color: rgba(255,107,138,0.35); background: rgba(255,107,138,0.1); }
+.sa-status.missed     { color: var(--error); border-color: rgba(255,107,138,0.35); background: rgba(255,107,138,0.1); }
 
 .sa-card-title {
   font-family: 'Syne', sans-serif;
@@ -391,7 +391,7 @@
   border-radius: 8px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #FF6B8A;
+  color: var(--error);
   margin-top: 2px;
 }
 

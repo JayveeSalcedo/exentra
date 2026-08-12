@@ -1,4 +1,4 @@
-:root { --pe-purple: #9B7ED4; }
+﻿:root { --pe-purple: var(--accent); }
 
 .pe-sfx-toggle {
   display: flex;
@@ -242,7 +242,7 @@
 .pe-pill.pe-combo {
   background: rgba(255,184,48,0.1);
   border-color: rgba(255,184,48,0.35);
-  color: #FFB830;
+  color: var(--xp);
   font-size: 14px;
   font-weight: 900;
   text-shadow: 0 0 12px rgba(255,184,48,0.6);
@@ -360,7 +360,7 @@
   margin: 0;
   padding: 9px 12px;
   border-left: 2px solid rgba(255,107,138,0.5);
-  color: #FF6B8A;
+  color: var(--error);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   line-height: 1.5;
@@ -383,8 +383,8 @@
   font-size: 16px;
   font-weight: 900;
 }
-.pe-floating-wrap .pos { color: #9B7ED4; }
-.pe-floating-wrap .neg { color: #FF6B8A; }
+.pe-floating-wrap .pos { color: var(--accent); }
+.pe-floating-wrap .neg { color: var(--error); }
 
 /* ── Feedback ────────────────────────────────────────────────────────────── */
 
@@ -407,12 +407,12 @@
 .pe-feedback.correct {
   border: 1px solid rgba(155,126,212,0.45);
   background: rgba(155,126,212,0.14);
-  color: #9B7ED4;
+  color: var(--accent);
 }
 .pe-feedback.wrong {
   border: 1px solid rgba(255,107,138,0.45);
   background: rgba(255,107,138,0.15);
-  color: #FF6B8A;
+  color: var(--error);
 }
 
 /* ── Multiple-choice area ────────────────────────────────────────────────── */
@@ -458,15 +458,15 @@
 }
 .pe-mc-btn:disabled { cursor: default; }
 .pe-mc-btn.correct {
-  border-color: #9B7ED4;
+  border-color: var(--accent);
   background: rgba(155,126,212,0.12);
-  color: #9B7ED4;
+  color: var(--accent);
   box-shadow: 0 0 20px rgba(155,126,212,0.2);
 }
 .pe-mc-btn.wrong {
-  border-color: #FF6B8A;
+  border-color: var(--error);
   background: rgba(255,107,138,0.1);
-  color: #FF6B8A;
+  color: var(--error);
 }
 .pe-mc-btn.reveal {
   border-color: rgba(155,126,212,0.4);
@@ -506,19 +506,19 @@
   user-select: none;
 }
 .pe-node-circle--start {
-  border-color: #00D4AA;
-  color: #00D4AA;
+  border-color: var(--cyan);
+  color: var(--cyan);
   box-shadow: 0 0 18px rgba(0,212,170,0.4);
 }
 .pe-node-circle--done {
-  border-color: #9B7ED4;
-  color: #9B7ED4;
+  border-color: var(--accent);
+  color: var(--accent);
   background: rgba(155,126,212,0.2);
   box-shadow: 0 0 22px rgba(155,126,212,0.45);
 }
 .pe-node-circle--wrong {
-  border-color: #FF6B8A;
-  color: #FF6B8A;
+  border-color: var(--error);
+  color: var(--error);
   background: rgba(255,107,138,0.14);
   box-shadow: 0 0 22px rgba(255,107,138,0.4);
 }

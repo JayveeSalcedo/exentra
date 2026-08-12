@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import type { VisualizerType } from '../../lessons/types'
 
@@ -71,7 +71,7 @@ export default function GraphVisualizer({ type }: Props) {
       <svg width="100%" height="220" viewBox="0 0 340 210" className="viz-graph-svg">
         <defs>
           <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="rgba(124,92,191,0.6)" />
+            <path d="M0,0 L0,6 L8,3 z" fill="rgba(59,91,219,0.6)" />
           </marker>
         </defs>
 
@@ -84,7 +84,7 @@ export default function GraphVisualizer({ type }: Props) {
             <line
               key={i}
               x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-              stroke={isActive ? 'rgba(0,212,170,0.6)' : 'rgba(124,92,191,0.35)'}
+              stroke={isActive ? 'rgba(0,212,170,0.6)' : 'rgba(59,91,219,0.35)'}
               strokeWidth={isActive ? 2.5 : 1.5}
               markerEnd={isDirected ? 'url(#arrow)' : undefined}
             />
@@ -99,8 +99,8 @@ export default function GraphVisualizer({ type }: Props) {
             <g key={node.id}>
               <motion.circle
                 cx={node.x} cy={node.y} r={20}
-                fill={isCurrent ? 'rgba(0,212,170,0.4)' : isVisited ? 'rgba(124,92,191,0.3)' : 'rgba(20,28,61,0.95)'}
-                stroke={isCurrent ? '#00D4AA' : isVisited ? 'rgba(124,92,191,0.8)' : 'rgba(124,92,191,0.4)'}
+                fill={isCurrent ? 'rgba(0,212,170,0.4)' : isVisited ? 'rgba(59,91,219,0.3)' : 'rgba(20,28,61,0.95)'}
+                stroke={isCurrent ? '#00D4AA' : isVisited ? 'rgba(59,91,219,0.8)' : 'rgba(59,91,219,0.4)'}
                 strokeWidth={isCurrent ? 3 : 2}
                 animate={{ r: isCurrent ? 23 : 20 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}

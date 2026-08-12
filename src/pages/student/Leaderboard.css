@@ -1,4 +1,4 @@
-/* ── Root ──────────────────────────────────────────────────────────────────── */
+﻿/* ── Root ──────────────────────────────────────────────────────────────────── */
 .lb-root {
   display: flex;
   flex-direction: column;
@@ -96,6 +96,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,7 +200,7 @@
 
 /* ── My rank card ──────────────────────────────────────────────────────────── */
 .lb-my-rank {
-  background: linear-gradient(135deg, rgba(0,212,170,0.06), rgba(124,92,191,0.06));
+  background: linear-gradient(135deg, rgba(0,212,170,0.06), rgba(59,91,219,0.06));
   border: 1px solid rgba(0,212,170,0.2);
   border-radius: 14px;
   padding: 16px 20px;
@@ -242,6 +243,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--purple), var(--cyan));
   display: flex;
   align-items: center;
@@ -480,6 +483,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -636,4 +641,14 @@
 
   .lb-controls { flex-direction: column; align-items: stretch; }
   .lb-sort-wrap { width: 100%; }
+}
+
+
+.lb-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }

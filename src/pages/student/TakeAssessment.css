@@ -1,4 +1,4 @@
-/* ── Take Assessment Page ─────────────────────────────────────────────────── */
+﻿/* ── Take Assessment Page ─────────────────────────────────────────────────── */
 
 .ta-root {
   display: flex;
@@ -612,13 +612,13 @@
 }
 
 .ta-choice:hover {
-  background: rgba(124,92,191,0.08);
-  border-color: rgba(124,92,191,0.3);
+  background: rgba(59,91,219,0.08);
+  border-color: rgba(59,91,219,0.3);
 }
 
 .ta-choice.selected {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.5);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.5);
 }
 
 .ta-choice-label {
@@ -639,8 +639,8 @@
 }
 
 .ta-choice.selected .ta-choice-label {
-  background: rgba(124,92,191,0.3);
-  border-color: rgba(124,92,191,0.5);
+  background: rgba(59,91,219,0.3);
+  border-color: rgba(59,91,219,0.5);
   color: var(--purple-light);
 }
 
@@ -712,18 +712,18 @@
 .ta-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .ta-nav-btn.primary {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.4);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.4);
   color: var(--purple-light);
 }
-.ta-nav-btn.primary:hover { background: rgba(124,92,191,0.25); color: var(--text-primary); }
+.ta-nav-btn.primary:hover { background: rgba(59,91,219,0.25); color: var(--text-primary); }
 
 .ta-nav-btn.submit {
-  background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(124,92,191,0.1));
+  background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(59,91,219,0.1));
   border-color: rgba(0,212,170,0.4);
   color: var(--cyan);
 }
-.ta-nav-btn.submit:hover { background: linear-gradient(135deg, rgba(0,212,170,0.25), rgba(124,92,191,0.15)); }
+.ta-nav-btn.submit:hover { background: linear-gradient(135deg, rgba(0,212,170,0.25), rgba(59,91,219,0.15)); }
 
 /* Dot navigator */
 .ta-dot-nav {
@@ -747,8 +747,8 @@
 }
 .ta-dot:hover { background: var(--surface-10); }
 .ta-dot.answered {
-  background: rgba(124,92,191,0.4);
-  border-color: rgba(124,92,191,0.6);
+  background: rgba(59,91,219,0.4);
+  border-color: rgba(59,91,219,0.6);
 }
 .ta-dot.active {
   background: var(--purple-light);
@@ -1220,8 +1220,8 @@
 .ta-review-explanation {
   margin-top: 12px;
   padding: 10px 14px;
-  background: rgba(155,126,212,0.07);
-  border: 1px solid rgba(155,126,212,0.15);
+  background: rgba(108,142,245,0.07);
+  border: 1px solid rgba(108,142,245,0.15);
   border-radius: 8px;
   font-size: 12px;
   color: var(--text-secondary);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+﻿import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -49,7 +49,7 @@ type Assessment = {
 type Phase = 'loading' | 'lobby' | 'quiz' | 'file_submission' | 'submitting' | 'results' | 'error' | 'already_done'
 
 const TYPE_COLOR: Record<string, string> = {
-  quiz: '#9B7ED4', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
+  quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
 }
 
 const ACCEPTED_TYPES = [
@@ -83,7 +83,7 @@ function formatDue(dateStr: string) {
 function fileIcon(type: string) {
   if (type.startsWith('image/')) return <Image size={18} color="#00D4AA" />
   if (type === 'application/pdf') return <FileText size={18} color="#FF6B8A" />
-  if (type.includes('word')) return <FileText size={18} color="#9B7ED4" />
+  if (type.includes('word')) return <FileText size={18} color="#6C8EF5" />
   if (type.includes('presentation') || type.includes('powerpoint')) return <FileText size={18} color="#FFB830" />
   return <File size={18} color="var(--text-secondary)" />
 }
@@ -556,7 +556,7 @@ export default function TakeAssessment() {
   // ── Lobby ─────────────────────────────────────────────────────────────────────
   if (phase === 'lobby') {
     const type = assessment?.type ?? 'quiz'
-    const color = TYPE_COLOR[type] ?? '#9B7ED4'
+    const color = TYPE_COLOR[type] ?? '#6C8EF5'
     const isFile = isFileType(type)
     return (
       <div className="ta-root">
@@ -589,7 +589,7 @@ export default function TakeAssessment() {
           <div className="ta-lobby-meta">
             {!isFile && questions.length > 0 && (
               <div className="ta-meta-chip">
-                <BookOpen size={13} color="#9B7ED4" />
+                <BookOpen size={13} color="#6C8EF5" />
                 <span>{questions.length} Questions</span>
               </div>
             )}
@@ -1092,7 +1092,7 @@ function AlreadyDone({ assessment, score, total, pct, xpEarned, submittedFileNam
         <div className="ta-lobby-meta">
           <div className="ta-meta-chip"><Trophy size={13} color="#FFB830" /><span>{score}/{total} pts</span></div>
           <div className="ta-meta-chip"><CheckCircle2 size={13} color="#00D4AA" /><span>{pct}%</span></div>
-          <div className="ta-meta-chip"><Zap size={13} color="#9B7ED4" /><span>{xpEarned} XP earned</span></div>
+          <div className="ta-meta-chip"><Zap size={13} color="#6C8EF5" /><span>{xpEarned} XP earned</span></div>
         </div>
       )}
 
@@ -1138,7 +1138,7 @@ function Results({ assessment, questions, answers, score, total, pct, xpEarned, 
         )}
 
         <div className="ta-results-chips">
-          <div className="ta-result-chip"><Zap size={14} color="#9B7ED4" /><span>+{xpEarned} XP (submission bonus)</span></div>
+          <div className="ta-result-chip"><Zap size={14} color="#6C8EF5" /><span>+{xpEarned} XP (submission bonus)</span></div>
         </div>
 
         <div className="ta-results-actions">
@@ -1150,7 +1150,7 @@ function Results({ assessment, questions, answers, score, total, pct, xpEarned, 
 
   // Quiz results
   const grade = pct >= 90 ? 'Excellent!' : pct >= 75 ? 'Great job!' : pct >= 50 ? 'Keep it up!' : 'Needs work'
-  const gradeColor = pct >= 90 ? '#00D4AA' : pct >= 75 ? '#9B7ED4' : pct >= 50 ? '#FFB830' : '#FF6B8A'
+  const gradeColor = pct >= 90 ? '#00D4AA' : pct >= 75 ? '#6C8EF5' : pct >= 50 ? '#FFB830' : '#FF6B8A'
 
   if (reviewMode) {
     return (
@@ -1215,7 +1215,7 @@ function Results({ assessment, questions, answers, score, total, pct, xpEarned, 
 
       <div className="ta-results-chips">
         <div className="ta-result-chip"><Trophy size={14} color="#FFB830" /><span>{score} / {total} pts</span></div>
-        <div className="ta-result-chip"><Zap size={14} color="#9B7ED4" /><span>+{xpEarned} XP</span></div>
+        <div className="ta-result-chip"><Zap size={14} color="#6C8EF5" /><span>+{xpEarned} XP</span></div>
         <div className="ta-result-chip">
           <CheckCircle2 size={14} color="#00D4AA" />
           <span>{questions.filter((q: Question) => answers[q.id] && q.choices.find((c: Choice) => c.id === answers[q.id])?.is_correct).length} correct</span>

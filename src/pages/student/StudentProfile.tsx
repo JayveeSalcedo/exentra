@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import {
   User, Zap, Flame, Shield, Star, Edit3, Save, X,
-  CheckCircle2, AlertTriangle, BookOpen, Trophy, Target
+  CheckCircle2, AlertTriangle, BookOpen, Trophy, Target, Camera, Trash2
 } from 'lucide-react'
 import './StudentProfile.css'
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024 // 2MB, matches storage bucket limit
+const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 const XP_PER_LEVEL = 500
 
@@ -22,18 +25,20 @@ const RANK_LABELS: Record<number, string> = {
 }
 
 const RANK_COLORS: Record<number, string> = {
-  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#7C5CBF',
+  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
   5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
 }
 
 const easeOut = [0.16, 1, 0.3, 1] as const
 
 export default function StudentProfile() {
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     firstName: user?.firstName ?? '',
@@ -119,6 +124,72 @@ export default function StudentProfile() {
     setTimeout(() => setToast(null), 3000)
   }
 
+  const handleAvatarClick = () => {
+    if (uploadingAvatar) return
+    avatarInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file || !user) return
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      showToast('Use a JPG, PNG, WEBP, or GIF image.', false)
+      return
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      showToast('Image must be under 2MB.', false)
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const path = `${user.id}/avatar.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, cacheControl: '3600' })
+      if (upErr) throw upErr
+
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}` // bust CDN cache on same filename
+
+      const { error: dbErr } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id)
+      if (dbErr) throw dbErr
+
+      await refreshProfile()
+      showToast('Profile picture updated!')
+    } catch (err: any) {
+      showToast(err.message ?? 'Upload failed', false)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const handleAvatarRemove = async () => {
+    if (!user || uploadingAvatar) return
+    setUploadingAvatar(true)
+    try {
+      const { error: dbErr } = await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('id', user.id)
+      if (dbErr) throw dbErr
+
+      await refreshProfile()
+      showToast('Profile picture removed.')
+    } catch (err: any) {
+      showToast(err.message ?? 'Remove failed', false)
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -163,11 +234,38 @@ export default function StudentProfile() {
           {/* Avatar */}
           <div className="sp-avatar-wrap">
             <div className="sp-avatar-ring" style={{ borderColor: rankColor }} />
-            <div className="sp-avatar">
+            <button
+              type="button"
+              className="sp-avatar sp-avatar-btn"
+              onClick={handleAvatarClick}
+              disabled={uploadingAvatar}
+              title="Change profile picture"
+            >
               {user?.avatarUrl
                 ? <img src={user.avatarUrl} alt="avatar" className="sp-avatar-img" />
                 : <span className="sp-avatar-initials">{initials}</span>}
-            </div>
+              <span className="sp-avatar-overlay">
+                {uploadingAvatar ? <span className="sp-spin" /> : <Camera size={18} />}
+              </span>
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="sp-avatar-input"
+              onChange={handleAvatarChange}
+            />
+            {user?.avatarUrl && (
+              <button
+                type="button"
+                className="sp-avatar-remove"
+                onClick={handleAvatarRemove}
+                disabled={uploadingAvatar}
+                title="Remove profile picture"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
             <div className="sp-avatar-level" style={{ background: rankColor }}>
               {level}
             </div>
@@ -228,7 +326,7 @@ export default function StudentProfile() {
           { icon: <Zap size={20} color="#FFB830" />, val: xp.toLocaleString(), label: 'Total XP', color: '#FFB830' },
           { icon: <Flame size={20} color="#FF6B8A" />, val: `${streak}d`, label: 'Streak', color: '#FF6B8A' },
           { icon: <BookOpen size={20} color="#00D4AA" />, val: stats.lessonsCompleted, label: 'Lessons Done', color: '#00D4AA' },
-          { icon: <Target size={20} color="#7C5CBF" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#7C5CBF' },
+          { icon: <Target size={20} color="#3B5BDB" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#3B5BDB' },
           { icon: <Star size={20} color="#FFB830" />, val: stats.avgScore ? `${stats.avgScore}%` : '—', label: 'Avg Score', color: '#FFB830' },
           { icon: <Trophy size={20} color="#00D4AA" />, val: stats.rank ? `#${stats.rank}` : '—', label: 'Leaderboard', color: '#00D4AA' },
         ].map((s, i) => (

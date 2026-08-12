@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import type { VisualizerType } from '../../lessons/types'
 
@@ -120,11 +120,11 @@ export default function SortVisualizer({ type }: Props) {
           const isLo_    = isBSearch && i === lo
           const isHi_    = isBSearch && i === hi
 
-          let barColor = 'rgba(124,92,191,0.6)'
+          let barColor = 'rgba(59,91,219,0.6)'
           if (isMid_)   barColor = '#00D4AA'
           else if (isComp)   barColor = '#F59E0B'
           else if (isSorted) barColor = 'rgba(0,212,170,0.5)'
-          else if (isLo_ || isHi_) barColor = 'rgba(124,92,191,0.9)'
+          else if (isLo_ || isHi_) barColor = 'rgba(59,91,219,0.9)'
 
           return (
             <div key={i} className="viz-sort-bar-col">

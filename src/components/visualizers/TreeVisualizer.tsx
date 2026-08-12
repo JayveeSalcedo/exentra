@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { VisualizerType } from '../../lessons/types'
 
@@ -38,7 +38,7 @@ function TreeNodeComponent({
       {/* Edge to parent */}
       {parentX !== undefined && parentY !== undefined && (
         <line x1={parentX} y1={parentY + 20} x2={x} y2={childY - 20}
-          stroke="rgba(124,92,191,0.4)" strokeWidth={2} />
+          stroke="rgba(59,91,219,0.4)" strokeWidth={2} />
       )}
 
       {/* Left child */}
@@ -69,7 +69,7 @@ function TreeNodeComponent({
       <motion.circle
         cx={x} cy={y} r={20}
         fill={isHighlit ? 'rgba(0,212,170,0.35)' : 'rgba(20,28,61,0.95)'}
-        stroke={isHighlit ? '#00D4AA' : 'rgba(124,92,191,0.7)'}
+        stroke={isHighlit ? '#00D4AA' : 'rgba(59,91,219,0.7)'}
         strokeWidth={2}
         animate={{ r: isHighlit ? 23 : 20 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}

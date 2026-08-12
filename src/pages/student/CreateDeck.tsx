@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
@@ -189,9 +189,9 @@ Example format: [{"front":"What is a stack?","back":"A LIFO data structure where
                 min={4} max={20} step={2}
                 value={aiCount}
                 onChange={e => setAiCount(Number(e.target.value))}
-                style={{ flex: 1, accentColor: '#9B7ED4' }}
+                style={{ flex: 1, accentColor: '#6C8EF5' }}
               />
-              <span style={{ fontFamily: 'JetBrains Mono', fontSize: 13, color: '#9B7ED4', minWidth: 24 }}>{aiCount}</span>
+              <span style={{ fontFamily: 'JetBrains Mono', fontSize: 13, color: '#6C8EF5', minWidth: 24 }}>{aiCount}</span>
             </div>
           </div>
 
@@ -213,7 +213,7 @@ Example format: [{"front":"What is a stack?","back":"A LIFO data structure where
         <div className="pb-form-panel" style={{ gap: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p className="pb-panel-title" style={{ margin: 0 }}>
-              Cards <span style={{ color: '#9B7ED4', fontFamily: 'JetBrains Mono' }}>({cards.filter(c => c.front || c.back).length}/{cards.length})</span>
+              Cards <span style={{ color: '#6C8EF5', fontFamily: 'JetBrains Mono' }}>({cards.filter(c => c.front || c.back).length}/{cards.length})</span>
             </p>
             <button className="pb-gen-btn" style={{ width: 'auto', padding: '0.4rem 0.9rem', fontSize: 12 }} onClick={addCard}>
               <Plus size={13} /> Add Card

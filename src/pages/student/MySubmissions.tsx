@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -36,7 +36,7 @@ interface Submission {
 }
 
 const TYPE_COLOR: Record<string, string> = {
-  quiz: '#9B7ED4', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
+  quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
 }
 
 const stagger = (i: number) => ({
@@ -251,7 +251,7 @@ export default function MySubmissions() {
         </div>
         <div className="msub-stats">
           {[
-            { label: 'Total',   value: stats.total,   color: '#9B7ED4', icon: Paperclip },
+            { label: 'Total',   value: stats.total,   color: '#6C8EF5', icon: Paperclip },
             { label: 'Graded',  value: stats.graded,  color: '#00D4AA', icon: CheckCircle2 },
             { label: 'Pending', value: stats.pending, color: '#FFB830', icon: Clock },
           ].map(({ label, value, color, icon: Icon }) => (
@@ -327,7 +327,7 @@ export default function MySubmissions() {
             const isOpen    = expanded.has(sub.id)
             const isGraded  = sub.score !== null
             const { color: gradeColor, label: gradeLabel } = gradeInfo(sub.percentage)
-            const typeColor = TYPE_COLOR[sub.assessment.type] ?? '#9B7ED4'
+            const typeColor = TYPE_COLOR[sub.assessment.type] ?? '#6C8EF5'
 
             return (
               <motion.div

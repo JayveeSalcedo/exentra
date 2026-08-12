@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -18,7 +18,7 @@ function CheckItem({ label, passed }: { label: string; passed: boolean }) {
   return (
     <motion.div
       className={`lp-check-item ${passed ? 'passed' : ''}`}
-      animate={{ borderColor: passed ? 'rgba(0,212,170,0.5)' : 'rgba(124,92,191,0.2)' }}
+      animate={{ borderColor: passed ? 'rgba(0,212,170,0.5)' : 'rgba(59,91,219,0.2)' }}
     >
       <CheckCircle2 size={14} className={passed ? 'check-icon-pass' : 'check-icon-idle'} />
       <span>{label}</span>

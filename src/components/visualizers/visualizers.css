@@ -1,4 +1,4 @@
-/* ─────────────────────────────────────────
+﻿/* ─────────────────────────────────────────
    Shared Visualizer Shell
 ───────────────────────────────────────── */
 .concept-viz-shell {
@@ -330,7 +330,7 @@
   margin-top: 2px;
 }
 .viz-queue-badge.front    { color: var(--cyan); background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); }
-.viz-queue-badge.rear     { color: rgba(124,92,191,0.9); background: rgba(124,92,191,0.1); border: 1px solid rgba(124,92,191,0.35); }
+.viz-queue-badge.rear     { color: rgba(59,91,219,0.9); background: rgba(59,91,219,0.1); border: 1px solid rgba(59,91,219,0.35); }
 .viz-queue-badge.priority { color: #F59E0B; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); }
 
 /* ─────────────────────────────────────────
@@ -349,7 +349,7 @@
 .viz-traversal-label { color: rgba(232,234,255,0.45); margin-right: 0.25rem; font-weight: 600; }
 .viz-traversal-val {
   background: var(--bg-viz-strong);
-  border: 1px solid rgba(124,92,191,0.3);
+  border: 1px solid rgba(59,91,219,0.3);
   border-radius: 6px;
   padding: 0.15rem 0.45rem;
   color: rgba(232,234,255,0.6);
@@ -376,13 +376,13 @@
   align-items: flex-end;
   height: 160px;
   padding-bottom: 4px;
-  border-bottom: 1px solid rgba(124,92,191,0.2);
+  border-bottom: 1px solid rgba(59,91,219,0.2);
 }
 .viz-sort-bar-col { display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; }
 .viz-sort-bar {
   width: 28px;
   border-radius: 4px 4px 0 0;
-  background: rgba(124,92,191,0.6);
+  background: rgba(59,91,219,0.6);
   min-height: 4px;
 }
 .viz-sort-label   { font-size: 0.62rem; color: rgba(232,234,255,0.45); }
@@ -418,7 +418,7 @@
 .viz-hash-index {
   font-size: 0.7rem;
   font-weight: 700;
-  color: rgba(124,92,191,0.8);
+  color: rgba(59,91,219,0.8);
   width: 18px;
   text-align: right;
   flex-shrink: 0;
@@ -430,13 +430,13 @@
   gap: 0.3rem;
   align-items: center;
   min-height: 28px;
-  border-left: 2px solid rgba(124,92,191,0.2);
+  border-left: 2px solid rgba(59,91,219,0.2);
   padding-left: 0.5rem;
 }
 
 .viz-hash-item {
   background: var(--bg-viz-strong);
-  border: 1px solid rgba(124,92,191,0.35);
+  border: 1px solid rgba(59,91,219,0.35);
   border-radius: 6px;
   padding: 0.15rem 0.45rem;
   font-size: 0.78rem;
@@ -446,7 +446,7 @@
   transition: border-color 0.2s;
 }
 .viz-hash-item:hover { border-color: rgba(0,212,170,0.5); }
-.viz-hash-arrow { color: rgba(124,92,191,0.5); }
+.viz-hash-arrow { color: rgba(59,91,219,0.5); }
 .viz-hash-empty { font-size: 0.7rem; color: rgba(232,234,255,0.2); }
 
 

@@ -28,6 +28,7 @@ interface RosterStudent {
   first_name: string
   last_name: string
   username: string
+  avatar_url?: string | null
 }
 
 interface StudentOption {
@@ -36,6 +37,7 @@ interface StudentOption {
   first_name: string
   last_name: string
   username: string
+  avatar_url?: string | null
   activeBlockId: string | null
   activeBlockName: string | null
 }
@@ -138,7 +140,7 @@ export default function TeacherBlocks() {
 
       const { data: students } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, username')
+        .select('id, school_id, first_name, last_name, username, avatar_url')
         .in('id', enrollments.map((e: any) => e.student_id))
 
       const merged: RosterStudent[] = enrollments
@@ -166,7 +168,7 @@ export default function TeacherBlocks() {
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, username')
+        .select('id, school_id, first_name, last_name, username, avatar_url')
         .eq('role', 'student')
         .order('last_name')
 
@@ -389,7 +391,7 @@ export default function TeacherBlocks() {
                 transition={{ duration: 0.2, delay: i * 0.03 }}
               >
                 <div className="blk-card-top">
-                  <div className="blk-card-icon"><Layers size={16} color="#9B7ED4" /></div>
+                  <div className="blk-card-icon"><Layers size={16} color="#6C8EF5" /></div>
                   <div className="blk-card-actions">
                     <button className="blk-icon-btn" title="Edit" onClick={() => openEdit(block)}>
                       <Pencil size={14} />
@@ -554,7 +556,7 @@ export default function TeacherBlocks() {
                 ) : (
                   roster.map(s => (
                     <div className="blk-roster-row" key={s.enrollment_id}>
-                      <div className="blk-roster-avatar">{s.first_name[0]}{s.last_name[0]}</div>
+                      <div className="blk-roster-avatar">{s.avatar_url ? <img src={s.avatar_url} alt="avatar" className="blk-roster-avatar-img" /> : `${s.first_name[0]}${s.last_name[0]}`}</div>
                       <div className="blk-roster-info">
                         <span className="blk-roster-name">{s.first_name} {s.last_name}</span>
                         <span className="blk-roster-sub">{s.school_id} · @{s.username}</span>
@@ -623,7 +625,7 @@ export default function TeacherBlocks() {
                     const isBusy = busyStudentId === s.id
                     return (
                       <div className="blk-add-row" key={s.id}>
-                        <div className="blk-roster-avatar">{s.first_name[0]}{s.last_name[0]}</div>
+                        <div className="blk-roster-avatar">{s.avatar_url ? <img src={s.avatar_url} alt="avatar" className="blk-roster-avatar-img" /> : `${s.first_name[0]}${s.last_name[0]}`}</div>
                         <div className="blk-roster-info">
                           <span className="blk-roster-name">{s.first_name} {s.last_name}</span>
                           <span className="blk-roster-sub">{s.school_id} · @{s.username}</span>

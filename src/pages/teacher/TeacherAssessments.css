@@ -1,4 +1,4 @@
-/* ── Teacher Assessments Page ────────────────────────────────────────────── */
+﻿/* ── Teacher Assessments Page ────────────────────────────────────────────── */
 
 .ta2-root {
   display: flex;
@@ -43,8 +43,8 @@
   align-items: center;
   gap: 7px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, rgba(124,92,191,0.2), rgba(0,212,170,0.1));
-  border: 1px solid rgba(124,92,191,0.4);
+  background: linear-gradient(135deg, rgba(59,91,219,0.2), rgba(0,212,170,0.1));
+  border: 1px solid rgba(59,91,219,0.4);
   border-radius: 10px;
   color: var(--purple-light);
   font-family: 'Syne', sans-serif;
@@ -56,7 +56,7 @@
   flex-shrink: 0;
 }
 .ta2-generate-btn:hover {
-  background: linear-gradient(135deg, rgba(124,92,191,0.3), rgba(0,212,170,0.15));
+  background: linear-gradient(135deg, rgba(59,91,219,0.3), rgba(0,212,170,0.15));
   color: var(--text-primary);
 }
 
@@ -122,8 +122,8 @@
 }
 .ta2-filter-btn:hover { background: var(--surface-04); color: var(--text-primary); }
 .ta2-filter-btn.active {
-  background: rgba(124,92,191,0.15);
-  border-color: rgba(124,92,191,0.4);
+  background: rgba(59,91,219,0.15);
+  border-color: rgba(59,91,219,0.4);
   color: var(--text-primary);
 }
 
@@ -212,8 +212,8 @@
 .ta2-card.draft     { border-color: var(--surface-05); }
 
 .ta2-card-highlight {
-  border-color: rgba(155,126,212,0.6) !important;
-  box-shadow: 0 0 0 3px rgba(155,126,212,0.15), 0 12px 32px rgba(155,126,212,0.12);
+  border-color: rgba(108,142,245,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(108,142,245,0.15), 0 12px 32px rgba(108,142,245,0.12);
   animation: ta2-highlight-pulse 1.2s ease-in-out 2;
 }
 
@@ -226,7 +226,7 @@
   background: rgba(255, 107, 138, 0.08);
   border: 1px solid rgba(255, 107, 138, 0.25);
   border-radius: 8px;
-  color: #FF6B8A;
+  color: var(--error);
   font-size: 11.5px;
   line-height: 1.5;
 }
@@ -237,8 +237,8 @@
 }
 
 @keyframes ta2-highlight-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(155,126,212,0.15), 0 12px 32px rgba(155,126,212,0.12); }
-  50% { box-shadow: 0 0 0 5px rgba(155,126,212,0.3), 0 12px 32px rgba(155,126,212,0.2); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(108,142,245,0.15), 0 12px 32px rgba(108,142,245,0.12); }
+  50% { box-shadow: 0 0 0 5px rgba(108,142,245,0.3), 0 12px 32px rgba(108,142,245,0.2); }
 }
 
 .ta2-card-accent {
@@ -494,8 +494,8 @@
   font-size: 10px;
   font-weight: 700;
   color: var(--purple-light);
-  background: rgba(155,126,212,0.1);
-  border: 1px solid rgba(155,126,212,0.2);
+  background: rgba(108,142,245,0.1);
+  border: 1px solid rgba(108,142,245,0.2);
   border-radius: 6px;
   padding: 3px 8px;
   flex-shrink: 0;
@@ -552,8 +552,8 @@
   color: var(--text-secondary);
   line-height: 1.5;
   padding: 8px 12px;
-  background: rgba(155,126,212,0.06);
-  border: 1px solid rgba(155,126,212,0.12);
+  background: rgba(108,142,245,0.06);
+  border: 1px solid rgba(108,142,245,0.12);
   border-radius: 7px;
 }
 .ta2-q-explanation span {
@@ -608,8 +608,8 @@
 }
 .ta2-tab:hover { background: var(--surface-04); color: var(--text-primary); }
 .ta2-tab.active {
-  background: rgba(155,126,212,0.12);
-  border-color: rgba(155,126,212,0.35);
+  background: rgba(108,142,245,0.12);
+  border-color: rgba(108,142,245,0.35);
   color: var(--purple-light);
 }
 
@@ -763,8 +763,8 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(155,126,212,0.2), rgba(0,212,170,0.15));
-  border: 1px solid rgba(155,126,212,0.25);
+  background: linear-gradient(135deg, rgba(108,142,245,0.2), rgba(0,212,170,0.15));
+  border: 1px solid rgba(108,142,245,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -849,8 +849,8 @@
 }
 .ta2-create-btn:hover {
   color: var(--text-primary);
-  border-color: rgba(124,92,191,0.4);
-  background: rgba(124,92,191,0.08);
+  border-color: rgba(59,91,219,0.4);
+  background: rgba(59,91,219,0.08);
 }
 
 .ta2-result-pass,
@@ -997,8 +997,8 @@
   transition: border-color 0.18s;
 }
 .ta2-grade-input:focus {
-  border-color: rgba(155,126,212,0.5);
-  background: rgba(155,126,212,0.06);
+  border-color: rgba(108,142,245,0.5);
+  background: rgba(108,142,245,0.06);
 }
 .ta2-grade-input::-webkit-inner-spin-button,
 .ta2-grade-input::-webkit-outer-spin-button { opacity: 1; }
@@ -1016,8 +1016,8 @@
   gap: 5px;
   padding: 7px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(155,126,212,0.4);
-  background: rgba(155,126,212,0.1);
+  border: 1px solid rgba(108,142,245,0.4);
+  background: rgba(108,142,245,0.1);
   color: var(--purple-light);
   font-family: 'Syne', sans-serif;
   font-size: 12px;
@@ -1028,7 +1028,7 @@
   margin-left: auto;
 }
 .ta2-grade-btn:hover:not(:disabled) {
-  background: rgba(155,126,212,0.2);
+  background: rgba(108,142,245,0.2);
   color: var(--text-primary);
 }
 .ta2-grade-btn:disabled {
@@ -1274,7 +1274,7 @@
   font-family: inherit;
   transition: all 0.18s;
 }
-.ta2-block-card:hover { border-color: rgba(155,126,212,0.35); background: var(--surface-02); }
+.ta2-block-card:hover { border-color: rgba(108,142,245,0.35); background: var(--surface-02); }
 
 .ta2-block-card--all { border-color: rgba(0,212,170,0.25); }
 .ta2-block-card--all:hover { border-color: rgba(0,212,170,0.4); }
@@ -1283,8 +1283,8 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: rgba(155,126,212,0.12);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.12);
+  border: 1px solid rgba(108,142,245,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1353,8 +1353,8 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--purple-light);
-  background: rgba(155,126,212,0.1);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.1);
+  border: 1px solid rgba(108,142,245,0.25);
   border-radius: 99px;
   padding: 6px 14px;
 }

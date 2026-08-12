@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════════════════════════
    NODE CONNECT — Game CSS
    Purple accent. One interaction: drag a pointer handle to where it belongs.
    Curved SVG arrows, node boxes, doubly ↔ singly styles.
@@ -145,7 +145,7 @@
 .nc-lobby-sub {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #9B7ED4;
+  color: var(--accent);
   letter-spacing: 3px;
   text-transform: uppercase;
   margin: 0 0 14px;
@@ -183,8 +183,8 @@
   transition: all 0.2s; color: var(--text-muted);
 }
 .nc-mode-card:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: var(--text-primary); }
-.nc-mode-card.active { border-color: #9B7ED4; background: rgba(155,126,212,0.08); color: #9B7ED4; box-shadow: 0 0 24px rgba(155,126,212,0.2); }
-.nc-mode-card.active.multi { border-color: #FFB830; background: rgba(255,184,48,0.08); color: #FFB830; box-shadow: 0 0 24px rgba(255,184,48,0.2); }
+.nc-mode-card.active { border-color: var(--accent); background: rgba(155,126,212,0.08); color: var(--accent); box-shadow: 0 0 24px rgba(155,126,212,0.2); }
+.nc-mode-card.active.multi { border-color: var(--xp); background: rgba(255,184,48,0.08); color: var(--xp); box-shadow: 0 0 24px rgba(255,184,48,0.2); }
 .nc-mode-title { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; }
 .nc-mode-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; opacity: 0.7; text-align: center; }
 .nc-mode-badge-bot {
@@ -221,7 +221,7 @@
   display: flex; align-items: center; gap: 12px;
   font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 2px;
   padding: 16px 48px; border-radius: 14px;
-  background: linear-gradient(135deg, #9B7ED4 0%, #7C5CBF 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #7C5CBF 100%);
   border: none; color: #fff; cursor: pointer;
   animation: startPulse 2.5s ease-in-out infinite;
   transition: transform 0.15s;
@@ -240,10 +240,10 @@
   background: rgba(255,184,48,0.08); border: 1px solid rgba(255,184,48,0.2);
   border-radius: 8px; padding: 6px 12px;
 }
-.nc-hud-score-num { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: #FFB830; letter-spacing: 1px; }
+.nc-hud-score-num { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; color: var(--xp); letter-spacing: 1px; }
 .nc-combo-badge {
   font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 900;
-  color: #FFB830; background: rgba(255,184,48,0.15); border: 1px solid rgba(255,184,48,0.4);
+  color: var(--xp); background: rgba(255,184,48,0.15); border: 1px solid rgba(255,184,48,0.4);
   border-radius: 6px; padding: 2px 8px; letter-spacing: 1.5px;
   text-shadow: 0 0 10px rgba(255,184,48,0.8);
 }
@@ -253,7 +253,7 @@
   background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
   transition: all 0.3s;
 }
-.nc-round-pip.done { background: #9B7ED4; border-color: #9B7ED4; box-shadow: 0 0 8px rgba(155,126,212,0.5); }
+.nc-round-pip.done { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(155,126,212,0.5); }
 .nc-round-pip.current { background: rgba(155,126,212,0.3); border-color: rgba(155,126,212,0.6); animation: timerUrgent 1s ease-in-out infinite; }
 .nc-hud-right { display: flex; gap: 6px; align-items: center; }
 .nc-diff-pill {
@@ -296,10 +296,10 @@
 .nc-run-reward {
   font-family: 'Orbitron', sans-serif;
   font-size: 11px;
-  color: #FFB830;
+  color: var(--xp);
   white-space: nowrap;
 }
-.nc-run-reward.complete { color: #00D4AA; }
+.nc-run-reward.complete { color: var(--cyan); }
 .nc-run-progress {
   grid-column: 1 / -1;
   height: 5px;
@@ -311,7 +311,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #9B7ED4, #FFB830);
+  background: linear-gradient(90deg, var(--accent), var(--xp));
   transition: width 0.25s ease;
 }
 .nc-powerups {
@@ -340,13 +340,13 @@
   cursor: pointer;
 }
 .nc-powerup-card:hover {
-  border-color: #FFB830;
+  border-color: var(--xp);
   box-shadow: 0 0 18px rgba(255,184,48,0.18);
 }
 .nc-powerup-card span {
   font-family: 'Orbitron', sans-serif;
   font-size: 11px;
-  color: #FFB830;
+  color: var(--xp);
 }
 .nc-powerup-card small {
   font-family: 'JetBrains Mono', monospace;
@@ -371,10 +371,10 @@
 }
 
 .nc-corner { position: absolute; width: 20px; height: 20px; pointer-events: none; z-index: 0; }
-.nc-corner--tl { top: -1px;    left: -1px;   border-top: 2px solid #9B7ED4; border-left: 2px solid #9B7ED4; border-radius: 4px 0 0 0; }
-.nc-corner--tr { top: -1px;    right: -1px;  border-top: 2px solid #9B7ED4; border-right: 2px solid #9B7ED4; border-radius: 0 4px 0 0; }
-.nc-corner--bl { bottom: -1px; left: -1px;   border-bottom: 2px solid #9B7ED4; border-left: 2px solid #9B7ED4; border-radius: 0 0 0 4px; }
-.nc-corner--br { bottom: -1px; right: -1px;  border-bottom: 2px solid #9B7ED4; border-right: 2px solid #9B7ED4; border-radius: 0 0 4px 0; }
+.nc-corner--tl { top: -1px;    left: -1px;   border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); border-radius: 4px 0 0 0; }
+.nc-corner--tr { top: -1px;    right: -1px;  border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); border-radius: 0 4px 0 0; }
+.nc-corner--bl { bottom: -1px; left: -1px;   border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); border-radius: 0 0 0 4px; }
+.nc-corner--br { bottom: -1px; right: -1px;  border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); border-radius: 0 0 4px 0; }
 
 .nc-svg-overlay {
   position: absolute;
@@ -410,7 +410,7 @@
   border: 1px dashed rgba(255,255,255,0.12); border-radius: 7px; padding: 6px 12px;
   cursor: pointer; transition: color 0.15s, border-color 0.15s;
 }
-.nc-hint-btn:hover:not(:disabled) { color: #FFB830; border-color: rgba(255,184,48,0.3); }
+.nc-hint-btn:hover:not(:disabled) { color: var(--xp); border-color: rgba(255,184,48,0.3); }
 .nc-hint-btn:disabled { opacity: 0.4; cursor: default; }
 .nc-bonus-closed-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); }
 
@@ -418,8 +418,8 @@
 
 .nc-floating-wrap { position: absolute; top: 80px; left: 0; right: 0; height: 80px; pointer-events: none; z-index: 20; }
 .nc-floating { position: absolute; font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; pointer-events: none; }
-.nc-floating.pos { color: #9B7ED4; text-shadow: 0 0 12px rgba(155,126,212,0.8); }
-.nc-floating.neg { color: #FF6B8A; text-shadow: 0 0 12px rgba(255,107,138,0.8); }
+.nc-floating.pos { color: var(--accent); text-shadow: 0 0 12px rgba(155,126,212,0.8); }
+.nc-floating.neg { color: var(--error); text-shadow: 0 0 12px rgba(255,107,138,0.8); }
 
 /* ── Feedback (only fires on full round completion now — no per-attempt "WRONG"
    stamp, since a bad pointer drag is shown as a dangling red line instead) ── */
@@ -432,7 +432,7 @@
   white-space: nowrap;
 }
 .nc-feedback--correct {
-  background: rgba(155,126,212,0.18); color: #9B7ED4;
+  background: rgba(155,126,212,0.18); color: var(--accent);
   border: 2px solid rgba(155,126,212,0.4);
   text-shadow: 0 0 20px rgba(155,126,212,0.8);
   box-shadow: 0 0 40px rgba(155,126,212,0.3);
@@ -456,7 +456,7 @@
   width: 44px;
   height: 34px;
   border-radius: 999px;
-  background: #FF6B8A;
+  background: var(--error);
   border: 2px solid rgba(255,107,138,0.4);
   box-shadow: 0 0 10px rgba(255,107,138,0.6);
   animation: fixHandlePing 1.4s ease-in-out infinite;
@@ -476,7 +476,7 @@
   background: #ff8fa8;
 }
 .nc-fix-dot--hint {
-  background: #FFB830;
+  background: var(--xp);
   border-color: rgba(255,184,48,0.5);
   box-shadow: 0 0 12px rgba(255,184,48,0.6);
   animation: hintHandlePing 1.2s ease-in-out infinite;
@@ -486,7 +486,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px;
   letter-spacing: 1px;
-  color: #FF6B8A;
+  color: var(--error);
   text-align: center;
   pointer-events: none;
   opacity: 0.8;
@@ -544,7 +544,7 @@
   border: 1px solid rgba(155,126,212,0.25);
 }
 .nc-floating-badge {
-  color: #FFB830;
+  color: var(--xp);
   background: rgba(255,184,48,0.1);
   border-color: rgba(255,184,48,0.3);
   animation: floatBob 2.2s ease-in-out infinite;
@@ -601,7 +601,7 @@
   background: linear-gradient(145deg, #2a2010, #1f1808);
   animation: floatBob 2.2s ease-in-out infinite;
 }
-.nc-node--floating .nc-node-value { color: #FFB830; }
+.nc-node--floating .nc-node-value { color: var(--xp); }
 
 .nc-node--orphaned { pointer-events: none; }
 
@@ -661,14 +661,14 @@
 .nc-result-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; padding: 14px 20px; border-radius: 12px; cursor: pointer; transition: all 0.15s; }
 .nc-result-btn.secondary { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); }
 .nc-result-btn.secondary:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
-.nc-result-btn.primary { background: linear-gradient(135deg, #9B7ED4, #7C5CBF); border: none; color: #fff; box-shadow: 0 4px 20px rgba(155,126,212,0.35); }
+.nc-result-btn.primary { background: linear-gradient(135deg, var(--accent), #7C5CBF); border: none; color: #fff; box-shadow: 0 4px 20px rgba(155,126,212,0.35); }
 .nc-result-btn.primary:hover { box-shadow: 0 4px 32px rgba(155,126,212,0.55); transform: translateY(-1px); }
 
 /* Real multiplayer room lobby */
 .nc-mp-room-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .nc-mp-join-row { display: flex; gap: 10px; }
 .nc-mp-code-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 15px; letter-spacing: 4px; color: var(--text-primary); text-transform: uppercase; text-align: center; }
-.nc-mp-code-input:focus { outline: none; border-color: #9B7ED450; }
+.nc-mp-code-input:focus { outline: none; border-color: var(--accent)50; }
 .nc-mp-room-players { display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 12px 0; }
 .nc-start-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.nc-result-win-msg { font-family: 'Orbitron', sans-serif; font-size: 13px; color: #FFB830; text-align: center; letter-spacing: 1px; text-shadow: 0 0 12px rgba(255,184,48,0.5); }
+.nc-result-win-msg { font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--xp); text-align: center; letter-spacing: 1px; text-shadow: 0 0 12px rgba(255,184,48,0.5); }

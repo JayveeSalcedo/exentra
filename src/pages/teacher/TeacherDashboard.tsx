@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -10,7 +10,7 @@ import {
 import './TeacherDashboard.css'
 
 const MODULES = [
-  { topic: 'Arrays',             label: 'Arrays',          color: '#9B7ED4' },
+  { topic: 'Arrays',             label: 'Arrays',          color: '#6C8EF5' },
   { topic: 'Linked Lists',       label: 'Linked Lists',    color: '#00D4AA' },
   { topic: 'Stacks',             label: 'Stacks',          color: '#FFB830' },
   { topic: 'Queues',             label: 'Queues',          color: '#FF6B8A' },
@@ -25,7 +25,7 @@ const QUICK_ACTIONS = [
     label: 'Generate AI Quiz',
     sub: 'Create assessments with Llama 3',
     icon: Sparkles,
-    color: '#9B7ED4',
+    color: '#6C8EF5',
     to: '/teacher/assessments/generate',
     featured: true,
   },
@@ -45,6 +45,7 @@ interface SubRow {
   assessmentTitle: string
   moduleTopic: string | null
   studentName: string
+  studentAvatar: string | null
 }
 
 const stagger = (i: number) => ({
@@ -109,11 +110,11 @@ export default function TeacherDashboard() {
         .limit(60)
 
       const studentIds = Array.from(new Set((subs ?? []).map(s => s.student_id)))
-      const profileMap: Record<string, { first_name: string; last_name: string }> = {}
+      const profileMap: Record<string, { first_name: string; last_name: string; avatar_url: string | null }> = {}
       if (studentIds.length) {
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name')
+          .select('id, first_name, last_name, avatar_url')
           .in('id', studentIds)
         ;(profiles ?? []).forEach(p => { profileMap[p.id] = p })
       }
@@ -129,6 +130,7 @@ export default function TeacherDashboard() {
         studentName: profileMap[s.student_id]
           ? `${profileMap[s.student_id].first_name} ${profileMap[s.student_id].last_name}`
           : 'Student',
+        studentAvatar: profileMap[s.student_id]?.avatar_url ?? null,
       })))
     } catch (e) {
       console.error(e)
@@ -265,7 +267,7 @@ export default function TeacherDashboard() {
                   className="td-list-row"
                   onClick={() => navigate(`/teacher/assessments?open=${s.assessment_id}`)}
                 >
-                  <span className="td-list-avatar">{s.studentName[0]}</span>
+                  <span className="td-list-avatar">{s.studentAvatar ? <img src={s.studentAvatar} alt="avatar" className="td-list-avatar-img" /> : s.studentName[0]}</span>
                   <div className="td-list-text">
                     <span className="td-list-name">{s.studentName}</span>
                     <span className="td-list-sub">{s.assessmentTitle}</span>
@@ -300,7 +302,7 @@ export default function TeacherDashboard() {
                     className="td-list-row"
                     onClick={() => navigate(`/teacher/assessments?open=${s.assessment_id}`)}
                   >
-                    <span className="td-list-avatar">{s.studentName[0]}</span>
+                    <span className="td-list-avatar">{s.studentAvatar ? <img src={s.studentAvatar} alt="avatar" className="td-list-avatar-img" /> : s.studentName[0]}</span>
                     <div className="td-list-text">
                       <span className="td-list-name">{s.studentName}</span>
                       <span className="td-list-sub">submitted {s.assessmentTitle}</span>

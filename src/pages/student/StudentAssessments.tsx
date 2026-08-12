@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -45,7 +45,7 @@ function isMissed(a: Assessment): boolean {
 }
 
 const TYPE_COLOR: Record<string, string> = {
-  quiz:       '#9B7ED4',
+  quiz:       '#6C8EF5',
   activity:   '#00D4AA',
   assignment: '#FFB830',
   exam:       '#FF6B8A',
@@ -62,7 +62,7 @@ const DIFF_COLOR: Record<string, string> = {
   Easy:   '#00D4AA',
   Medium: '#FFB830',
   Hard:   '#FF6B8A',
-  Mixed:  '#9B7ED4',
+  Mixed:  '#6C8EF5',
 }
 
 const stagger = (i: number) => ({
@@ -189,7 +189,7 @@ export default function StudentAssessments() {
       {/* Stats row */}
       <motion.div className="sa-stats" {...stagger(1)}>
         {[
-          { label: 'Total',     value: stats.total,   icon: ClipboardList, color: '#9B7ED4' },
+          { label: 'Total',     value: stats.total,   icon: ClipboardList, color: '#6C8EF5' },
           { label: 'Pending',   value: stats.pending,  icon: Clock,         color: '#FFB830' },
           { label: 'Done',      value: stats.done,     icon: CheckCircle2,  color: '#00D4AA' },
           { label: 'Missed',    value: stats.missed,   icon: XCircle,       color: '#FF6B8A' },
@@ -287,7 +287,7 @@ export default function StudentAssessments() {
               const isFile       = isFileType(a.type)
               const hasGrade     = done && !isFile && a.submission?.percentage != null
               const pendingGrade = done && isFile && (a.submission?.percentage == null || a.submission.percentage === 0)
-              const typeColor    = TYPE_COLOR[a.type] ?? '#9B7ED4'
+              const typeColor    = TYPE_COLOR[a.type] ?? '#6C8EF5'
               const overdue      = a.due_date && !done && !missed && new Date(a.due_date) < new Date()
               const locked       = !!a.opens_at && new Date(a.opens_at) > new Date()
               const archivedLocked = !!a.blockArchived && !done
@@ -312,7 +312,7 @@ export default function StudentAssessments() {
                           {TYPE_LABEL[a.type]}
                         </span>
                         {a.difficulty && (
-                          <span className="sa-diff-badge" style={{ color: DIFF_COLOR[a.difficulty] ?? '#9B7ED4' }}>
+                          <span className="sa-diff-badge" style={{ color: DIFF_COLOR[a.difficulty] ?? '#6C8EF5' }}>
                             {a.difficulty}
                           </span>
                         )}

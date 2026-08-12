@@ -1,4 +1,4 @@
-.sd-root {
+﻿.sd-root {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -11,8 +11,8 @@
   align-items: center;
   gap: 7px;
   width: fit-content;
-  background: rgba(155,126,212,0.1);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.1);
+  border: 1px solid rgba(108,142,245,0.25);
   border-radius: 99px;
   padding: 6px 14px;
   font-family: 'JetBrains Mono', monospace;
@@ -277,9 +277,9 @@
 }
 
 .sd-module-card.active {
-  border-color: rgba(124,92,191,0.35);
-  background: rgba(124,92,191,0.08);
-  box-shadow: 0 0 20px rgba(124,92,191,0.1);
+  border-color: rgba(59,91,219,0.35);
+  background: rgba(59,91,219,0.08);
+  box-shadow: 0 0 20px rgba(59,91,219,0.1);
 }
 
 .sd-module-card.locked {
@@ -428,8 +428,8 @@
 
 /* ── Daily Challenge ───────────────────────────────────────────────────────── */
 .sd-challenge-card {
-  background: linear-gradient(135deg, var(--bg-card), rgba(124,92,191,0.08));
-  border: 1px solid rgba(124,92,191,0.2);
+  background: linear-gradient(135deg, var(--bg-card), rgba(59,91,219,0.08));
+  border: 1px solid rgba(59,91,219,0.2);
   border-radius: 14px;
   padding: 18px;
   display: flex;
@@ -451,8 +451,8 @@
   font-size: 9px;
   letter-spacing: 1.5px;
   color: var(--purple-light);
-  background: rgba(124,92,191,0.1);
-  border: 1px solid rgba(124,92,191,0.2);
+  background: rgba(59,91,219,0.1);
+  border: 1px solid rgba(59,91,219,0.2);
   border-radius: 99px;
   padding: 4px 10px;
 }
@@ -554,6 +554,9 @@
   height: 28px;
   background: linear-gradient(135deg, var(--purple), var(--cyan));
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -562,6 +565,15 @@
   color: white;
   flex-shrink: 0;
   letter-spacing: 0.3px;
+}
+
+.sd-lb-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .sd-lb-name {
@@ -716,7 +728,7 @@
 }
 
 .sd-attempt-input::placeholder { color: var(--text-muted); }
-.sd-attempt-input:focus { border-color: rgba(124,92,191,0.4); }
+.sd-attempt-input:focus { border-color: rgba(59,91,219,0.4); }
 
 .sd-challenge-done {
   display: flex;
@@ -845,7 +857,7 @@
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #FFB830;
+  color: var(--xp);
   background: rgba(255,184,48,0.12);
   border: 1px solid rgba(255,184,48,0.3);
   border-radius: 999px;
@@ -864,6 +876,6 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: 600;
-  color: var(--teal, #00D4AA);
+  color: var(--teal, var(--cyan));
   letter-spacing: 0.3px;
 }

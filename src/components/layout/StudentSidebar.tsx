@@ -281,7 +281,9 @@ export default function StudentSidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="sidebar-footer">
         <div className={`sidebar-user ${collapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-avatar">
-            {user?.firstName?.[0]}{user?.lastName?.[0]}
+            {user?.avatarUrl
+              ? <img src={user.avatarUrl} alt="avatar" className="sidebar-avatar-img" />
+              : <>{user?.firstName?.[0]}{user?.lastName?.[0]}</>}
           </div>
           <AnimatePresence>
             {!collapsed && (

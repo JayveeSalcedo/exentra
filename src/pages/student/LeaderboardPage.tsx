@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -74,7 +74,7 @@ export default function LeaderboardPage() {
         </div>
         <div className="lb-header-stats">
           <div className="lb-header-stat">
-            <Users size={14} style={{ color: '#9B7ED4' }} />
+            <Users size={14} style={{ color: '#6C8EF5' }} />
             <span className="lb-header-stat-val">{totalStudents}</span>
             <span className="lb-header-stat-label">Students</span>
           </div>
@@ -188,7 +188,7 @@ export default function LeaderboardPage() {
                         : <span className="lb-rank-num">#{entry.global_rank}</span>}
                     </div>
                     <div className="lb-col-student">
-                      <div className="lb-avatar" style={isYou ? { background: 'linear-gradient(135deg, #00D4AA, #9B7ED4)' } : {}}>
+                      <div className="lb-avatar" style={isYou ? { background: 'linear-gradient(135deg, #00D4AA, #6C8EF5)' } : {}}>
                         {entry.first_name[0]}{entry.last_name[0]}
                       </div>
                       <div className="lb-student-info">

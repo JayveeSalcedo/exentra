@@ -1,8 +1,9 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Gamepad2, Lock, Star, Zap, Users, User } from 'lucide-react'
 import './Games.css'
+import { useTheme } from '../../store/ThemeContext'
 
 interface GameCard {
   id: string
@@ -30,7 +31,7 @@ const GAMES: GameCard[] = [
     title: 'Node Connect',
     description: 'Build and repair linked structures by connecting nodes and traversing lists.',
     topic: 'Lists & Linked Lists',
-    color: '#9B7ED4',
+    color: '#6C8EF5',
     available: true,
   },
   {
@@ -66,7 +67,7 @@ const GAMES: GameCard[] = [
     title: 'Path Explorer',
     description: 'Traverse graphs using BFS, DFS, and find shortest paths with Dijkstra.',
     topic: 'Graphs',
-    color: '#9B7ED4',
+    color: '#6C8EF5',
     available: true,
   },
   {
@@ -80,6 +81,19 @@ const GAMES: GameCard[] = [
   },
 ]
 
+// Light mode swaps the dark-tuned neons for readable institution-colorway
+// equivalents (same values as the CSS accent variables) — only used for the
+// card body (text/buttons on the cream surface), not the dark preview art.
+const LIGHT_BODY_COLOR: Record<string, string> = {
+  '#00D4AA': '#0E8F72',
+  '#6C8EF5': '#2A4AC4',
+  '#FFB830': '#B8860B',
+  '#FF6B8A': '#C4302B',
+}
+function useBodyColor(color: string) {
+  const { theme } = useTheme()
+  return theme === 'light' ? (LIGHT_BODY_COLOR[color] ?? color) : color
+}
 // ─── Per-game schematic glyph — a tiny diagram of the structure itself ────
 // (replaces the old emoji/video preview; stays consistent with the
 // "mechanic IS the data structure" direction of the games rework)
@@ -174,6 +188,7 @@ function GameGlyph({ id, color }: { id: string; color: string }) {
 function GameCardItem({ game, index }: { game: GameCard; index: number }) {
   const navigate = useNavigate()
   const [hovered, setHovered] = useState(false)
+  const bodyColor = useBodyColor(game.color)
 
   return (
     <motion.div
@@ -188,7 +203,7 @@ function GameCardItem({ game, index }: { game: GameCard; index: number }) {
     >
       {/* ── Preview area ────────────────────────────────────── */}
       <div className="game-preview"
-        style={{ background: `linear-gradient(135deg, ${game.color}12 0%, rgba(8,11,24,0.9) 100%)` }}>
+        style={{ background: `linear-gradient(135deg, ${game.color}12 0%, var(--preview-dark) 100%)` }}>
         <div className="game-preview-grid" style={{ '--dot-color': `${game.color}25` } as React.CSSProperties} />
 
         <div className="game-preview-glyph-wrap">
@@ -222,7 +237,7 @@ function GameCardItem({ game, index }: { game: GameCard; index: number }) {
           <div>
             <h3 className="game-card-title">{game.title}</h3>
             <p className="game-card-topic"
-              style={{ color: game.available ? game.color : 'var(--text-muted)' }}>
+              style={{ color: game.available ? bodyColor : 'var(--text-muted)' }}>
               {game.topic}
             </p>
           </div>
@@ -241,7 +256,7 @@ function GameCardItem({ game, index }: { game: GameCard; index: number }) {
           {game.available ? (
             <button
               className="game-play-btn"
-              style={{ background: `${game.color}15`, color: game.color, borderColor: `${game.color}40` }}
+              style={{ background: `${bodyColor}15`, color: bodyColor, borderColor: `${bodyColor}40` }}
               onClick={e => { e.stopPropagation(); navigate(`/student/games/${game.id}`) }}
             >
               Play →
@@ -278,7 +293,7 @@ export default function Games() {
             <span>{available} Available</span>
           </div>
           <div className="games-stat">
-            <Star size={13} color="#9B7ED4" />
+            <Star size={13} color="#6C8EF5" />
             <span>{GAMES.length} Total</span>
           </div>
         </div>

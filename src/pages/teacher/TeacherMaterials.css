@@ -1,4 +1,4 @@
-/* ── Teacher Materials Page ───────────────────────────────────────────────── */
+﻿/* ── Teacher Materials Page ───────────────────────────────────────────────── */
 
 .tm-root {
   display: flex;
@@ -82,7 +82,7 @@
   font-family: inherit;
   transition: all 0.18s;
 }
-.tm-block-card:hover { border-color: rgba(155,126,212,0.35); background: var(--surface-02); }
+.tm-block-card:hover { border-color: rgba(108,142,245,0.35); background: var(--surface-02); }
 
 .tm-block-card--all { border-color: rgba(0,212,170,0.25); }
 .tm-block-card--all:hover { border-color: rgba(0,212,170,0.4); }
@@ -91,8 +91,8 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: rgba(155,126,212,0.12);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.12);
+  border: 1px solid rgba(108,142,245,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,8 +161,8 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--purple-light);
-  background: rgba(155,126,212,0.1);
-  border: 1px solid rgba(155,126,212,0.25);
+  background: rgba(108,142,245,0.1);
+  border: 1px solid rgba(108,142,245,0.25);
   border-radius: 99px;
   padding: 6px 14px;
 }
@@ -228,8 +228,8 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg, rgba(124,92,191,0.2), rgba(0,212,170,0.1));
-  border: 1px solid rgba(124,92,191,0.3);
+  background: linear-gradient(135deg, rgba(59,91,219,0.2), rgba(0,212,170,0.1));
+  border: 1px solid rgba(59,91,219,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -391,7 +391,7 @@
   text-decoration: none;
   transition: all 0.18s;
 }
-.tm-file-view:hover { background: rgba(155,126,212,0.1); border-color: rgba(155,126,212,0.3); color: var(--purple-light); }
+.tm-file-view:hover { background: rgba(108,142,245,0.1); border-color: rgba(108,142,245,0.3); color: var(--purple-light); }
 
 .tm-file-delete {
   display: flex;
