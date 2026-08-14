@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import StudentSidebar from './StudentSidebar'
@@ -17,21 +17,30 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function StudentLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const pageTitle = location.pathname.startsWith('/student/courses/')
     ? 'Interactive Lesson'
     : PAGE_TITLES[location.pathname] ?? 'Exentra'
+
+  // Close the mobile drawer automatically whenever the route changes
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   return (
     <div className="app-layout">
       <StudentSidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((v) => !v)}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
       />
       <div className="app-main">
         <Topbar
           pageTitle={pageTitle}
           breadcrumb="Dashboard"
+          onMenuClick={() => setMobileOpen(true)}
         />
         <motion.main
           className="app-content"

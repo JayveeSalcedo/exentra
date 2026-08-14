@@ -34,6 +34,12 @@
   background: var(--surface-15);
 }
 
+@media (max-width: 900px) {
+  .app-content {
+    padding: 18px;
+  }
+}
+
 /* Teacher role badge */
 .sidebar-role-badge {
   margin: 8px 12px;

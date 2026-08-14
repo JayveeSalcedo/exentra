@@ -19,6 +19,28 @@
   gap: 0;
 }
 
+/* Hamburger — hidden on desktop, shown only on mobile via media query below */
+.topbar-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-right: 10px;
+  background: var(--surface-04);
+  border: 1px solid var(--surface-07);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.topbar-menu-btn:hover {
+  background: var(--surface-08);
+  color: var(--text-primary);
+}
+
 .topbar-breadcrumb {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -248,6 +270,28 @@
   border-radius: 50%;
   background: var(--cyan);
   margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    padding: 0 14px;
+  }
+
+  .topbar-menu-btn {
+    display: flex;
+  }
+
+  .topbar-breadcrumb {
+    display: none;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+  }
+
+  .topbar-right {
+    gap: 6px;
+  }
 }
 
 @media (max-width: 768px) {

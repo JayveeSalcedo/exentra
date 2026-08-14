@@ -417,3 +417,72 @@
   padding: 4px;
   border-radius: 8px;
 }
+
+/* ===== Mobile hamburger drawer ===== */
+.sidebar-mobile-close {
+  display: none;
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-06);
+  border: 1px solid var(--surface-10);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  z-index: 5;
+}
+
+.sidebar-mobile-close:hover {
+  background: var(--surface-10);
+  color: var(--text-primary);
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 268px !important;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 300;
+    box-shadow: 24px 0 60px rgba(0,0,0,0.45);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* On mobile the drawer always shows the full (uncollapsed) layout */
+  .sidebar.mobile-collapsed-override .sidebar-link.collapsed {
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar-mobile-close {
+    display: flex;
+  }
+
+  .sidebar-backdrop.visible {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(4,6,16,0.6);
+    backdrop-filter: blur(2px);
+    z-index: 290;
+  }
+}
+

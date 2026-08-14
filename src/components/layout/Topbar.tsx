@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
   Bell, Moon, Sun, ClipboardList, BookOpen,
-  Award, CalendarClock, CheckCheck, Inbox, FileCheck2,
+  Award, CalendarClock, CheckCheck, Inbox, FileCheck2, Menu,
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import { useTheme } from '../../store/ThemeContext'
@@ -13,6 +13,7 @@ import './Topbar.css'
 interface TopbarProps {
   pageTitle: string
   breadcrumb?: string
+  onMenuClick?: () => void
 }
 
 type NotificationType = 'assessment_posted' | 'material_posted' | 'grade_released' | 'due_soon' | 'student_submitted'
@@ -55,7 +56,7 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
 }
 
-export default function Topbar({ pageTitle, breadcrumb }: TopbarProps) {
+export default function Topbar({ pageTitle, breadcrumb, onMenuClick }: TopbarProps) {
   const { user } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
@@ -132,8 +133,15 @@ export default function Topbar({ pageTitle, breadcrumb }: TopbarProps) {
 
   return (
     <header className="topbar">
-      {/* Left — breadcrumb + title */}
+      {/* Left — hamburger (mobile) + breadcrumb + title */}
       <div className="topbar-left">
+        <button
+          className="topbar-menu-btn"
+          onClick={onMenuClick}
+          title="Open menu"
+        >
+          <Menu size={18} />
+        </button>
         {breadcrumb && (
           <span className="topbar-breadcrumb">{breadcrumb} /&nbsp;</span>
         )}
