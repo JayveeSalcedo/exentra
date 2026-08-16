@@ -188,7 +188,21 @@ function GameGlyph({ id, color }: { id: string; color: string }) {
 function GameCardItem({ game, index }: { game: GameCard; index: number }) {
   const navigate = useNavigate()
   const [hovered, setHovered] = useState(false)
+  const { theme } = useTheme()
   const bodyColor = useBodyColor(game.color)
+  const isLight = theme === 'light'
+
+  // Light mode: soft pastel preview panel + white glyph card (institution look).
+  // Dark mode: keeps the original deep-navy schematic panel.
+  const previewBg = isLight
+    ? `linear-gradient(160deg, ${bodyColor}22 0%, ${bodyColor}0A 100%)`
+    : `linear-gradient(135deg, ${game.color}12 0%, var(--preview-dark) 100%)`
+  const ringBg = isLight ? '#FFFFFF' : 'var(--preview-dark-soft)'
+  const ringBorderColor = isLight ? `${bodyColor}20` : `${game.color}30`
+  const ringShadow = hovered
+    ? (isLight ? `0 10px 24px ${bodyColor}33` : `0 0 32px ${game.color}30`)
+    : (isLight ? `0 2px 10px ${bodyColor}17` : 'none')
+  const badgeBg = isLight ? 'rgba(255,255,255,0.7)' : `${bodyColor}12`
 
   return (
     <motion.div
@@ -199,18 +213,17 @@ function GameCardItem({ game, index }: { game: GameCard; index: number }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => game.available && navigate(`/student/games/${game.id}`)}
-      style={{ '--card-color': game.color } as React.CSSProperties}
+      style={{ '--card-color': bodyColor, '--card-color-30': `${bodyColor}4D`, '--card-color-15': `${bodyColor}26` } as React.CSSProperties}
     >
       {/* ── Preview area ────────────────────────────────────── */}
-      <div className="game-preview"
-        style={{ background: `linear-gradient(135deg, ${game.color}12 0%, var(--preview-dark) 100%)` }}>
-        <div className="game-preview-grid" style={{ '--dot-color': `${game.color}25` } as React.CSSProperties} />
+      <div className="game-preview" style={{ background: previewBg }}>
+        <div className="game-preview-grid" style={{ '--dot-color': `${bodyColor}25` } as React.CSSProperties} />
 
         <div className="game-preview-glyph-wrap">
           <div className="game-preview-glyph-ring"
-            style={{ borderColor: `${game.color}30`, boxShadow: hovered ? `0 0 32px ${game.color}30` : 'none' }}>
+            style={{ background: ringBg, borderColor: ringBorderColor, boxShadow: ringShadow }}>
             {game.available ? (
-              <GameGlyph id={game.id} color={game.color} />
+              <GameGlyph id={game.id} color={bodyColor} />
             ) : (
               <Lock size={22} color="var(--text-muted)" />
             )}
@@ -218,17 +231,17 @@ function GameCardItem({ game, index }: { game: GameCard; index: number }) {
         </div>
 
         <div className="game-preview-badge"
-          style={{ color: game.color, borderColor: `${game.color}30`, background: `${game.color}12` }}>
+          style={{ color: bodyColor, borderColor: `${bodyColor}30`, background: badgeBg }}>
           MOD {String(game.module).padStart(2, '0')}
         </div>
 
         {game.available && (
           <div className="game-preview-live"
-            style={{ background: game.color, boxShadow: `0 0 8px ${game.color}` }} />
+            style={{ background: bodyColor, boxShadow: `0 0 8px ${bodyColor}` }} />
         )}
 
         <div className={`game-preview-overlay ${hovered && game.available ? 'visible' : ''}`}
-          style={{ background: `linear-gradient(to top, ${game.color}22, transparent)` }} />
+          style={{ background: `linear-gradient(to top, ${bodyColor}22, transparent)` }} />
       </div>
 
       {/* ── Info area ───────────────────────────────────────── */}

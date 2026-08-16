@@ -121,7 +121,7 @@ export default function SplashScreen() {
               transition={{ delay: 0.4, duration: 0.7, type: 'spring', stiffness: 100, damping: 12 }}
             >
               <motion.img
-                src="/algie.svg"
+                src="/mascot.png"
                 alt="Algie"
                 className="splash-mascot-img"
                 animate={{
@@ -214,6 +214,17 @@ export default function SplashScreen() {
               background: radial-gradient(circle, rgba(59,91,219,0.15), transparent);
               bottom: 100px; left: 30%;
             }
+            /* Light mode: same institution-colorway (royal blue / gold) orbs, much
+               softer so they read as a warm glow on cream instead of murky haze. */
+            :root.light-mode .splash-orb-1 {
+              background: radial-gradient(circle, rgba(42,74,196,0.12), transparent);
+            }
+            :root.light-mode .splash-orb-2 {
+              background: radial-gradient(circle, rgba(14,143,114,0.10), transparent);
+            }
+            :root.light-mode .splash-orb-3 {
+              background: radial-gradient(circle, rgba(184,134,11,0.08), transparent);
+            }
             .splash-grid {
               position: absolute;
               inset: 0;
@@ -221,6 +232,11 @@ export default function SplashScreen() {
                 linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
               background-size: 40px 40px;
+            }
+            :root.light-mode .splash-grid {
+              background-image:
+                linear-gradient(rgba(42,74,196,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42,74,196,0.05) 1px, transparent 1px);
             }
             /* Particles */
             .splash-particles {
@@ -235,9 +251,17 @@ export default function SplashScreen() {
               opacity: 0;
               animation: particleFade ease-in-out infinite;
             }
+            :root.light-mode .particle {
+              background: var(--accent, #2A4AC4);
+              animation-name: particleFadeLight;
+            }
             @keyframes particleFade {
               0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
               50% { opacity: 0.4; transform: translateY(-20px) scale(1.5); }
+            }
+            @keyframes particleFadeLight {
+              0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+              50% { opacity: 0.28; transform: translateY(-20px) scale(1.5); }
             }
             /* Content */
             .splash-content {
@@ -264,11 +288,19 @@ export default function SplashScreen() {
               border-right-color: rgba(59,91,219,0.5);
               display: flex; align-items: center; justify-content: center;
             }
+            :root.light-mode .splash-logo-ring {
+              border-top-color: var(--accent, #2A4AC4);
+              border-right-color: rgba(184,134,11,0.5);
+            }
             .splash-logo-inner {
               width: 52px; height: 52px;
               border-radius: 50%;
               background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(59,91,219,0.15));
               border: 1px solid rgba(0,212,170,0.2);
+            }
+            :root.light-mode .splash-logo-inner {
+              background: linear-gradient(135deg, rgba(42,74,196,0.10), rgba(184,134,11,0.12));
+              border: 1px solid rgba(42,74,196,0.18);
             }
             .splash-title-wrap {
               text-align: center;
@@ -284,6 +316,13 @@ export default function SplashScreen() {
               background-clip: text;
               line-height: 1;
             }
+            /* Light mode: dark institution-navy fading into royal blue, since a
+               white-to-teal gradient disappears against the cream surface. */
+            :root.light-mode .splash-title {
+              background: linear-gradient(135deg, #23201A 25%, var(--accent, #2A4AC4));
+              -webkit-background-clip: text;
+              background-clip: text;
+            }
             .splash-subtitle {
               font-family: 'JetBrains Mono', monospace;
               font-size: 11px;
@@ -291,6 +330,10 @@ export default function SplashScreen() {
               color: #00D4AA;
               opacity: 0.7;
               margin-top: 6px;
+            }
+            :root.light-mode .splash-subtitle {
+              color: var(--accent, #2A4AC4);
+              opacity: 0.85;
             }
             /* Mascot */
             .splash-mascot {
@@ -304,6 +347,10 @@ export default function SplashScreen() {
               height: auto;
               position: relative;
               z-index: 1;
+              filter: drop-shadow(0 10px 22px rgba(0,0,0,0.35));
+            }
+            :root.light-mode .splash-mascot-img {
+              filter: drop-shadow(0 10px 20px rgba(40,30,10,0.18));
             }
             .mascot-glow {
               position: absolute;
@@ -314,6 +361,9 @@ export default function SplashScreen() {
               background: radial-gradient(ellipse, rgba(0,212,170,0.3), transparent);
               filter: blur(10px);
               border-radius: 50%;
+            }
+            :root.light-mode .mascot-glow {
+              background: radial-gradient(ellipse, rgba(184,134,11,0.28), transparent);
             }
             /* Loading */
             .splash-loading {
@@ -344,6 +394,9 @@ export default function SplashScreen() {
               border-radius: 999px;
               transition: width 0.1s linear;
             }
+            :root.light-mode .splash-bar-fill {
+              background: linear-gradient(90deg, var(--accent, #2A4AC4), var(--xp, #B8860B));
+            }
             .splash-bar-glow {
               position: absolute;
               top: 50%;
@@ -355,11 +408,18 @@ export default function SplashScreen() {
               opacity: 0.8;
               transition: left 0.1s linear;
             }
+            :root.light-mode .splash-bar-glow {
+              background: var(--xp, #B8860B);
+            }
             .splash-percent {
               font-family: 'Orbitron', monospace;
               font-size: 11px;
               color: #00D4AA;
               opacity: 0.7;
+            }
+            :root.light-mode .splash-percent {
+              color: var(--accent, #2A4AC4);
+              opacity: 0.85;
             }
             /* School */
             .splash-school {
