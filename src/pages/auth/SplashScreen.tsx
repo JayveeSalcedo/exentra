@@ -100,13 +100,16 @@ export default function SplashScreen() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <motion.div
-                className="splash-logo-ring"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              >
-                <div className="splash-logo-inner" />
-              </motion.div>
+              <div className="splash-logo-wrap">
+                <motion.div
+                  className="splash-logo-ring"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                >
+                  <div className="splash-logo-inner" />
+                </motion.div>
+                <img src="/ex-big.png" alt="Exentra" className="splash-logo-img" />
+              </div>
               <div className="splash-title-wrap">
                 <h1 className="splash-title">EXENTRA</h1>
                 <p className="splash-subtitle">DSA LEARNING SYSTEM</p>
@@ -280,6 +283,13 @@ export default function SplashScreen() {
               gap: 16px;
               margin-bottom: 8px;
             }
+            .splash-logo-wrap {
+              position: relative;
+              width: 72px; height: 72px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
             .splash-logo-ring {
               width: 72px; height: 72px;
               border-radius: 50%;
@@ -297,6 +307,15 @@ export default function SplashScreen() {
               border-radius: 50%;
               background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(59,91,219,0.15));
               border: 1px solid rgba(0,212,170,0.2);
+            }
+            .splash-logo-img {
+              position: absolute;
+              top: 50%; left: 50%;
+              transform: translate(-50%, -50%);
+              width: 40px; height: 40px;
+              object-fit: contain;
+              z-index: 1;
+              pointer-events: none;
             }
             :root.light-mode .splash-logo-inner {
               background: linear-gradient(135deg, rgba(42,74,196,0.10), rgba(184,134,11,0.12));
@@ -343,7 +362,7 @@ export default function SplashScreen() {
               align-items: center;
             }
             .splash-mascot-img {
-              width: 260px;
+              width: 150px;
               height: auto;
               position: relative;
               z-index: 1;

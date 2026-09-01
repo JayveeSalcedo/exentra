@@ -38,15 +38,14 @@ import CreateAssessment from './pages/teacher/CreateAssessment'
 import ActivityLog from './pages/teacher/ActivityLog'
 import TeacherStudents from './pages/teacher/TeacherStudents'
 import TeacherProgress from './pages/teacher/TeacherProgress'
-import DevWatermark from './components/ui/DevWatermark'
-import './components/ui/DevWatermark.css'
+import TeacherProfile from './pages/teacher/TeacherProfile'
 import './index.css'
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <DevWatermark />
+       
         <BrowserRouter>
           <Routes>
             {/* Public */}
@@ -110,6 +109,7 @@ function App() {
               <Route path="activity-log" element={<ActivityLog />} />
               <Route path="students" element={<TeacherStudents />} />
               <Route path="progress" element={<TeacherProgress />} />
+              <Route path="profile" element={<TeacherProfile />} />
             </Route>
 
             {/* Fallback */}

@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   BookOpen, ChevronDown, Play, Download,
   Lock, CheckCircle2, Clock, FileText, Video, Paperclip,
-  Zap, Search, ExternalLink, ArrowRight, Target
+  Zap, Search, ExternalLink, ArrowRight, Target, User
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -184,6 +184,7 @@ export default function LearningMaterials() {
   const [activeTab, setActiveTab] = useState<'lessons' | 'materials' | 'videos'>('lessons')
   const [search, setSearch] = useState('')
   const [, setLoading] = useState(true)
+  const [instructorName, setInstructorName] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -214,6 +215,22 @@ export default function LearningMaterials() {
             .eq('status', 'active')
             .maybeSingle()
           myBlockId = enrollment?.block_id ?? null
+
+          if (myBlockId) {
+            const { data: block } = await supabase
+              .from('blocks')
+              .select('teacher_id')
+              .eq('id', myBlockId)
+              .single()
+            if (block?.teacher_id) {
+              const { data: teacher } = await supabase
+                .from('profiles')
+                .select('first_name, last_name')
+                .eq('id', block.teacher_id)
+                .single()
+              if (teacher) setInstructorName(`${teacher.first_name} ${teacher.last_name}`.trim())
+            }
+          }
         }
 
         const visibleMaterials = (dbMaterials ?? []).filter((mat: any) =>
@@ -356,6 +373,9 @@ export default function LearningMaterials() {
           <div>
             <h1 className="lm-title">Learning Materials</h1>
             <p className="lm-subtitle">CC 104 – Data Structures & Algorithms</p>
+            {instructorName && (
+              <p className="lm-instructor"><User size={12} /> {instructorName}</p>
+            )}
           </div>
         </div>
         <div className="lm-header-stats">

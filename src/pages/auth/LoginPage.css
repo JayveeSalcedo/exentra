@@ -154,6 +154,10 @@
   letter-spacing: 0.3px;
 }
 
+:root.light-mode .login-root .terminal-path {
+  color: rgba(255,255,255,0.6);
+}
+
 .login-root .terminal-body {
   padding: 16px 18px 18px;
 }
@@ -164,6 +168,10 @@
   line-height: 1.9;
   color: var(--text-soft);
   white-space: pre;
+}
+
+:root.light-mode .login-root .terminal-line {
+  color: rgba(255,255,255,0.85);
 }
 
 .login-root .terminal-prefix {

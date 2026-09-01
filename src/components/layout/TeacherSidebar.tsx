@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, ClipboardList, Layers,
-  Users, BarChart2, LogOut, ChevronRight, Sparkles, ScrollText, X
+  Users, BarChart2, LogOut, ChevronRight, Sparkles, ScrollText, X, User
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
 import { useState } from 'react'
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { to: '/teacher/students',               icon: Users,            label: 'Students'       },
   { to: '/teacher/progress',               icon: BarChart2,        label: 'Progress'       },
   { to: '/teacher/activity-log',           icon: ScrollText,       label: 'Activity Log'   },
+  { to: '/teacher/profile',                icon: User,             label: 'Profile'        },
 ]
 
 interface SidebarProps {

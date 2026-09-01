@@ -200,7 +200,7 @@ export default function ChatBot() {
             </motion.span>
           ) : (
             <motion.span key="open" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-              <img src="/alchat.png" alt="AI Tutor" className="cb-bubble-icon" draggable={false} />
+              <img src="/alchat.png" alt="Algie" className="cb-bubble-icon" draggable={false} />
             </motion.span>
           )}
         </AnimatePresence>
@@ -211,7 +211,7 @@ export default function ChatBot() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
           >
-            AI Tutor
+            Algie
           </motion.span>
         )}
       </motion.button>

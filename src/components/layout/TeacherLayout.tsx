@@ -15,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/teacher/students':             'Student Roster',
   '/teacher/progress':             'Class Progress',
   '/teacher/activity-log':         'Activity Log',
+  '/teacher/profile':              'Profile',
 }
 
 export default function TeacherLayout() {

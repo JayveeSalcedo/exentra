@@ -1,4 +1,4 @@
-import Groq from 'groq-sdk'
+﻿import Groq from 'groq-sdk'
 
 const apiKey = import.meta.env.VITE_GROQ_API_KEY
 
@@ -8,7 +8,7 @@ if (!apiKey) {
 
 export const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true })
 
-export const MODEL = 'llama-3.3-70b-versatile'
+export const MODEL = 'openai/gpt-oss-120b'
 
 // ── DSA topics ─────────────────────────────────────────────────────────────
 export const DSA_TOPICS = [
@@ -161,9 +161,12 @@ Respond ONLY with valid JSON matching this exact format (no markdown, no extra t
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 512,
+    max_tokens: 1536,
     temperature: 0.8,
-  })
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
 
   const raw = response.choices[0]?.message?.content ?? '{}'
   const clean = raw.replace(/```json|```/g, '').trim()
@@ -207,9 +210,12 @@ Respond ONLY with valid JSON, no markdown, no preamble:
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 512,
+    max_tokens: 1024,
     temperature: 0.3,
-  })
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
 
   const raw = response.choices[0]?.message?.content ?? '{}'
   const clean = raw.replace(/```json|```/g, '').trim()
@@ -286,9 +292,12 @@ Respond ONLY with valid JSON, no markdown, no preamble:
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 1024,
+    max_tokens: 2048,
     temperature: 0.8,
-  })
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
 
   const raw = response.choices[0]?.message?.content ?? '{}'
   const clean = raw.replace(/```json|```/g, '').trim()
@@ -332,9 +341,12 @@ Respond ONLY with valid JSON, no markdown, no preamble:
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 2048,
+    max_tokens: 3072,
     temperature: 0.75,
-  })
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
 
   const raw = response.choices[0]?.message?.content ?? '{}'
   const clean = raw.replace(/```json|```/g, '').trim()
@@ -378,9 +390,12 @@ Generate exactly ${numQuestions} questions. The correct_index must be 0, 1, 2, o
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 4096,
+    max_tokens: 6144,
     temperature: 0.7,
-  })
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
 
   const raw = response.choices[0]?.message?.content ?? '[]'
   const clean = raw.replace(/```json|```/g, '').trim()

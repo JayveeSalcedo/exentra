@@ -850,6 +850,155 @@
   line-height: 1.6;
 }
 
+/* ── Daily Challenge: compact result summary (opens modal) ───────────────── */
+.sd-challenge-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0,212,170,0.06);
+  border: 1px solid rgba(0,212,170,0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: 'Syne', sans-serif;
+  color: inherit;
+  text-align: left;
+}
+
+.sd-challenge-summary:hover {
+  background: rgba(0,212,170,0.1);
+}
+
+.sd-challenge-summary.incorrect {
+  background: rgba(255,107,138,0.06);
+  border-color: rgba(255,107,138,0.18);
+}
+
+.sd-challenge-summary.incorrect:hover {
+  background: rgba(255,107,138,0.1);
+}
+
+.sd-challenge-summary-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sd-challenge-summary-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cyan);
+}
+
+.sd-challenge-summary.incorrect .sd-challenge-summary-status {
+  color: var(--error);
+}
+
+.sd-challenge-summary-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.sd-challenge-summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.sd-challenge-summary-cta {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Daily Challenge: result modal ────────────────────────────────────────── */
+.sd-challenge-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 18, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.sd-challenge-modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: linear-gradient(135deg, var(--bg-card), rgba(59,91,219,0.1));
+  border: 1px solid rgba(59,91,219,0.25);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+.sd-challenge-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--surface-04);
+  border: 1px solid var(--surface-08);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sd-challenge-modal-close:hover {
+  background: var(--surface-06);
+}
+
+.sd-challenge-modal-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--purple-light);
+  background: rgba(59,91,219,0.1);
+  border: 1px solid rgba(59,91,219,0.2);
+  border-radius: 99px;
+  padding: 4px 10px;
+  width: fit-content;
+  margin-bottom: 14px;
+}
+
+.sd-challenge-modal .sd-challenge-done {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.sd-challenge-modal .sd-challenge-done.incorrect {
+  background: none;
+  border: none;
+}
+
+@media (max-width: 640px) {
+  .sd-challenge-modal { padding: 18px; max-height: 80vh; }
+}
+
 .sd-block-archived-badge {
   margin-left: 6px;
   padding: 1px 7px;
@@ -868,7 +1017,6 @@
   align-items: center;
   gap: 7px;
   width: fit-content;
-  margin-top: 8px;
   background: rgba(0,212,170,0.08);
   border: 1px solid rgba(0,212,170,0.2);
   border-radius: 99px;
@@ -878,4 +1026,28 @@
   font-weight: 600;
   color: var(--teal, var(--cyan));
   letter-spacing: 0.3px;
+}
+
+.sd-block-instructor {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  background: rgba(155,126,212,0.08);
+  border: 1px solid rgba(155,126,212,0.22);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--purple-light, #9B7ED4);
+  letter-spacing: 0.3px;
+}
+
+.sd-block-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }

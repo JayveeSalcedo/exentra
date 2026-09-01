@@ -7,7 +7,7 @@ import { getTodayChallenge, getTodayAttempt, submitChallengeAttempt, type DailyC
 import {
   Zap, Trophy, Flame, CheckCircle2, ChevronRight,
   BookOpen, Brain, Target, TrendingUp, Star, Play, Lock,
-  Lightbulb, Send, RefreshCw, Layers, XCircle, Clock
+  Lightbulb, Send, RefreshCw, Layers, XCircle, Clock, X, User
 } from 'lucide-react'
 import './StudentDashboard.css'
 
@@ -79,6 +79,7 @@ export default function StudentDashboard() {
   const [completedModules, setCompletedModules] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [blockName, setBlockName] = useState<string | null>(null)
+  const [instructorName, setInstructorName] = useState<string | null>(null)
   const [blockArchived, setBlockArchived] = useState(false)
   const [blockSchedule, setBlockSchedule] = useState<string | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
@@ -93,6 +94,7 @@ export default function StudentDashboard() {
   const [attemptedAnswer, setAttemptedAnswer] = useState('')
   const [attemptResult, setAttemptResult] = useState<ChallengeAttempt | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showResultModal, setShowResultModal] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,12 +148,21 @@ export default function StudentDashboard() {
         if (enrollment?.block_id) {
           const { data: block } = await supabase
             .from('blocks')
-            .select('name, is_archived, schedule')
+            .select('name, is_archived, schedule, teacher_id')
             .eq('id', enrollment.block_id)
             .single()
           setBlockName(block?.name ?? null)
           setBlockArchived(!!block?.is_archived)
           setBlockSchedule(block?.schedule ?? null)
+
+          if (block?.teacher_id) {
+            const { data: teacher } = await supabase
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', block.teacher_id)
+              .single()
+            if (teacher) setInstructorName(`${teacher.first_name} ${teacher.last_name}`.trim())
+          }
         }
       }
 
@@ -246,6 +257,7 @@ export default function StudentDashboard() {
       setAttempted(true)
       setAttemptedAnswer(attemptAnswer)
       setAttemptResult(result)
+      setShowResultModal(true)
     }
     setSubmitting(false)
   }
@@ -277,28 +289,42 @@ export default function StudentDashboard() {
     <div className="sd-root">
 
       {/* ── Stats row ─────────────────────────────────────────────────── */}
-      <motion.div
-        className="sd-block-badge"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Layers size={12} />
-        {blockName ? blockName : 'No section assigned yet — contact your instructor'}
-        {blockName && blockArchived && <span className="sd-block-archived-badge">Archived</span>}
-      </motion.div>
-
-      {blockName && blockSchedule && (
+      <div className="sd-block-meta-row">
         <motion.div
-          className="sd-block-schedule"
+          className="sd-block-badge"
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.05 }}
+          transition={{ duration: 0.3 }}
         >
-          <Clock size={12} />
-          {blockSchedule}
+          <Layers size={12} />
+          {blockName ? blockName : 'No section assigned yet — contact your instructor'}
+          {blockName && blockArchived && <span className="sd-block-archived-badge">Archived</span>}
         </motion.div>
-      )}
+
+        {blockName && blockSchedule && (
+          <motion.div
+            className="sd-block-schedule"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+          >
+            <Clock size={12} />
+            {blockSchedule}
+          </motion.div>
+        )}
+
+        {blockName && instructorName && (
+          <motion.div
+            className="sd-block-instructor"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.08 }}
+          >
+            <User size={12} />
+            {instructorName}
+          </motion.div>
+        )}
+      </div>
 
       <div className="sd-stats-row">
         {stats.map((stat, i) => (
@@ -510,13 +536,22 @@ export default function StudentDashboard() {
 
                 {/* Attempt area */}
                 {attempted ? (
-                  <div className={`sd-challenge-done ${attemptResult?.is_correct ? 'correct' : 'incorrect'}`}>
-                    <div className="sd-challenge-done-top">
-                      {attemptResult?.is_correct ? (
-                        <><CheckCircle2 size={14} color="#00D4AA" /><span>Correct!</span></>
-                      ) : (
-                        <><XCircle size={14} color="#FF6B8A" /><span>Not quite right</span></>
-                      )}
+                  <button
+                    type="button"
+                    className={`sd-challenge-summary ${attemptResult?.is_correct ? 'correct' : 'incorrect'}`}
+                    onClick={() => setShowResultModal(true)}
+                  >
+                    <div className="sd-challenge-summary-top">
+                      <span className="sd-challenge-summary-status">
+                        {attemptResult?.is_correct ? (
+                          <><CheckCircle2 size={14} color="#00D4AA" /> Correct!</>
+                        ) : (
+                          <><XCircle size={14} color="#FF6B8A" /> Not quite right</>
+                        )}
+                      </span>
+                      <ChevronRight size={15} className="sd-challenge-summary-chevron" />
+                    </div>
+                    <div className="sd-challenge-summary-meta">
                       {attemptResult?.score_pct != null && (
                         <span className="sd-challenge-done-pct">{attemptResult.score_pct}%</span>
                       )}
@@ -525,27 +560,9 @@ export default function StudentDashboard() {
                           <Zap size={11} color="#FFB830" /> +{attemptResult?.xp_earned} XP
                         </span>
                       )}
+                      <span className="sd-challenge-summary-cta">View full result</span>
                     </div>
-
-                    <p className="sd-attempted-answer-label">Your answer</p>
-                    <p className="sd-attempted-answer">{attemptedAnswer}</p>
-
-                    {attemptResult?.ai_feedback && (
-                      <div className="sd-challenge-feedback">
-                        <p className="sd-challenge-feedback-label">
-                          <Brain size={12} /> {attemptResult.is_correct ? 'Why it\'s correct' : 'Where you went wrong'}
-                        </p>
-                        <p>{attemptResult.ai_feedback}</p>
-                      </div>
-                    )}
-
-                    {!attemptResult?.is_correct && challenge.model_answer && (
-                      <div className="sd-challenge-model-answer">
-                        <p className="sd-challenge-model-answer-label">Correct answer</p>
-                        <p>{challenge.model_answer}</p>
-                      </div>
-                    )}
-                  </div>
+                  </button>
                 ) : (
                   <div className="sd-challenge-attempt">
                     <textarea
@@ -641,6 +658,81 @@ export default function StudentDashboard() {
 
         </div>
       </div>
+
+      {/* ── Daily Challenge result modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {showResultModal && challenge && attemptResult && (
+          <motion.div
+            className="sd-challenge-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowResultModal(false)}
+          >
+            <motion.div
+              className="sd-challenge-modal"
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 8 }}
+              transition={{ duration: 0.2 }}
+              onClick={e => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Daily challenge result"
+            >
+              <button
+                type="button"
+                className="sd-challenge-modal-close"
+                onClick={() => setShowResultModal(false)}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+
+              <span className="sd-challenge-modal-tag">
+                <Brain size={11} /> AI DAILY CHALLENGE
+              </span>
+
+              <div className={`sd-challenge-done ${attemptResult.is_correct ? 'correct' : 'incorrect'}`}>
+                <div className="sd-challenge-done-top">
+                  {attemptResult.is_correct ? (
+                    <><CheckCircle2 size={14} color="#00D4AA" /><span>Correct!</span></>
+                  ) : (
+                    <><XCircle size={14} color="#FF6B8A" /><span>Not quite right</span></>
+                  )}
+                  {attemptResult.score_pct != null && (
+                    <span className="sd-challenge-done-pct">{attemptResult.score_pct}%</span>
+                  )}
+                  {(attemptResult.xp_earned ?? 0) > 0 && (
+                    <span className="sd-challenge-done-xp">
+                      <Zap size={11} color="#FFB830" /> +{attemptResult.xp_earned} XP
+                    </span>
+                  )}
+                </div>
+
+                <p className="sd-attempted-answer-label">Your answer</p>
+                <p className="sd-attempted-answer">{attemptedAnswer}</p>
+
+                {attemptResult.ai_feedback && (
+                  <div className="sd-challenge-feedback">
+                    <p className="sd-challenge-feedback-label">
+                      <Brain size={12} /> {attemptResult.is_correct ? 'Why it\'s correct' : 'Where you went wrong'}
+                    </p>
+                    <p>{attemptResult.ai_feedback}</p>
+                  </div>
+                )}
+
+                {!attemptResult.is_correct && challenge.model_answer && (
+                  <div className="sd-challenge-model-answer">
+                    <p className="sd-challenge-model-answer-label">Correct answer</p>
+                    <p>{challenge.model_answer}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
