@@ -42,36 +42,36 @@ interface StudentProgress {
 
 const YT_LINKS: Record<number, { title: string; url: string }[]> = {
   1: [
-    { title: 'Arrays in Java – Bro Code', url: 'https://www.youtube.com/watch?v=ei_4Nt7XWkw' },
-    { title: 'ArrayList vs Array – Alex Lee', url: 'https://www.youtube.com/watch?v=NbYgm0r7u6o' },
+    { title: 'Learn Java Arrays in 9 Minutes', url: 'https://www.youtube.com/watch?v=9dr2mHYYoug' },
+    { title: 'Array vs ArrayList in Java', url: 'https://www.youtube.com/watch?v=VUcYAnJrglo' },
   ],
   2: [
-    { title: 'Linked Lists Explained – freeCodeCamp', url: 'https://www.youtube.com/watch?v=F8AbOfQwl1c' },
-    { title: 'Singly vs Doubly Linked List', url: 'https://www.youtube.com/watch?v=UwplnKiHPCk' },
+    { title: 'Introduction to Linked Lists – CS Dojo', url: 'https://www.youtube.com/watch?v=WwfhLC16bis' },
+    { title: 'Linked List: Singly + Doubly + Circular – Kunal Kushwaha', url: 'https://www.youtube.com/watch?v=58YbpRDc4yw' },
   ],
   3: [
-    { title: 'Stack Data Structure – mycodeschool', url: 'https://www.youtube.com/watch?v=F1Zzww9Loos' },
-    { title: 'Queue Data Structure – mycodeschool', url: 'https://www.youtube.com/watch?v=okr-XE8yTO8' },
+    { title: 'Push, Pop and Peek Operations on Stack', url: 'https://www.youtube.com/watch?v=uSl2joOs0d0' },
+    { title: 'Queue Data Structure Basics', url: 'https://www.youtube.com/watch?v=W-_60OXqwLk' },
   ],
   4: [
-    { title: 'Binary Trees – freeCodeCamp', url: 'https://www.youtube.com/watch?v=fAAZixBzIAI' },
-    { title: 'BST Insert/Delete – mycodeschool', url: 'https://www.youtube.com/watch?v=gcULXE7ViZw' },
+    { title: 'Binary Trees – Neso Academy', url: 'https://www.youtube.com/watch?v=lAo9r_asiew' },
+    { title: 'Binary Search Tree (BST) – codebasics', url: 'https://www.youtube.com/watch?v=lFq5mYUWEBk' },
   ],
   5: [
-    { title: 'Graphs for Beginners – CS Dojo', url: 'https://www.youtube.com/watch?v=gXgEDyodOJU' },
-    { title: 'BFS and DFS – freeCodeCamp', url: 'https://www.youtube.com/watch?v=tWVWeAqZ0WU' },
+    { title: 'Introduction to Graphs – Apna College', url: 'https://www.youtube.com/watch?v=RpgyCJBbl5E' },
+    { title: 'BFS and DFS Graph Traversal Explained', url: 'https://www.youtube.com/watch?v=D8ZS32wGs0s' },
   ],
   6: [
-    { title: 'Sorting Algorithms Visualized', url: 'https://www.youtube.com/watch?v=kPRA0W1kECg' },
-    { title: 'Searching Algorithms – CS50', url: 'https://www.youtube.com/watch?v=DSffdCT4lSY' },
+    { title: 'All the Sorting Algorithms', url: 'https://www.youtube.com/watch?v=GMV7ycKZ-mM' },
+    { title: 'Linear vs Jump vs Binary Search', url: 'https://www.youtube.com/watch?v=m1VOyAk7FCw' },
   ],
   7: [
-    { title: 'Binary Search – freeCodeCamp', url: 'https://www.youtube.com/watch?v=P3YID7liBug' },
-    { title: 'Linear vs Binary Search', url: 'https://www.youtube.com/watch?v=C46QfTjVCNU' },
+    { title: 'Learn Binary Search in 10 Minutes', url: 'https://www.youtube.com/watch?v=xrMppTpoqdw' },
+    { title: 'Linear Search vs Binary Search', url: 'https://www.youtube.com/watch?v=gJvhiR7Yi6Q' },
   ],
   8: [
-    { title: 'Hashing Explained – CS Dojo', url: 'https://www.youtube.com/watch?v=KyUTuwz_b7Q' },
-    { title: 'Hash Tables – Paul Programming', url: 'https://www.youtube.com/watch?v=MfhjkfocRR0' },
+    { title: 'Learn Hash Tables in 13 Minutes', url: 'https://www.youtube.com/watch?v=FsfRsGFHuv4' },
+    { title: 'Introduction to Hash Tables and Dictionaries – CS Dojo', url: 'https://www.youtube.com/watch?v=sfWyugl4JWA' },
   ],
 }
 
