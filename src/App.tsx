@@ -20,7 +20,6 @@ import CreateDeck from './pages/student/CreateDeck'
 import StudyDeck from './pages/student/StudyDeck'
 import Leaderboard from './pages/student/Leaderboard'
 import StudentProgress from './pages/student/StudentProgress'
-import Achievements from './pages/student/Achievements'
 import Games from './pages/student/Games'
 import ArrayBlitz from './pages/student/games/ArrayBlitz'
 import NodeConnect from './pages/student/games/NodeConnect'
@@ -86,7 +85,6 @@ function App() {
               <Route path="games/path-explorer" element={<PathExplorer />} />
               <Route path="games/sort-arena" element={<SortArena />} />
               <Route path="leaderboard" element={<Leaderboard />} />
-              <Route path="achievements" element={<Achievements />} />
               <Route path="profile" element={<StudentProfile />} />
             </Route>
 

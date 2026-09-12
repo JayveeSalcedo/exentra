@@ -1,4 +1,4 @@
-﻿.ts-root {
+.ts-root {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -194,7 +194,7 @@
 
 .ts-table-head {
   display: grid;
-  grid-template-columns: 44px 130px 1fr 90px 130px 90px 70px 80px 90px;
+  grid-template-columns: 44px 130px 1fr 80px 90px;
   padding: 12px 20px;
   border-bottom: 1px solid var(--surface-05);
   background: var(--surface-02);
@@ -216,19 +216,9 @@
   transition: color 0.15s;
 }
 
-.ts-col-static {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-}
-
 .ts-row {
   display: grid;
-  grid-template-columns: 44px 130px 1fr 90px 130px 90px 70px 80px 90px;
+  grid-template-columns: 44px 130px 1fr 80px 90px;
   align-items: center;
   padding: 12px 20px;
   border-bottom: 1px solid var(--surface-04);
@@ -292,65 +282,6 @@
   color: var(--text-muted);
 }
 
-/* Student type badge */
-.ts-type-badge {
-  display: inline-flex;
-  align-items: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border: 1px solid;
-  border-radius: 99px;
-  padding: 3px 10px;
-  width: fit-content;
-  text-transform: capitalize;
-}
-
-.ts-level-col {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.ts-level-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  border: 1px solid;
-  border-radius: 99px;
-  padding: 2px 8px;
-  width: fit-content;
-}
-
-.ts-rank-title {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  padding-left: 2px;
-}
-
-.ts-xp {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'Orbitron', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--xp);
-}
-
-.ts-streak {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--error);
-}
-
 .ts-modules {
   display: flex;
   align-items: center;
@@ -405,11 +336,8 @@
   .ts-controls { flex-direction: column; align-items: stretch; }
   .ts-table-head,
   .ts-row {
-    grid-template-columns: 44px 110px 1fr 80px 90px 80px;
+    grid-template-columns: 44px 110px 1fr 80px 90px;
   }
-  .ts-streak, .ts-modules,
-  .ts-table-head :nth-child(7),
-  .ts-table-head :nth-child(8) { display: none; }
 }
 
 .ts-block-filter option { background: var(--bg-card); color: var(--text-primary); }

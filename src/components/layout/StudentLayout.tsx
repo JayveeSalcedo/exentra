@@ -11,7 +11,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/student/courses':      'Courses',
   '/student/quests':       'Quests',
   '/student/leaderboard':  'Leaderboard',
-  '/student/achievements': 'Achievements',
   '/student/profile':      'Profile',
 }
 

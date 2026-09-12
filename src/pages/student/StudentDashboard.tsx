@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
@@ -588,50 +588,6 @@ export default function StudentDashboard() {
                 )}
               </>
             )}
-          </motion.div>
-
-          {/* Leaderboard preview */}
-          <motion.div className="sd-section" {...stagger(1)}>
-            <div className="sd-section-header">
-              <h3 className="sd-section-title">
-                <Trophy size={16} /> Leaderboard
-              </h3>
-              <button className="sd-view-all" onClick={() => navigate('/student/leaderboard')}>
-                Full <ChevronRight size={13} />
-              </button>
-            </div>
-            <div className="sd-lb-list">
-              {loading
-                ? Array(5).fill(null).map((_, i) => (
-                    <div key={i} className="sd-lb-item skeleton" style={{ height: 44 }} />
-                  ))
-                : leaderboard.map((entry, i) => {
-                    const isYou = entry.id === user?.id
-                    const initials = `${entry.first_name[0]}${entry.last_name[0]}`
-                    return (
-                      <motion.div
-                        key={entry.id}
-                        className={`sd-lb-item ${isYou ? 'you' : ''}`}
-                        initial={{ opacity: 0, x: 12 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + i * 0.07 }}
-                      >
-                        <span className="sd-lb-rank">
-                          {entry.global_rank <= 3
-                            ? ['🥇','🥈','🥉'][entry.global_rank - 1]
-                            : `#${entry.global_rank}`}
-                        </span>
-                        <div className="sd-lb-avatar">{entry.avatar_url ? <img src={entry.avatar_url} alt="avatar" className="sd-lb-avatar-img" /> : initials}</div>
-                        <span className="sd-lb-name">
-                          {entry.first_name} {entry.last_name}{isYou ? ' (You)' : ''}
-                        </span>
-                        <span className="sd-lb-xp">
-                          <Zap size={10} color="#FFB830" /> {entry.xp.toLocaleString()}
-                        </span>
-                      </motion.div>
-                    )
-                  })}
-            </div>
           </motion.div>
 
           {/* This Week */}

@@ -1,11 +1,11 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
-  Users, Search, Zap, Flame, BookOpen,
-  ChevronDown, ChevronUp, ChevronsUpDown, Shield,
-  TrendingUp, UserCheck, UserX, Layers
+  Users, Search, BookOpen,
+  ChevronDown, ChevronUp, ChevronsUpDown,
+  TrendingUp
 } from 'lucide-react'
 import './TeacherStudents.css'
 
@@ -20,7 +20,6 @@ interface Student {
   level: number
   streak: number
   created_at: string
-  student_type: 'regular' | 'irregular' | null
   modulesCompleted?: number
   assessmentsDone?: number
   avgScore?: number | null
@@ -32,12 +31,7 @@ interface BlockOption { id: string; name: string }
 
 type SortKey = 'school_id' | 'last_name' | 'xp' | 'level' | 'streak' | 'avgScore' | 'modulesCompleted'
 type SortDir = 'asc' | 'desc'
-type TypeFilter = 'all' | 'regular' | 'irregular'
 
-const RANK_LABELS: Record<number, string> = {
-  1: 'Novice', 2: 'Apprentice', 3: 'Explorer', 4: 'Coder',
-  5: 'Analyst', 6: 'Architect', 7: 'Expert', 8: 'Master', 9: 'Legend', 10: 'Grandmaster',
-}
 const RANK_COLORS: Record<number, string> = {
   1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
   5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
@@ -50,7 +44,6 @@ const stagger = (i: number) => ({
 })
 
 function rankColor(level: number) { return RANK_COLORS[Math.min(level, 10)] ?? 'var(--text-primary)' }
-function rankLabel(level: number) { return RANK_LABELS[Math.min(level, 10)] ?? 'Legend' }
 
 export default function TeacherStudents() {
   const { user } = useAuth()
@@ -60,7 +53,6 @@ export default function TeacherStudents() {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('xp')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [blocks, setBlocks] = useState<BlockOption[]>([])
   const [blockFilter, setBlockFilter] = useState<string>('all') // 'all' | 'unassigned' | block id
 
@@ -71,7 +63,7 @@ export default function TeacherStudents() {
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, username, avatar_url, xp, level, streak, created_at, student_type')
+        .select('id, school_id, first_name, last_name, username, avatar_url, xp, level, streak, created_at')
         .eq('role', 'student')
         .order('xp', { ascending: false })
 
@@ -150,10 +142,6 @@ export default function TeacherStudents() {
   useEffect(() => {
     let rows = [...students]
 
-    if (typeFilter !== 'all') {
-      rows = rows.filter(s => s.student_type === typeFilter)
-    }
-
     if (blockFilter === 'unassigned') {
       rows = rows.filter(s => !s.blockId)
     } else if (blockFilter !== 'all') {
@@ -179,7 +167,7 @@ export default function TeacherStudents() {
     })
 
     setFiltered(rows)
-  }, [students, search, sortKey, sortDir, typeFilter, blockFilter])
+  }, [students, search, sortKey, sortDir, blockFilter])
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -203,13 +191,10 @@ export default function TeacherStudents() {
     return Math.round(scored.reduce((s, st) => s + (st.avgScore ?? 0), 0) / scored.length)
   })()
 
-  const regularCount   = students.filter(s => s.student_type === 'regular').length
-  const irregularCount = students.filter(s => s.student_type === 'irregular').length
-
-  const TYPE_FILTERS: { key: TypeFilter; label: string; count: number }[] = [
-    { key: 'all',       label: 'All Students', count: students.length   },
-    { key: 'regular',   label: 'Regular',      count: regularCount      },
-    { key: 'irregular', label: 'Irregular',    count: irregularCount    },
+  const BLOCK_FILTERS: { key: string; label: string; count: number }[] = [
+    { key: 'all',         label: 'All Blocks',  count: students.length },
+    { key: 'unassigned',  label: 'Unassigned',  count: students.filter(s => !s.blockId).length },
+    ...blocks.map(b => ({ key: b.id, label: b.name, count: students.filter(s => s.blockId === b.id).length })),
   ]
 
   return (
@@ -226,10 +211,8 @@ export default function TeacherStudents() {
       {/* Stats */}
       <motion.div className="ts-stats-row" {...stagger(1)}>
         {[
-          { label: 'Total Students',  value: students.length,                                                                                                      color: '#6C8EF5', icon: Users      },
-          { label: 'Regular',         value: regularCount,                                                                                                          color: '#00D4AA', icon: UserCheck  },
-          { label: 'Irregular',       value: irregularCount,                                                                                                        color: '#FFB830', icon: UserX      },
-          { label: 'Class Avg Score', value: avgClassScore != null ? `${avgClassScore}%` : '—',                                                                    color: '#FF6B8A', icon: TrendingUp  },
+          { label: 'Total Students',  value: students.length,                                            color: '#6C8EF5', icon: Users      },
+          { label: 'Class Avg Score', value: avgClassScore != null ? `${avgClassScore}%` : '—',           color: '#FF6B8A', icon: TrendingUp  },
         ].map(({ label, value, color, icon: Icon }) => (
           <div key={label} className="ts-stat-card">
             <div className="ts-stat-icon" style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
@@ -243,31 +226,19 @@ export default function TeacherStudents() {
         ))}
       </motion.div>
 
-      {/* Filter tabs + Search */}
+      {/* Filter pills + Search */}
       <motion.div className="ts-controls" {...stagger(2)}>
         <div className="ts-type-tabs">
-          {TYPE_FILTERS.map(({ key, label, count }) => (
+          {BLOCK_FILTERS.map(({ key, label, count }) => (
             <button
               key={key}
-              className={`ts-type-tab ${typeFilter === key ? 'ts-type-tab--active' : ''}`}
-              onClick={() => setTypeFilter(key)}
+              className={`ts-type-tab ${blockFilter === key ? 'ts-type-tab--active' : ''}`}
+              onClick={() => setBlockFilter(key)}
             >
               {label}
               <span className="ts-type-tab-count">{count}</span>
             </button>
           ))}
-        </div>
-        <div className="ts-block-filter-wrap">
-          <Layers size={13} color="var(--text-muted)" />
-          <select
-            className="ts-block-filter"
-            value={blockFilter}
-            onChange={e => setBlockFilter(e.target.value)}
-          >
-            <option value="all">All Blocks</option>
-            <option value="unassigned">Unassigned</option>
-            {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-          </select>
         </div>
         <div className="ts-search-wrap">
           <Search size={14} color="var(--text-muted)" className="ts-search-icon" />
@@ -286,10 +257,6 @@ export default function TeacherStudents() {
           <div />
           {colBtn('school_id', 'School ID')}
           {colBtn('last_name', 'Name')}
-          <span className="ts-col-static">Type</span>
-          {colBtn('level', 'Level')}
-          {colBtn('xp', 'XP')}
-          {colBtn('streak', 'Streak')}
           {colBtn('modulesCompleted', 'Modules')}
           {colBtn('avgScore', 'Avg Score')}
         </div>
@@ -299,16 +266,13 @@ export default function TeacherStudents() {
         ) : filtered.length === 0 ? (
           <div className="ts-empty">
             <Users size={32} color="var(--text-muted)" />
-            <p>{search || typeFilter !== 'all' ? 'No students match your filters.' : 'No students registered yet.'}</p>
+            <p>{search || blockFilter !== 'all' ? 'No students match your filters.' : 'No students registered yet.'}</p>
           </div>
         ) : (
           <AnimatePresence>
             {filtered.map((s, i) => {
               const color = rankColor(s.level)
               const scoreColor = s.avgScore == null ? 'var(--text-muted)' : s.avgScore >= 80 ? '#00D4AA' : s.avgScore >= 60 ? '#FFB830' : '#FF6B8A'
-              const isRegular = s.student_type === 'regular'
-              const typeColor = isRegular ? '#00D4AA' : '#FFB830'
-              const typeLabel = s.student_type ? (isRegular ? 'Regular' : 'Irregular') : '—'
 
               return (
                 <motion.div
@@ -336,28 +300,6 @@ export default function TeacherStudents() {
                       @{s.username}{s.blockName ? ` · ${s.blockName}` : ''}
                     </span>
                   </div>
-
-                  {/* Student Type */}
-                  <span
-                    className="ts-type-badge"
-                    style={{ color: typeColor, borderColor: `${typeColor}35`, background: `${typeColor}12` }}
-                  >
-                    {typeLabel}
-                  </span>
-
-                  {/* Level */}
-                  <div className="ts-level-col">
-                    <span className="ts-level-badge" style={{ color, borderColor: `${color}35`, background: `${color}12` }}>
-                      <Shield size={10} /> Lv.{s.level}
-                    </span>
-                    <span className="ts-rank-title" style={{ color }}>{rankLabel(s.level)}</span>
-                  </div>
-
-                  {/* XP */}
-                  <span className="ts-xp"><Zap size={11} color="#FFB830" /> {s.xp.toLocaleString()}</span>
-
-                  {/* Streak */}
-                  <span className="ts-streak"><Flame size={11} color="#FF6B8A" /> {s.streak}d</span>
 
                   {/* Modules */}
                   <span className="ts-modules"><BookOpen size={11} color="#6C8EF5" /> {s.modulesCompleted}/8</span>

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, BookOpen, Gamepad2, Trophy, Star,
+  LayoutDashboard, BookOpen, Gamepad2, Trophy,
   User, LogOut, ChevronRight, ClipboardList, FolderOpen, ChevronDown, Brain, BarChart2, X,
 } from 'lucide-react'
 import { useAuth } from '../../store/AuthContext'
@@ -45,7 +45,6 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { to: '/student/leaderboard',  icon: Trophy, label: 'Leaderboard'          },
-  { to: '/student/achievements', icon: Star,   label: 'Achievements'         },
   { to: '/student/profile',      icon: User,   label: 'Profile'              },
 ]
 
