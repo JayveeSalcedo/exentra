@@ -96,31 +96,8 @@ export default function LoginPage() {
 
   return (
     <div className="login-root">
-      {/* Animated background — a graph structure, quietly traversed */}
-      <div className="login-bg">
-        <svg className="graph-bg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <g className="graph-edges">
-            <path id="traversal-path" d="M120,180 L360,120 L620,240 L820,150 L680,420 L440,380 L200,460 L120,180" />
-            <line x1="360" y1="120" x2="440" y2="380" />
-            <line x1="620" y1="240" x2="440" y2="380" />
-            <line x1="200" y1="460" x2="120" y2="680" />
-            <line x1="440" y1="380" x2="560" y2="640" />
-            <line x1="680" y1="420" x2="560" y2="640" />
-            <line x1="560" y1="640" x2="780" y2="720" />
-            <line x1="120" y1="680" x2="340" y2="780" />
-          </g>
-          <g className="graph-nodes">
-            {[[120,180],[360,120],[620,240],[820,150],[680,420],[440,380],[200,460],[120,680],[560,640],[780,720],[340,780]].map(([cx,cy], i) => (
-              <circle key={i} cx={cx} cy={cy} r={i % 3 === 0 ? 5 : 3.5} className={i % 2 === 0 ? 'node-cyan' : 'node-purple'} />
-            ))}
-          </g>
-          <circle r="5" className="graph-pulse">
-            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#traversal-path" />
-            </animateMotion>
-          </circle>
-        </svg>
-      </div>
+      {/* Background — PSU campus photo */}
+      <div className="login-bg" />
 
       <div className="login-layout">
         {/* Left panel — branding */}
@@ -131,44 +108,10 @@ export default function LoginPage() {
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
           <div className="brand-logo">
-            <img src="/ex-big.png" alt="Exentra logo" className="brand-logo-img" />
+            <img src="/exe_final.png" alt="Exentra logo" className="brand-logo-img" />
           </div>
           <h1 className="brand-name">EXENTRA</h1>
           <p className="brand-sub">DSA LEARNING SYSTEM</p>
-
-          <motion.div
-            className="brand-terminal"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.5 }}
-          >
-            <div className="terminal-chrome">
-              <span className="terminal-dot dot-red" />
-              <span className="terminal-dot dot-amber" />
-              <span className="terminal-dot dot-cyan" />
-              <span className="terminal-path">cc104@exentra</span>
-            </div>
-            <div className="terminal-body">
-              {[
-                'course     :: CC 104 — Data Structures & Algorithms',
-                'modules    :: 8 loaded',
-                'games      :: 7 active',
-                'ai_tutor   :: Algie — online',
-                'status     :: ready_to_learn',
-              ].map((line, i) => (
-                <motion.p
-                  key={line}
-                  className="terminal-line"
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.55 + i * 0.12, duration: 0.3 }}
-                >
-                  <span className="terminal-prefix">&gt;</span> {line}
-                </motion.p>
-              ))}
-              <span className="terminal-cursor" />
-            </div>
-          </motion.div>
 
           <p className="brand-school">Pangasinan State University · IT Department</p>
         </motion.div>

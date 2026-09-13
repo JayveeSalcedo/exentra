@@ -127,7 +127,7 @@ export default function StudentSidebar({ collapsed, onToggle, mobileOpen = false
         {/* Logo */}
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <img src="/ex-big.png" alt="Exentra" className="sidebar-logo-img" />
+            <img src="/exe_final.png" alt="Exentra" className="sidebar-logo-img" />
           </div>
           <AnimatePresence>
             {!collapsedView && (
