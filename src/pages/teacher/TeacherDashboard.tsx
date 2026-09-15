@@ -7,23 +7,15 @@ import {
   Sparkles, ClipboardList, Users, BarChart2, BookOpen, Layers,
   ArrowRight, FileWarning, Activity, TrendingUp, CheckCircle2, Inbox,
 } from 'lucide-react'
+import { COURSE_MODULES, moduleForTopic } from '../../lessons/course'
 import './TeacherDashboard.css'
 
-const MODULES = [
-  { topic: 'Arrays',             label: 'Arrays',          color: '#6C8EF5' },
-  { topic: 'Linked Lists',       label: 'Linked Lists',    color: '#00D4AA' },
-  { topic: 'Stacks',             label: 'Stacks',          color: '#FFB830' },
-  { topic: 'Queues',             label: 'Queues',          color: '#FF6B8A' },
-  { topic: 'Trees',              label: 'Trees',           color: '#4FC3F7' },
-  { topic: 'Graphs',             label: 'Graphs',          color: '#81C784' },
-  { topic: 'Sorting Algorithms', label: 'Sorting',         color: '#FFB830' },
-  { topic: 'Hashing',            label: 'Hashing',         color: '#FF6B8A' },
-]
+const MODULES = COURSE_MODULES.map(m => ({ topic: m.topic, label: m.topic, color: m.color }))
 
 const QUICK_ACTIONS = [
   {
     label: 'Generate AI Quiz',
-    sub: 'Create assessments with Llama 3',
+    sub: 'Create assessments from your lessons with AI',
     icon: Sparkles,
     color: '#6C8EF5',
     to: '/teacher/assessments/generate',
@@ -146,9 +138,10 @@ export default function TeacherDashboard() {
   const topicStats = useMemo(() => {
     const map: Record<string, number[]> = {}
     gradedSubs.forEach(s => {
-      if (!s.moduleTopic) return
-      if (!map[s.moduleTopic]) map[s.moduleTopic] = []
-      map[s.moduleTopic].push(s.percentage as number)
+      const topic = moduleForTopic(s.moduleTopic)?.topic
+      if (!topic) return
+      if (!map[topic]) map[topic] = []
+      map[topic].push(s.percentage as number)
     })
     return MODULES
       .map(m => {

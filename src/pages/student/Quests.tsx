@@ -4,18 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { Lock, CheckCircle2, Play, Zap, BookOpen } from 'lucide-react'
+import { COURSE_MODULES, TOTAL_MODULES } from '../../lessons/course'
+import { computeCourseProgress, completedLessonSet, type UnlockState } from '../../lessons/progress'
 import './Quests.css'
 
-const QUESTS = [
-  { order: 1, title: 'Arrays & Array Lists',   desc: 'Master static/dynamic arrays, indexing, insertion, and deletion operations.',       icon: '[ ]', color: '#6C8EF5', xp: 200, lessons: 3, tag: 'Fundamentals' },
-  { order: 2, title: 'Lists & Linked Lists',   desc: 'Explore singly, doubly, and circular linked lists with pointer manipulation.',       icon: '→',   color: '#00D4AA', xp: 220, lessons: 3, tag: 'Linear'        },
-  { order: 3, title: 'Stacks',                 desc: 'Understand LIFO structures, push/pop operations, and real-world stack applications.', icon: '≡',   color: '#FFB830', xp: 180, lessons: 2, tag: 'Linear'        },
-  { order: 4, title: 'Queues',                 desc: 'Learn FIFO queues, priority queues, and deques with enqueue/dequeue operations.',    icon: '⊏',   color: '#FF6B8A', xp: 180, lessons: 2, tag: 'Linear'        },
-  { order: 5, title: 'Trees',                  desc: 'Dive into binary trees, BSTs, AVL trees, and tree traversal algorithms.',             icon: '△',   color: '#4FC3F7', xp: 280, lessons: 4, tag: 'Non-Linear'    },
-  { order: 6, title: 'Graphs',                 desc: 'Explore directed/undirected graphs, BFS, DFS, Dijkstra, and topological sort.',       icon: '◈',   color: '#81C784', xp: 300, lessons: 4, tag: 'Non-Linear'    },
-  { order: 7, title: 'Sorting & Searching',    desc: 'Study bubble, merge, quick, and heap sort. Binary search and search strategies.',    icon: '⇅',   color: '#FFB830', xp: 250, lessons: 4, tag: 'Algorithms'    },
-  { order: 8, title: 'Hashing',                desc: 'Master hash tables, hash functions, collision resolution strategies.',               icon: '#',   color: '#FF6B8A', xp: 240, lessons: 3, tag: 'Advanced'      },
-]
 
 const stagger = (i: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -26,7 +18,7 @@ const stagger = (i: number) => ({
 export default function Quests() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [completedOrders, setCompletedOrders] = useState<Set<number>>(new Set())
+  const [states, setStates] = useState<Record<number, { state: UnlockState; lessons: number }>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,27 +26,19 @@ export default function Quests() {
     const fetch = async () => {
       const { data } = await supabase
         .from('student_progress')
-        .select('modules(order_index)')
+        .select('lesson_id, completed')
         .eq('student_id', user.id)
-        .eq('completed', true)
 
-      const set = new Set<number>()
-      data?.forEach((p: any) => {
-        if (p.modules?.order_index) set.add(p.modules.order_index)
-      })
-      setCompletedOrders(set)
+      const progress = computeCourseProgress(completedLessonSet(data))
+      setStates(Object.fromEntries(progress.map(p => [p.module.order, { state: p.state, lessons: p.lessons.length }])))
       setLoading(false)
     }
     fetch()
   }, [user])
 
-  const getState = (order: number) => {
-    if (completedOrders.has(order)) return 'done'
-    if (order === 1 || completedOrders.has(order - 1)) return 'active'
-    return 'locked'
-  }
+  const getState = (order: number): UnlockState => states[order]?.state ?? (order === 1 ? 'active' : 'locked')
 
-  const done = completedOrders.size
+  const done = Object.values(states).filter(s => s.state === 'done').length
 
   return (
     <div className="qst-root">
@@ -63,7 +47,7 @@ export default function Quests() {
         <div>
           <p className="qst-header-label">STUDENT</p>
           <h1 className="qst-header-title">Quest Board</h1>
-          <p className="qst-header-sub">Complete all 8 DSA modules to master the course</p>
+          <p className="qst-header-sub">Complete all {TOTAL_MODULES} study guide modules to master the course</p>
         </div>
         <div className="qst-header-stats">
           <div className="qst-header-stat">
@@ -72,7 +56,7 @@ export default function Quests() {
           </div>
           <div className="qst-header-divider" />
           <div className="qst-header-stat">
-            <span className="qst-header-num" style={{ color: '#6C8EF5' }}>{8 - done}</span>
+            <span className="qst-header-num" style={{ color: '#6C8EF5' }}>{TOTAL_MODULES - done}</span>
             <span className="qst-header-lbl">Remaining</span>
           </div>
         </div>
@@ -82,13 +66,13 @@ export default function Quests() {
       <motion.div className="qst-progress-bar-wrap" {...stagger(1)}>
         <div className="qst-progress-label">
           <span>Quest Completion</span>
-          <span style={{ color: '#00D4AA' }}>{done}/8 modules</span>
+          <span style={{ color: '#00D4AA' }}>{done}/{TOTAL_MODULES} modules</span>
         </div>
         <div className="qst-progress-track">
           <motion.div
             className="qst-progress-fill"
             initial={{ width: 0 }}
-            animate={{ width: `${(done / 8) * 100}%` }}
+            animate={{ width: `${(done / TOTAL_MODULES) * 100}%` }}
             transition={{ duration: 1, delay: 0.4 }}
           />
         </div>
@@ -96,7 +80,7 @@ export default function Quests() {
 
       {/* Quest list */}
       <div className="qst-list">
-        {QUESTS.map((q, i) => {
+        {COURSE_MODULES.map((q, i) => {
           const state = loading ? 'locked' : getState(q.order)
           const isActive = state === 'active'
           const isDone = state === 'done'
@@ -123,7 +107,7 @@ export default function Quests() {
                 >
                   {isDone ? <CheckCircle2 size={18} /> : isLocked ? <Lock size={16} /> : q.order}
                 </div>
-                {i < QUESTS.length - 1 && (
+                {i < COURSE_MODULES.length - 1 && (
                   <div className={`qst-connector ${isDone ? 'done' : ''}`} />
                 )}
               </div>
@@ -160,16 +144,16 @@ export default function Quests() {
                     {q.title}
                   </h3>
                   <p className="qst-desc" style={{ color: isLocked ? '#2D3748' : 'var(--text-secondary)' }}>
-                    {q.desc}
+                    {q.description}
                   </p>
 
                   {/* Meta */}
                   <div className="qst-meta">
                     <span style={{ color: isLocked ? '#2D3748' : 'var(--text-muted)' }}>
-                      <BookOpen size={11} /> {q.lessons} lessons
+                      <BookOpen size={11} /> {states[q.order]?.lessons ?? '—'} lessons
                     </span>
                     <span style={{ color: isLocked ? '#2D3748' : '#FFB830' }}>
-                      <Zap size={11} /> {q.xp} XP
+                      <Zap size={11} /> {q.xpReward} XP
                     </span>
                   </div>
                 </div>

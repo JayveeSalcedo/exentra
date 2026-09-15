@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
-import { DSA_TOPICS } from '../../lib/groq'
+import { COURSE_MODULES, moduleForTopic } from '../../lessons/course'
 import {
   Plus, Brain, Code2, ListChecks, CheckCircle2,
   Circle, Flame, Zap, Filter, Search, Trash2, Loader2,
@@ -157,7 +157,7 @@ export default function ProblemBank() {
     ...problems.filter(p => {
       if (filterType === 'deck') return false
       if (filterType !== 'All' && p.type !== filterType) return false
-      if (filterTopic !== 'All' && p.topic !== filterTopic) return false
+      if (filterTopic !== 'All' && moduleForTopic(p.topic)?.topic !== filterTopic) return false
       if (filterDiff !== 'All' && p.difficulty !== filterDiff) return false
       if (filterSolved === 'Solved' && !p.is_solved) return false
       if (filterSolved === 'Unsolved' && p.is_solved) return false
@@ -166,7 +166,7 @@ export default function ProblemBank() {
     }),
     ...decks.filter(d => {
       if (filterType !== 'All' && filterType !== 'deck') return false
-      if (filterTopic !== 'All' && d.topic !== filterTopic) return false
+      if (filterTopic !== 'All' && moduleForTopic(d.topic)?.topic !== filterTopic) return false
       if (filterDiff !== 'All') return false  // decks have no difficulty
       if (filterSolved !== 'All') return false // decks have no solved state
       if (search && !d.title.toLowerCase().includes(search.toLowerCase())) return false
@@ -230,8 +230,8 @@ export default function ProblemBank() {
         <div className="pb-filter-group">
           <Filter size={13} style={{ color: 'var(--text-muted)' }} />
           <select className="pb-select" value={filterTopic} onChange={e => setFilterTopic(e.target.value)}>
-            <option value="All">All Topics</option>
-            {DSA_TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
+            <option value="All">All Modules</option>
+            {COURSE_MODULES.map(m => <option key={m.order} value={m.topic}>Module {m.order} – {m.title}</option>)}
           </select>
           <select className="pb-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="All">All Types</option>
@@ -316,7 +316,7 @@ function ProblemRow({ problem: p, i, deleting, onDelete, navigate }: {
             <span className="pb-diff-badge" style={{ color: DIFF_COLOR[p.difficulty], borderColor: DIFF_COLOR[p.difficulty] + '44', background: DIFF_COLOR[p.difficulty] + '11' }}>
               {p.difficulty === 'Hard' ? <Flame size={11} /> : <Zap size={11} />} {p.difficulty}
             </span>
-            <span className="pb-topic-badge">{p.topic}</span>
+            <span className="pb-topic-badge">{moduleForTopic(p.topic)?.topic ?? p.topic}</span>
           </div>
           <p className="pb-card-title">{p.title}</p>
           <p className="pb-card-desc">{p.description.slice(0, 100)}{p.description.length > 100 ? '…' : ''}</p>
@@ -354,7 +354,7 @@ function DeckRow({ deck: d, i, deleting, onDelete, navigate }: {
             <span className="pb-type-badge deck-type-badge">
               <Layers size={11} /> Flashcard Deck
             </span>
-            <span className="pb-topic-badge">{d.topic}</span>
+            <span className="pb-topic-badge">{moduleForTopic(d.topic)?.topic ?? d.topic}</span>
             <span className="deck-count-badge">{d.card_count} cards</span>
           </div>
           <p className="pb-card-title">{d.title}</p>

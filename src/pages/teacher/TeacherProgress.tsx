@@ -5,21 +5,14 @@ import { groq, MODEL } from '../../lib/groq'
 import { useAuth } from '../../store/AuthContext'
 import {
   BarChart2, Brain, Users, TrendingUp, AlertTriangle,
-  Star, RefreshCw, BookOpen, Zap,
+  Star, RefreshCw, BookOpen,
   ChevronDown, ChevronUp, ChevronsUpDown, Layers
 } from 'lucide-react'
+import { COURSE_MODULES, TOTAL_MODULES, moduleForTopic } from '../../lessons/course'
+import { computeCourseProgress, completedLessonSet } from '../../lessons/progress'
 import './TeacherProgress.css'
 
-const MODULES = [
-  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             color: '#6C8EF5', icon: '[ ]' },
-  { order: 2, title: 'Lists & Linked Lists',   topic: 'Linked Lists',       color: '#00D4AA', icon: '→'   },
-  { order: 3, title: 'Stacks',                 topic: 'Stacks',             color: '#FFB830', icon: '≡'   },
-  { order: 4, title: 'Queues',                 topic: 'Queues',             color: '#FF6B8A', icon: '⊏'   },
-  { order: 5, title: 'Trees',                  topic: 'Trees',              color: '#4FC3F7', icon: '△'   },
-  { order: 6, title: 'Graphs',                 topic: 'Graphs',             color: '#81C784', icon: '◈'   },
-  { order: 7, title: 'Sorting & Searching',    topic: 'Sorting Algorithms', color: '#FFB830', icon: '⇅'   },
-  { order: 8, title: 'Hashing',                topic: 'Hashing',            color: '#FF6B8A', icon: '#'   },
-]
+const MODULES = COURSE_MODULES
 
 interface TopicStats {
   topic: string
@@ -34,8 +27,6 @@ interface StudentRow {
   first_name: string
   last_name: string
   avatar_url: string | null
-  xp: number
-  level: number
   modulesCompleted: number
   assessmentsDone: number
   avgScore: number | null
@@ -48,7 +39,7 @@ interface RawSub {
   topic: string | null
 }
 
-type SortKey = 'last_name' | 'xp' | 'avgScore' | 'modulesCompleted'
+type SortKey = 'last_name' | 'avgScore' | 'modulesCompleted'
 type SortDir = 'asc' | 'desc'
 
 const stagger = (i: number) => ({
@@ -63,7 +54,7 @@ export default function TeacherProgress() {
   // Raw fetched data — kept unfiltered so block scoping can be recomputed client-side
   const [rawProfiles, setRawProfiles] = useState<any[]>([])
   const [rawSubs, setRawSubs] = useState<RawSub[]>([])
-  const [rawProgress, setRawProgress] = useState<{ student_id: string }[]>([])
+  const [rawProgress, setRawProgress] = useState<{ student_id: string; lesson_id: string; completed: boolean }[]>([])
   const [enrollMap, setEnrollMap] = useState<Record<string, string>>({}) // student_id -> block_id
   const [blocks, setBlocks] = useState<{ id: string; name: string }[]>([])
   const [blockFilter, setBlockFilter] = useState<string>('all') // 'all' | block id
@@ -71,7 +62,7 @@ export default function TeacherProgress() {
   const [loading, setLoading] = useState(true)
   const [sentiment, setSentiment] = useState<string | null>(null)
   const [sentimentLoading, setSentimentLoading] = useState(false)
-  const [sortKey, setSortKey] = useState<SortKey>('xp')
+  const [sortKey, setSortKey] = useState<SortKey>('avgScore')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
   useEffect(() => { fetchAll() }, [])
@@ -82,7 +73,7 @@ export default function TeacherProgress() {
       // Students
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, avatar_url, xp, level')
+        .select('id, school_id, first_name, last_name, avatar_url')
         .eq('role', 'student')
 
       if (!profiles) { setLoading(false); return }
@@ -98,13 +89,14 @@ export default function TeacherProgress() {
       setRawSubs((subs ?? []).map((s: any) => ({
         student_id: s.student_id,
         percentage: s.percentage,
-        topic: s.assessments?.module_topic ?? null,
+        // Map legacy topic labels onto the study guide modules
+        topic: moduleForTopic(s.assessments?.module_topic)?.topic ?? null,
       })))
 
       // Module completions
       const { data: progress } = await supabase
         .from('student_progress')
-        .select('student_id')
+        .select('student_id, lesson_id, completed')
         .eq('completed', true)
       setRawProgress(progress ?? [])
 
@@ -169,10 +161,14 @@ export default function TeacherProgress() {
       subByStudent[s.student_id].push(s.percentage)
     })
 
-    const modByStudent: Record<string, number> = {}
+    const lessonsByStudent: Record<string, { lesson_id: string; completed: boolean }[]> = {}
     rawProgress.forEach(p => {
       if (!scopedStudentIds.has(p.student_id)) return
-      modByStudent[p.student_id] = (modByStudent[p.student_id] ?? 0) + 1
+      ;(lessonsByStudent[p.student_id] ??= []).push(p)
+    })
+    const modByStudent: Record<string, number> = {}
+    Object.entries(lessonsByStudent).forEach(([id, rows]) => {
+      modByStudent[id] = computeCourseProgress(completedLessonSet(rows)).filter(m => m.state === 'done').length
     })
 
     const rows: StudentRow[] = rawProfiles
@@ -185,8 +181,6 @@ export default function TeacherProgress() {
           first_name: p.first_name,
           last_name: p.last_name,
           avatar_url: p.avatar_url ?? null,
-          xp: p.xp ?? 0,
-          level: p.level ?? 1,
           modulesCompleted: modByStudent[p.id] ?? 0,
           assessmentsDone: scores.length,
           avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null,
@@ -449,7 +443,6 @@ Write in a professional but approachable tone. No bullet points — flowing pros
         <div className="tp-student-head">
           <span />
           <span className="tp-col-label">Name</span>
-          {colBtn('xp', 'XP')}
           {colBtn('modulesCompleted', 'Modules')}
           {colBtn('avgScore', 'Avg Score')}
           <span className="tp-col-label">Score Bar</span>
@@ -477,8 +470,7 @@ Write in a professional but approachable tone. No bullet points — flowing pros
                   <span className="tp-s-name">{s.first_name} {s.last_name}</span>
                   <span className="tp-s-id">{s.school_id}</span>
                 </div>
-                <span className="tp-s-xp"><Zap size={10} color="#FFB830" /> {s.xp.toLocaleString()}</span>
-                <span className="tp-s-modules"><BookOpen size={10} color="#6C8EF5" /> {s.modulesCompleted}/8</span>
+                <span className="tp-s-modules"><BookOpen size={10} color="#6C8EF5" /> {s.modulesCompleted}/{TOTAL_MODULES}</span>
                 <span className="tp-s-score" style={{ color: scoreColor }}>
                   {s.avgScore != null ? `${s.avgScore}%` : '—'}
                 </span>

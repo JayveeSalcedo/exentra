@@ -3,7 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 860px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Page header ────────────────────────────────────────────────────────────── */
@@ -139,6 +140,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+/* Wide screens: fit the short settings fields three across */
+@media (min-width: 1200px) {
+  .ca-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 .ca-field { display: flex; flex-direction: column; gap: 6px; }

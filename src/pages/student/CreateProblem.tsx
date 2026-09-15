@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
-import { DSA_TOPICS, generateStudentProblem, type ProblemChoice } from '../../lib/groq'
+import { generateStudentProblem, type ProblemChoice } from '../../lib/groq'
+import { useLessonScope } from '../../lessons/useLessonScope'
+import LessonScopePicker from '../../components/lesson/LessonScopePicker'
 import {
   ArrowLeft, Sparkles, Save, Code2, ListChecks,
   Loader2, CheckCircle2, AlertCircle,
@@ -18,7 +20,9 @@ export default function CreateProblem() {
   const navigate = useNavigate()
 
   // Config
-  const [topic,      setTopic]      = useState(DSA_TOPICS[0])
+  /** Study guide module + lessons the problem is based on */
+  const scope = useLessonScope()
+  const topic = scope.courseModule.topic
   const [difficulty, setDifficulty] = useState<Difficulty>('Medium')
   const [type,       setType]       = useState<ProblemType>('coding')
 
@@ -44,7 +48,7 @@ export default function CreateProblem() {
     setGenerating(true)
     setGenError('')
     try {
-      const result = await generateStudentProblem(topic, difficulty, type)
+      const result = await generateStudentProblem(scope.scopeLabel, difficulty, type, scope.buildContext(12000))
       setTitle(result.title)
       setDescription(result.description)
       setHint(result.hint)
@@ -120,10 +124,10 @@ export default function CreateProblem() {
         <div className="pb-config-panel">
           <p className="pb-panel-title">Configuration</p>
 
-          <label className="pb-field-label">Topic</label>
-          <select className="pb-select full" value={topic} onChange={e => setTopic(e.target.value)}>
-            {DSA_TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <LessonScopePicker
+            scope={scope}
+            hint="AI drafts the problem from the study guide content of the selected lessons."
+          />
 
           <label className="pb-field-label" style={{ marginTop: 14 }}>Difficulty</label>
           <div className="pb-diff-btns">

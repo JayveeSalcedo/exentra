@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
-import { groq, MODEL, DSA_TOPICS } from '../../lib/groq'
+import { generateFlashcards } from '../../lib/groq'
+import { useLessonScope } from '../../lessons/useLessonScope'
+import LessonScopePicker from '../../components/lesson/LessonScopePicker'
 import {
   ArrowLeft, Plus, Trash2, Sparkles, Loader2,
   BookOpen, GripVertical,
@@ -21,7 +23,9 @@ export default function CreateDeck() {
 
   // Config
   const [title, setTitle] = useState('')
-  const [topic, setTopic] = useState(DSA_TOPICS[0])
+  /** Study guide module + lessons the deck covers */
+  const scope = useLessonScope()
+  const topic = scope.courseModule.topic
   const [description, setDescription] = useState('')
 
   // Cards
@@ -55,22 +59,10 @@ export default function CreateDeck() {
     setGenerating(true)
     setAiError('')
     try {
-      const prompt = `Generate exactly ${aiCount} flashcard pairs about the DSA topic: "${topic}".
-Return ONLY a JSON array, no markdown, no preamble. Each item must have "front" (term/question, max 12 words) and "back" (definition/answer, max 40 words).
-Example format: [{"front":"What is a stack?","back":"A LIFO data structure where elements are pushed and popped from the same end."}]`
-
-      const response = await groq.chat.completions.create({
-        model: MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1200,
-        temperature: 0.6,
-      })
-
-      const raw = response.choices[0]?.message?.content ?? ''
-      const clean = raw.replace(/```json|```/g, '').trim()
-      const parsed: CardDraft[] = JSON.parse(clean)
-      if (!Array.isArray(parsed)) throw new Error('Not an array')
-      setCards(parsed.map(c => ({ front: String(c.front ?? ''), back: String(c.back ?? '') })))
+      const generated = await generateFlashcards(scope.scopeLabel, aiCount, scope.buildContext(12000))
+      if (!generated.length) throw new Error('No cards returned')
+      setCards(generated)
+      if (!title.trim()) setTitle(`${scope.shortTitle} Flashcards`)
     } catch {
       setAiError('AI generation failed. Check your Groq key or try again.')
     }
@@ -138,21 +130,15 @@ Example format: [{"front":"What is a stack?","back":"A LIFO data structure where
         </div>
       </div>
 
-      <div className="pb-create-layout" style={{ gridTemplateColumns: '280px 1fr' }}>
+      <div className="pb-create-layout" style={{ gridTemplateColumns: 'minmax(280px, 320px) 1fr' }}>
         {/* Left config panel */}
         <div className="pb-config-panel" style={{ gap: 14 }}>
           <p className="pb-panel-title">Deck Settings</p>
 
-          <div className="pb-field">
-            <label className="pb-field-label">Topic <span className="pb-required">*</span></label>
-            <select
-              className="pb-select full"
-              value={topic}
-              onChange={e => setTopic(e.target.value)}
-            >
-              {DSA_TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
+          <LessonScopePicker
+            scope={scope}
+            hint="AI cards are generated from the study guide content of the selected lessons."
+          />
 
           <div className="pb-field">
             <label className="pb-field-label">Deck Title <span className="pb-required">*</span></label>

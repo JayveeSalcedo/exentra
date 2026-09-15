@@ -1,0 +1,97 @@
+import type { Lesson } from '../types'
+
+const lesson: Lesson = {
+  id: 'l3-3',
+  moduleId: '3',
+  title: 'Infix to Postfix',
+  summary: 'Use a stack and operator priorities to convert infix expressions into postfix form.',
+  unitOutcomes: [
+    'Define infix and postfix',
+    'Convert expressions from infix to postfix notation',
+  ],
+  reading: [
+    { type: 'paragraph', text: 'Infix notation places the binary operator between the left and right operands. Postfix notation places the operator after the two operands. Infix is the traditional notation, but it requires extensive rules regarding the order of operations — the precedence and associativity rules. In postfix notation, the operators appear in the order in which they are to be executed, so there is no need for parentheses or any rules of precedence or associativity.' },
+    { type: 'heading', text: 'Infix to Postfix' },
+    { type: 'paragraph', text: 'An expression is in infix form if every subexpression to be evaluated is of the form operand-operator-operand. It is in postfix form if every subexpression is of the form operand-operand-operator. We are accustomed to evaluating infix expressions, but it is more appropriate for computers to evaluate expressions in postfix form.' },
+    { type: 'list', items: [
+      'The degree of an operator is the number of operands it has.',
+      'The rank of an operand is 1. The rank of an operator is 1 minus its degree. The rank of a sequence of operands and operators is the sum of their individual ranks.',
+      'If z = x | y is a string, then x is the head of z. x is a proper head if y is not the null string.',
+    ] },
+    { type: 'note', text: 'Theorem: A postfix expression is well-formed if the rank of every proper head is greater than or equal to 1 and the rank of the expression is 1.' },
+    { type: 'table', caption: 'Order of precedence of operators', headers: ['Operator', 'Priority', 'Property', 'Example'], rows: [
+      ['^', '3', 'right associative', 'a^b^c = a^(b^c)'],
+      ['* /', '2', 'left associative', 'a*b*c = (a*b)*c'],
+      ['+ -', '1', 'left associative', 'a+b+c = (a+b)+c'],
+    ] },
+    { type: 'table', caption: 'Examples', headers: ['Infix Expression', 'Postfix Expression'], rows: [
+      ['a * b + c / d', 'a b * c d / +'],
+      ['a ^ b ^ c - d', 'a b c ^ ^ d -'],
+      ['a * ( b + ( c + d ) / e ) - f', 'a b c d + e / + * f -'],
+      ['a * b / c + f * ( g + d ) / ( f – h ) ^ i', 'a b * c / f g d + * f h – i ^ / +'],
+    ] },
+    { type: 'paragraph', text: 'Rules in converting from infix to postfix:' },
+    { type: 'list', ordered: true, items: [
+      'The order of the operands in both forms is the same, whether or not parentheses are present in the infix expression.',
+      'If the infix expression contains no parentheses, then the order of the operators in the postfix expression is according to their priority.',
+      'If the infix expression contains parenthesized subexpressions, rule 2 applies for each such subexpression.',
+    ] },
+    { type: 'paragraph', text: 'Priority numbers: icp(x) is the priority number when token x is an incoming symbol (incoming priority); isp(x) is the priority number when token x is in the stack (in-stack priority).' },
+    { type: 'table', headers: ['Token, x', 'icp(x)', 'isp(x)', 'Rank'], rows: [
+      ['Operand', '0', '–', '+1'],
+      ['+ -', '1', '2', '-1'],
+      ['* /', '3', '4', '-1'],
+      ['^', '6', '5', '-1'],
+      ['(', '7', '0', '–'],
+    ] },
+    { type: 'heading', text: 'The Algorithm' },
+    { type: 'list', ordered: true, items: [
+      'Get the next token x.',
+      'If x is an operand, then output x.',
+      'If x is (, then push x onto the stack.',
+      'If x is ), then output stack elements until a ( is encountered. Pop the stack once more to delete the (. If top = 0, the algorithm terminates.',
+      'If x is an operator, then while icp(x) < isp(stack(top)), output stack elements; else, if icp(x) > isp(stack(top)), push x onto the stack.',
+      'Go to step 1.',
+    ] },
+    { type: 'table', caption: 'Converting a + ( b * c + d ) - f / g ^ h', headers: ['Incoming Symbol', 'Stack', 'Output', 'Remarks'], rows: [
+      ['a', '', 'a', 'Output a'],
+      ['+', '+', 'a', 'Push +'],
+      ['(', '+ (', 'a', 'Push ('],
+      ['b', '+ (', 'ab', 'Output b'],
+      ['*', '+ ( *', 'ab', 'icp(*) > isp((), push *'],
+      ['c', '+ ( *', 'abc', 'Output c'],
+      ['+', '+ ( +', 'abc*', 'icp(+) < isp(*), pop *; icp(+) > isp((), push +'],
+      ['d', '+ ( +', 'abc*d', 'Output d'],
+      [')', '+', 'abc*d+', 'Pop +, pop ('],
+      ['-', '-', 'abc*d++', 'icp(-) < isp(+), pop +, push -'],
+      ['f', '-', 'abc*d++f', 'Output f'],
+      ['/', '- /', 'abc*d++f', 'icp(/) > isp(-), push /'],
+      ['g', '- /', 'abc*d++fg', 'Output g'],
+      ['^', '- / ^', 'abc*d++fg', 'icp(^) > isp(/), push ^'],
+      ['h', '- / ^', 'abc*d++fgh', 'Output h'],
+      ['(end)', '', 'abc*d++fgh^/-', 'Pop ^, pop /, pop -'],
+    ] },
+  ],
+  keyPoints: [
+    'Infix: operand-operator-operand. Postfix: operand-operand-operator.',
+    'Operands keep the same order in both forms — only the operators move.',
+    'Priority: ^ (3, right associative) > * / (2) > + - (1).',
+    'Pop while the incoming priority is lower than the in-stack priority, then push.',
+    '( has the highest incoming priority but the lowest in-stack priority.',
+  ],
+  exercises: [
+    'Convert the following expressions into their postfix form. Show the stack.\na) a+(b*c+d)-f/g^h\nb) 1/2-5*7^3*(8+11)/4+2',
+    'Learning Activity – Convert into postfix form:\na. a+b/c*d*(e+f)-g/h\nb. (a-b)*c/d^e*f^(g+h)-i\nc. 4^(2+1)/5*6-(3+7/4)*8-2\nd. (m+n)/o*p^q^r*(s/t+u)-v',
+  ],
+  durationMinutes: 30,
+  source: { guide: 3, pages: '18–20' },
+  visualizerType: 'stack',
+  hints: [
+    'Write three columns — incoming symbol, stack, output — and fill one row per token.',
+    'Because ^ is right associative, its icp (6) is higher than its isp (5), so a second ^ is pushed instead of popping the first.',
+    'At the end of the expression, pop everything left on the stack to the output.',
+  ],
+  complexityNote: 'Conversion O(n) — each token is pushed and popped at most once',
+}
+
+export default lesson

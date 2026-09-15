@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 960px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* Header */
@@ -349,6 +350,96 @@
   cursor: not-allowed;
 }
 
+/* Published / archived actions */
+.ta2-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.ta2-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ta2-action-btn.archive {
+  background: var(--surface-03);
+  border-color: var(--surface-10);
+  color: var(--text-secondary);
+}
+.ta2-action-btn.archive:hover:not(:disabled) { background: var(--surface-06); color: var(--text-primary); }
+.ta2-action-btn.reopen {
+  background: rgba(255,184,48,0.08);
+  border-color: rgba(255,184,48,0.3);
+  color: var(--xp);
+}
+.ta2-action-btn.reopen:hover { background: rgba(255,184,48,0.15); }
+.ta2-action-btn.restore {
+  background: rgba(0,212,170,0.08);
+  border-color: rgba(0,212,170,0.3);
+  color: var(--cyan);
+}
+.ta2-action-btn.restore:hover:not(:disabled) { background: rgba(0,212,170,0.15); }
+
+.ta2-card.archived { opacity: 0.78; }
+.ta2-meta-overdue { color: var(--error); }
+
+/* Reopen: pick a new due date */
+.ta2-reopen {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255,184,48,0.06);
+  border: 1px solid rgba(255,184,48,0.22);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ta2-reopen-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--xp);
+}
+.ta2-reopen-input {
+  background: var(--surface-05);
+  border: 1px solid var(--surface-09);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--text-primary);
+  outline: none;
+  color-scheme: dark;
+}
+:root.light-mode .ta2-reopen-input { color-scheme: light; }
+.ta2-reopen-input:focus { border-color: rgba(255,184,48,0.5); }
+.ta2-reopen-save {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--xp);
+  color: #1A1206;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ta2-reopen-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .ta2-delete-btn {
   display: flex;
   align-items: center;
@@ -454,6 +545,16 @@
   color: var(--text-secondary);
   border-color: var(--surface-10);
   background: var(--surface-03);
+}
+.ta2-status-badge.closed {
+  color: var(--error);
+  border-color: rgba(255,107,138,0.3);
+  background: rgba(255,107,138,0.08);
+}
+.ta2-status-badge.archived {
+  color: var(--text-muted);
+  border-color: var(--surface-10);
+  background: var(--surface-02);
 }
 
 /* Meta row */

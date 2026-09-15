@@ -238,6 +238,27 @@ export interface ProblemChoice {
   is_correct: boolean
 }
 
+// ── Study guide grounding (shared by the quiz, problem and flashcard generators) ──
+/**
+ * Prompt block that restricts generation to the selected study guide lessons.
+ * `items` names what is being generated, e.g. "question", "problem", "flashcard".
+ */
+export function lessonGrounding(lessonContext: string | undefined, items: string): string {
+  if (!lessonContext) return ''
+  return `
+The class studies from the CC 104 study guide. Base EVERY ${items} only on the lesson material below:
+- Use the definitions, terminology, notation, algorithms, code demonstrations and examples exactly as the material presents them.
+- Do not use topics, techniques or language features that the material does not cover.
+- Spread the ${items}s across the selected lessons instead of focusing on one section.
+- When code is involved, use Java as in the material.
+- Mention which lesson the answer comes from in the explanation or solution.
+
+===== LESSON MATERIAL START =====
+${lessonContext}
+===== LESSON MATERIAL END =====
+`
+}
+
 export interface GeneratedProblem {
   title: string
   description: string
@@ -249,13 +270,16 @@ export interface GeneratedProblem {
 export async function generateStudentProblem(
   topic: string,
   difficulty: 'Easy' | 'Medium' | 'Hard',
-  type: 'coding' | 'multiple_choice'
+  type: 'coding' | 'multiple_choice',
+  /** Study guide text for the selected lessons (see src/lessons/lessonContext.ts) */
+  lessonContext?: string
 ): Promise<GeneratedProblem> {
   const isMC = type === 'multiple_choice'
+  const grounding = lessonGrounding(lessonContext, 'problem')
 
   const prompt = isMC
-    ? `You are a DSA problem generator. Create ONE multiple-choice practice problem.
-
+    ? `You are a DSA problem generator for CC 104. Create ONE multiple-choice practice problem.
+${grounding}
 Specs:
 - Topic: ${topic}
 - Difficulty: ${difficulty}
@@ -274,8 +298,8 @@ Respond ONLY with valid JSON, no markdown, no preamble:
     { "text": "Choice D text", "is_correct": false }
   ]
 }`
-    : `You are a DSA problem generator. Create ONE coding practice problem.
-
+    : `You are a DSA problem generator for CC 104. Create ONE coding practice problem.
+${grounding}
 Specs:
 - Topic: ${topic}
 - Difficulty: ${difficulty}
@@ -286,13 +310,13 @@ Respond ONLY with valid JSON, no markdown, no preamble:
   "title": "Short descriptive title",
   "description": "Full problem statement with example input and expected output",
   "hint": "A helpful hint about the approach or data structure to use",
-  "solution": "A complete working solution with explanation (pseudocode or Java/Python)"
+  "solution": "A complete working solution with explanation (${lessonContext ? 'in Java' : 'pseudocode or Java/Python'})"
 }`
 
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 2048,
+    max_tokens: 3072,
     temperature: 0.8,
     reasoning_effort: 'low',
     reasoning_format: 'hidden',
@@ -315,6 +339,36 @@ export interface GeneratedDeck {
   title: string
   description: string
   cards: FlashCard[]
+}
+
+/** Flashcard pairs for the Create Deck page, optionally grounded in study guide lessons */
+export async function generateFlashcards(
+  topic: string,
+  count: number,
+  lessonContext?: string
+): Promise<FlashCard[]> {
+  const prompt = `You are a DSA flashcard generator for CC 104. Generate exactly ${count} flashcard pairs about: "${topic}".
+${lessonGrounding(lessonContext, 'flashcard')}
+Each item must have "front" (term/question, max 12 words) and "back" (definition/answer, max 40 words).
+Respond ONLY with valid JSON, no markdown, no preamble:
+{ "cards": [ { "front": "What is a stack?", "back": "A LIFO data structure where elements are pushed and popped from the same end." } ] }`
+
+  const response = await groq.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: Math.min(16000, 1500 + count * 150),
+    temperature: 0.6,
+    reasoning_effort: 'low',
+    reasoning_format: 'hidden',
+    response_format: { type: 'json_object' },
+  } as any)
+
+  const raw = response.choices[0]?.message?.content ?? '{}'
+  const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()) as FlashCard[] | Record<string, unknown>
+  const list = Array.isArray(parsed)
+    ? parsed
+    : (Object.values(parsed).find(Array.isArray) as FlashCard[] | undefined) ?? []
+  return list.slice(0, count).map(c => ({ front: String(c.front ?? ''), back: String(c.back ?? '') }))
 }
 
 export async function generateFlashcardDeck(
@@ -362,12 +416,16 @@ export interface QuizQuestion {
 
 export async function generateQuiz(
   module: string,
-  numQuestions: 5 | 10 | 15,
+  numQuestions: number,
   difficulty: 'Easy' | 'Medium' | 'Hard' | 'Mixed',
-  assessmentType: 'Quiz' | 'Activity' | 'Exam'
+  assessmentType: 'Quiz' | 'Activity' | 'Exam',
+  /** Study guide text for the selected lessons (see src/lessons/lessonContext.ts) */
+  lessonContext?: string
 ): Promise<QuizQuestion[]> {
-  const prompt = `You are a DSA assessment generator. Generate exactly ${numQuestions} multiple-choice questions for a ${assessmentType}.
+  const grounding = lessonGrounding(lessonContext, 'question')
 
+  const prompt = `You are a DSA assessment generator for CC 104 (Data Structures and Algorithms). Generate exactly ${numQuestions} multiple-choice questions for a ${assessmentType}.
+${grounding}
 Specs:
 - Topic: ${module}
 - Difficulty: ${difficulty}
@@ -390,7 +448,8 @@ Generate exactly ${numQuestions} questions. The correct_index must be 0, 1, 2, o
   const response = await groq.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 6144,
+    // Roughly 350 tokens per question plus room for reasoning
+    max_tokens: Math.min(32000, 2000 + numQuestions * 350),
     temperature: 0.7,
     reasoning_effort: 'low',
     reasoning_format: 'hidden',
@@ -399,6 +458,10 @@ Generate exactly ${numQuestions} questions. The correct_index must be 0, 1, 2, o
 
   const raw = response.choices[0]?.message?.content ?? '[]'
   const clean = raw.replace(/```json|```/g, '').trim()
-  const parsed = JSON.parse(clean) as QuizQuestion[]
-  return parsed
+  const parsed = JSON.parse(clean) as QuizQuestion[] | Record<string, unknown>
+  // JSON mode may wrap the array in an object, e.g. { "questions": [...] }
+  const list = Array.isArray(parsed)
+    ? parsed
+    : (Object.values(parsed).find(Array.isArray) as QuizQuestion[] | undefined) ?? []
+  return list.slice(0, numQuestions)
 }

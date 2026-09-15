@@ -143,7 +143,7 @@ export default function ActivityLog() {
   }).length
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 900 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%', minWidth: 0 }}>
 
       {/* Header */}
       <motion.div {...stagger(0)} style={{

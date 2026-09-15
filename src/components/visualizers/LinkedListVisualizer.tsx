@@ -1,113 +1,169 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import type { VisualizerType } from '../../lessons/types'
+import {
+  newNode, singlyInsertSteps, singlyDeleteSteps,
+  doublyInsertFirstSteps, doublyInsertLastSteps, doublyDeleteFirstSteps, doublyBackwardSteps,
+  SINGLY_INSERT_CODE, SINGLY_DELETE_CODE,
+  DOUBLY_INSERT_FIRST_CODE, DOUBLY_INSERT_LAST_CODE, DOUBLY_DELETE_FIRST_CODE, DOUBLY_BACKWARD_CODE,
+  type DLLStep, type LLNode,
+} from './algorithms/linkedList'
+import { useStepper } from './stepper/useStepper'
+import StepControls from './stepper/StepControls'
+import ModeTabs from './stepper/ModeTabs'
 
 interface Props { type: VisualizerType; lessonId: string }
 
-interface LLNode { id: number; val: string }
+type SinglyMode = 'insert' | 'delete'
+type DoublyMode = 'insertFirst' | 'insertLast' | 'deleteFirst' | 'backward'
 
-let nextId = 100
+const START = ['10', '20', '30']
 
 export default function LinkedListVisualizer({ type }: Props) {
-  const [nodes, setNodes] = useState<LLNode[]>([
-    { id: 1, val: '10' }, { id: 2, val: '20' }, { id: 3, val: '30' },
-  ])
-  const [input, setInput] = useState('')
-  const [highlight, setHighlight] = useState<number | null>(null)
+  const isDoubly = type === 'doubly-linked-list'
+  const [list, setList] = useState<LLNode[]>(() => START.map(newNode))
+  const [value, setValue] = useState('25')
+  const [pos, setPos] = useState('2')
+  const [singlyMode, setSinglyMode] = useState<SinglyMode>('insert')
+  const [doublyMode, setDoublyMode] = useState<DoublyMode>('insertFirst')
+  const [code, setCode] = useState<string[]>(isDoubly ? DOUBLY_INSERT_FIRST_CODE : SINGLY_INSERT_CODE)
+  const stepper = useStepper<DLLStep>()
+  const step = stepper.step
 
-  const flash = (id: number) => { setHighlight(id); setTimeout(() => setHighlight(null), 700) }
-
-  const prepend = () => {
-    const node: LLNode = { id: ++nextId, val: input.trim() || '?' }
-    setNodes(prev => [node, ...prev])
-    flash(node.id)
-    setInput('')
+  const run = () => {
+    const v = value.trim() || '?'
+    const p = parseInt(pos)
+    let steps: DLLStep[]
+    if (isDoubly) {
+      steps = doublyMode === 'insertFirst' ? doublyInsertFirstSteps(list, v)
+        : doublyMode === 'insertLast' ? doublyInsertLastSteps(list, v)
+        : doublyMode === 'deleteFirst' ? doublyDeleteFirstSteps(list)
+        : doublyBackwardSteps(list)
+      setCode(doublyMode === 'insertFirst' ? DOUBLY_INSERT_FIRST_CODE
+        : doublyMode === 'insertLast' ? DOUBLY_INSERT_LAST_CODE
+        : doublyMode === 'deleteFirst' ? DOUBLY_DELETE_FIRST_CODE
+        : DOUBLY_BACKWARD_CODE)
+    } else {
+      steps = singlyMode === 'insert'
+        ? singlyInsertSteps(list, v, isNaN(p) ? list.length : p)
+        : singlyDeleteSteps(list, isNaN(p) ? 1 : p)
+      setCode(singlyMode === 'insert' ? SINGLY_INSERT_CODE : SINGLY_DELETE_CODE)
+    }
+    setList(steps[steps.length - 1].nodes)
+    stepper.load(steps)
   }
 
-  const append = () => {
-    const node: LLNode = { id: ++nextId, val: input.trim() || '?' }
-    setNodes(prev => [...prev, node])
-    flash(node.id)
-    setInput('')
+  const resetList = () => {
+    setList(START.map(newNode))
+    stepper.load([], false)
   }
 
-  const removeHead = () => setNodes(prev => prev.slice(1))
-  const removeTail = () => setNodes(prev => prev.slice(0, -1))
-
-  const isCircular = type === 'circular-linked-list'
-  const isDoubly   = type === 'doubly-linked-list'
+  // Before any operation, show the current list
+  const nodes = step?.nodes ?? list
+  const pointers = step?.pointers ?? (nodes.length ? { list: 0 } : {})
+  const buttonLabel = isDoubly
+    ? { insertFirst: 'Insert first', insertLast: 'Insert last', deleteFirst: 'Delete first', backward: 'Print backward' }[doublyMode]
+    : singlyMode === 'insert' ? 'Insert' : 'Delete'
 
   return (
     <div className="viz-ll-root">
-      <div className="viz-ll-row">
-        <AnimatePresence>
-          {nodes.map((node, i) => (
-            <motion.div
-              key={node.id}
-              className="viz-ll-node-wrap"
-              layout
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-            >
-              <motion.div
-                className={`viz-ll-node ${highlight === node.id ? 'viz-ll-flash' : ''}`}
-                animate={{}}
-              >
-                <span className="viz-ll-val">{node.val}</span>
-                <span className="viz-ll-ptr">●</span>
-              </motion.div>
+      {isDoubly ? (
+        <ModeTabs<DoublyMode>
+          value={doublyMode}
+          onChange={setDoublyMode}
+          modes={[
+            { key: 'insertFirst', label: 'Insert first' },
+            { key: 'insertLast', label: 'Insert last' },
+            { key: 'deleteFirst', label: 'Delete first' },
+            { key: 'backward', label: 'Display backward' },
+          ]}
+        />
+      ) : (
+        <ModeTabs<SinglyMode>
+          value={singlyMode}
+          onChange={setSinglyMode}
+          modes={[
+            { key: 'insert', label: 'Insert at position' },
+            { key: 'delete', label: 'Delete at position' },
+          ]}
+        />
+      )}
 
-              {/* Arrow to next */}
-              {i < nodes.length - 1 && (
-                <div className="viz-ll-arrow">
-                  {isDoubly && <span className="viz-ll-back">◀</span>}
-                  <span>▶</span>
-                </div>
-              )}
-
-              {/* Circular: last node back to head */}
-              {isCircular && i === nodes.length - 1 && (
-                <div className="viz-ll-circular-label">↩ head</div>
-              )}
-
-              {/* null terminator */}
-              {!isCircular && i === nodes.length - 1 && (
-                <div className="viz-ll-null">null</div>
-              )}
-            </motion.div>
-          ))}
-          {nodes.length === 0 && (
-            <motion.span key="empty" className="viz-empty-label" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              null (empty list)
-            </motion.span>
+      <div className="viz-lls-stage">
+        <div className="viz-lls-floating">
+          {step?.floating && (
+            <>
+              <span className="viz-lls-ptr">{step.floating.label}</span>
+              <div className="viz-lls-node fresh">
+                {isDoubly && <span className="viz-lls-cell link prev">prev</span>}
+                <span className="viz-lls-cell">{step.floating.node.val}</span>
+                <span className="viz-lls-cell link">{isDoubly ? 'next' : 'link'}</span>
+              </div>
+              <span>→ {step.floating.linkTo === null ? 'null' : nodes[step.floating.linkTo]?.val}</span>
+            </>
           )}
-        </AnimatePresence>
+        </div>
+
+        <div className="viz-lls-row">
+          {nodes.length === 0 && <span className="viz-empty-label">list → null (empty)</span>}
+          {nodes.map((node, i) => {
+            const labels = Object.entries(pointers).filter(([, idx]) => idx === i).map(([name]) => name)
+            const cls = [
+              'viz-lls-node',
+              step?.highlight.includes(i) ? 'hl' : '',
+              step?.removing === i ? 'removing' : '',
+            ].join(' ')
+            return (
+              <div key={node.id} className="viz-lls-item">
+                <div className="viz-lls-col">
+                  <div className={cls}>
+                    {isDoubly && <span className="viz-lls-cell link prev">{i === 0 ? '∅' : '◀'}</span>}
+                    <span className="viz-lls-cell">{node.val}</span>
+                    <span className="viz-lls-cell link">{i === nodes.length - 1 ? '∅' : '▶'}</span>
+                  </div>
+                  <div className="viz-lls-ptrs">
+                    {labels.map(l => <span key={l} className={`viz-lls-ptr ${l === 'list' ? 'head' : ''}`}>{l}</span>)}
+                  </div>
+                </div>
+                {i < nodes.length - 1
+                  ? <span className="viz-lls-arrow">{isDoubly ? '⇄' : '→'}</span>
+                  : <span className="viz-lls-null">null</span>}
+              </div>
+            )
+          })}
+        </div>
+
+        {step?.output && step.output.length > 0 && (
+          <div className="viz-panel-row">
+            <span className="viz-muted">Printed:</span>
+            {step.output.map((v, i) => <span key={i} className="viz-chip accent">{v}</span>)}
+          </div>
+        )}
       </div>
 
       <div className="viz-controls">
-        <input
-          className="viz-input"
-          placeholder="Value"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && append()}
-          maxLength={6}
-        />
-        <button className="viz-btn" onClick={prepend}>Prepend</button>
-        <button className="viz-btn" onClick={append}>Append</button>
-        <button className="viz-btn ghost" onClick={removeHead} disabled={!nodes.length}>Remove Head</button>
-        <button className="viz-btn ghost" onClick={removeTail} disabled={!nodes.length}>Remove Tail</button>
+        {(isDoubly ? doublyMode === 'insertFirst' || doublyMode === 'insertLast' : singlyMode === 'insert') && (
+          <label className="viz-field">
+            value
+            <input className="viz-input narrow" value={value} maxLength={4} onChange={e => setValue(e.target.value)} />
+          </label>
+        )}
+        {!isDoubly && (
+          <label className="viz-field">
+            pos
+            <input className="viz-input narrow" value={pos} maxLength={2} onChange={e => setPos(e.target.value)}
+              title={singlyMode === 'insert' ? '0 = new head' : '1 = first node'} />
+          </label>
+        )}
+        <button className="viz-btn" onClick={run} disabled={stepper.playing}>{buttonLabel}</button>
+        <button className="viz-btn ghost" onClick={resetList}>Reset list</button>
       </div>
+      {!isDoubly && (
+        <p className="viz-muted" style={{ fontSize: '0.68rem', margin: '0.3rem 0 0' }}>
+          {singlyMode === 'insert' ? 'pos 0 inserts a new head; pos n inserts after the n-th node.' : 'pos 1 deletes the head.'}
+        </p>
+      )}
 
-      <div className="viz-legend">
-        <span className="viz-legend-item"><span className="viz-legend-dot accent" />Node</span>
-        {isDoubly && <span className="viz-legend-item">◀▶ Bidirectional</span>}
-        {isCircular && <span className="viz-legend-item">↩ Tail → Head</span>}
-        <span className="viz-legend-item">Size: {nodes.length}</span>
-      </div>
+      <StepControls stepper={stepper} caption={step?.caption} code={code} activeLine={step?.line ?? null} />
     </div>
   )
 }
-

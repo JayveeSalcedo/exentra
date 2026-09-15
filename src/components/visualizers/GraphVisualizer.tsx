@@ -1,138 +1,111 @@
-﻿import { useState, useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import type { VisualizerType } from '../../lessons/types'
+import {
+  BFS_CODE, DFS_CODE, GUIDE_EDGES, GUIDE_VERTICES,
+  bfsSteps, dfsSteps, type GraphStep,
+} from './algorithms/graph'
+import { useStepper } from './stepper/useStepper'
+import StepControls from './stepper/StepControls'
+import ModeTabs from './stepper/ModeTabs'
 
 interface Props { type: VisualizerType; lessonId: string }
 
-interface GNode { id: number; label: string; x: number; y: number }
-interface GEdge { from: number; to: number; weight?: number }
+type Traversal = 'bfs' | 'dfs'
 
-const PRESET_NODES: GNode[] = [
-  { id: 0, label: '0', x: 100, y: 60 },
-  { id: 1, label: '1', x: 220, y: 40 },
-  { id: 2, label: '2', x: 60,  y: 160 },
-  { id: 3, label: '3', x: 180, y: 160 },
-  { id: 4, label: '4', x: 280, y: 120 },
-]
-
-const PRESET_EDGES: GEdge[] = [
-  { from: 0, to: 1 }, { from: 0, to: 2 },
-  { from: 1, to: 3 }, { from: 1, to: 4 },
-  { from: 2, to: 3 }, { from: 3, to: 4 },
-]
+const R = 16
 
 export default function GraphVisualizer({ type }: Props) {
-  const [visited, setVisited]   = useState<Set<number>>(new Set())
-  const [current, setCurrent]   = useState<number | null>(null)
-  const [queue_,  setQueue_]    = useState<number[]>([])
-  const [running, setRunning]   = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  // The traversal lesson follows the study guide's directed example graph
+  const directed = type !== 'graph-undirected'
+  const [mode, setMode] = useState<Traversal>('dfs')
+  const [start, setStart] = useState(1)
+  const stepper = useStepper<GraphStep>()
+  const step = stepper.step
 
-  const clearTimers = () => { timerRef.current.forEach(clearTimeout); timerRef.current = [] }
-
-  const reset = () => { clearTimers(); setVisited(new Set()); setCurrent(null); setQueue_([]); setRunning(false) }
-
-  const runBFS = () => {
-    reset()
-    setRunning(true)
-    const adj: Record<number, number[]> = {}
-    PRESET_NODES.forEach(n => { adj[n.id] = [] })
-    PRESET_EDGES.forEach(e => {
-      adj[e.from].push(e.to)
-      if (type !== 'graph-directed') adj[e.to].push(e.from)
-    })
-
-    const order: number[] = []
-    const vis = new Set<number>()
-    const bfsQ = [0]; vis.add(0)
-    while (bfsQ.length) {
-      const v = bfsQ.shift()!
-      order.push(v)
-      for (const nb of adj[v]) if (!vis.has(nb)) { vis.add(nb); bfsQ.push(nb) }
-    }
-
-    let delay = 0
-    order.forEach((v, i) => {
-      const t1 = setTimeout(() => { setCurrent(v); setQueue_(order.slice(i + 1)) }, delay)
-      const t2 = setTimeout(() => setVisited(prev => new Set([...prev, v])), delay + 300)
-      timerRef.current.push(t1, t2)
-      delay += 600
-    })
-    const t3 = setTimeout(() => { setCurrent(null); setRunning(false) }, delay + 300)
-    timerRef.current.push(t3)
+  const run = (m: Traversal = mode, s: number = start) => {
+    stepper.load(m === 'bfs' ? bfsSteps(s, GUIDE_EDGES, directed) : dfsSteps(s, GUIDE_EDGES, directed))
   }
 
-  useEffect(() => () => clearTimers(), [])
-
-  const isDirected = type === 'graph-directed' || type === 'bfs-dfs'
+  const vertex = (id: number) => GUIDE_VERTICES.find(v => v.id === id)!
+  const visited = new Set(step?.visited ?? [])
+  const treeEdges = new Set(step?.treeEdges ?? [])
 
   return (
     <div className="viz-graph-root">
-      <svg width="100%" height="220" viewBox="0 0 340 210" className="viz-graph-svg">
-        <defs>
-          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="rgba(59,91,219,0.6)" />
-          </marker>
-        </defs>
+      <ModeTabs<Traversal>
+        value={mode}
+        onChange={m => { setMode(m); run(m) }}
+        modes={[
+          { key: 'dfs', label: 'Depth First Search' },
+          { key: 'bfs', label: 'Breadth First Search' },
+        ]}
+      />
 
-        {/* Edges */}
-        {PRESET_EDGES.map((e, i) => {
-          const from = PRESET_NODES.find(n => n.id === e.from)!
-          const to   = PRESET_NODES.find(n => n.id === e.to)!
-          const isActive = visited.has(e.from) && visited.has(e.to)
-          return (
-            <line
-              key={i}
-              x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-              stroke={isActive ? 'rgba(0,212,170,0.6)' : 'rgba(59,91,219,0.35)'}
-              strokeWidth={isActive ? 2.5 : 1.5}
-              markerEnd={isDirected ? 'url(#arrow)' : undefined}
-            />
-          )
-        })}
+      <div className="viz-graph-stage">
+        <svg viewBox="0 0 385 290">
+          <defs>
+            <marker id="viz-arrow" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 z" fill="rgba(124,92,191,0.7)" />
+            </marker>
+            <marker id="viz-arrow-active" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 z" fill="#00D4AA" />
+            </marker>
+          </defs>
 
-        {/* Nodes */}
-        {PRESET_NODES.map(node => {
-          const isVisited = visited.has(node.id)
-          const isCurrent = current === node.id
-          return (
-            <g key={node.id}>
-              <motion.circle
-                cx={node.x} cy={node.y} r={20}
-                fill={isCurrent ? 'rgba(0,212,170,0.4)' : isVisited ? 'rgba(59,91,219,0.3)' : 'rgba(20,28,61,0.95)'}
-                stroke={isCurrent ? '#00D4AA' : isVisited ? 'rgba(59,91,219,0.8)' : 'rgba(59,91,219,0.4)'}
-                strokeWidth={isCurrent ? 3 : 2}
-                animate={{ r: isCurrent ? 23 : 20 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-              />
-              <text x={node.x} y={node.y + 5} textAnchor="middle"
-                fill={isCurrent ? '#00D4AA' : 'var(--text-viz)'} fontSize={13} fontWeight={600}>
-                {node.label}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
+          {GUIDE_EDGES.map(e => {
+            const a = vertex(e.from)
+            const b = vertex(e.to)
+            const key = `${e.from}-${e.to}`
+            const used = treeEdges.has(key) || (!directed && treeEdges.has(`${e.to}-${e.from}`))
+            const active = step?.activeEdge === key
+            // Stop the line at the edge of the target circle so the arrow is visible
+            const dx = b.x - a.x
+            const dy = b.y - a.y
+            const len = Math.hypot(dx, dy)
+            const ex = b.x - (dx / len) * (R + 2)
+            const ey = b.y - (dy / len) * (R + 2)
+            return (
+              <line key={key} x1={a.x} y1={a.y} x2={directed ? ex : b.x} y2={directed ? ey : b.y}
+                stroke={used ? '#00D4AA' : active ? '#F59E0B' : 'rgba(124,92,191,0.45)'}
+                strokeWidth={used || active ? 2.6 : 1.5}
+                strokeDasharray={active && !used ? '4 3' : undefined}
+                markerEnd={directed ? `url(#${used ? 'viz-arrow-active' : 'viz-arrow'})` : undefined} />
+            )
+          })}
 
-      {queue_.length > 0 && (
-        <div className="viz-traversal-row">
-          <span className="viz-traversal-label">Queue:</span>
-          {queue_.map((v, i) => (
-            <span key={i} className="viz-traversal-val">{v}</span>
-          ))}
-        </div>
-      )}
+          {GUIDE_VERTICES.map(v => {
+            const isCurrent = step?.current === v.id
+            const isVisited = visited.has(v.id)
+            return (
+              <g key={v.id} style={{ cursor: 'pointer' }} onClick={() => { setStart(v.id); run(mode, v.id) }}>
+                <circle cx={v.x} cy={v.y} r={R}
+                  fill={isCurrent ? 'rgba(0,212,170,0.4)' : isVisited ? 'rgba(59,91,219,0.35)' : 'var(--bg-viz-strong)'}
+                  stroke={isCurrent ? '#00D4AA' : isVisited ? 'rgba(99,131,255,0.9)' : v.id === start ? '#F59E0B' : 'rgba(124,92,191,0.6)'}
+                  strokeWidth={isCurrent ? 3 : 2} />
+                <text x={v.x} y={v.y + 4.5} textAnchor="middle" fontSize={12.5} fontWeight={700} fill="var(--text-viz)">{v.id}</text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+
+      <div className="viz-panel-row">
+        <span className="viz-muted">{mode === 'bfs' ? 'QUEUE (front → rear):' : 'Recursion stack (bottom → top):'}</span>
+        {(step?.frontier ?? []).map((v, i) => <span key={i} className="viz-chip">{v}</span>)}
+      </div>
+      <div className="viz-panel-row">
+        <span className="viz-muted">Visit order:</span>
+        {(step?.order ?? []).map((v, i) => (
+          <span key={i} className={`viz-chip ${i === (step?.order.length ?? 0) - 1 ? 'accent' : ''}`}>{v}</span>
+        ))}
+      </div>
 
       <div className="viz-controls">
-        <button className="viz-btn" onClick={runBFS} disabled={running}>Run BFS</button>
-        <button className="viz-btn ghost" onClick={reset}>Reset</button>
+        <button className="viz-btn" onClick={() => run()} disabled={stepper.playing}>Run {mode.toUpperCase()} from {start}</button>
+        <span className="viz-muted" style={{ fontSize: '0.7rem' }}>Click a vertex to start from it. Neighbours are taken in ascending order.</span>
       </div>
 
-      <div className="viz-legend">
-        <span className="viz-legend-item"><span className="viz-legend-dot accent" />Current</span>
-        <span className="viz-legend-item"><span className="viz-legend-dot purple" />Visited</span>
-        <span className="viz-legend-item">{isDirected ? 'Directed' : 'Weighted'}</span>
-      </div>
+      <StepControls stepper={stepper} caption={step?.caption} code={mode === 'bfs' ? BFS_CODE : DFS_CODE} activeLine={step?.line ?? null} />
     </div>
   )
 }

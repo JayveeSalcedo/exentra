@@ -204,41 +204,41 @@ export default function StudentProfile() {
   const initials = `${form.firstName[0] ?? ''}${form.lastName[0] ?? ''}`.toUpperCase()
 
   return (
-    <div className="sp-root">
+    <div className="spf-root">
 
       {/* ── Header card ── */}
-      <motion.div className="sp-header"
+      <motion.div className="spf-header"
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: easeOut }}
       >
-        <div className="sp-header-top">
+        <div className="spf-header-top">
           {/* Avatar */}
-          <div className="sp-avatar-wrap">
+          <div className="spf-avatar-wrap">
             <button
               type="button"
-              className="sp-avatar sp-avatar-btn"
+              className="spf-avatar spf-avatar-btn"
               onClick={handleAvatarClick}
               disabled={uploadingAvatar}
               title="Change profile picture"
             >
               {user?.avatarUrl
-                ? <img src={user.avatarUrl} alt="avatar" className="sp-avatar-img" />
-                : <span className="sp-avatar-initials">{initials}</span>}
-              <span className="sp-avatar-overlay">
-                {uploadingAvatar ? <span className="sp-spin" /> : <Camera size={16} />}
+                ? <img src={user.avatarUrl} alt="avatar" className="spf-avatar-img" />
+                : <span className="spf-avatar-initials">{initials}</span>}
+              <span className="spf-avatar-overlay">
+                {uploadingAvatar ? <span className="spf-spin" /> : <Camera size={16} />}
               </span>
             </button>
             <input
               ref={avatarInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
-              className="sp-avatar-input"
+              className="spf-avatar-input"
               onChange={handleAvatarChange}
             />
             {user?.avatarUrl && (
               <button
                 type="button"
-                className="sp-avatar-remove"
+                className="spf-avatar-remove"
                 onClick={handleAvatarRemove}
                 disabled={uploadingAvatar}
                 title="Remove profile picture"
@@ -246,62 +246,62 @@ export default function StudentProfile() {
                 <Trash2 size={11} />
               </button>
             )}
-            <div className="sp-avatar-level">Lv {level}</div>
+            <div className="spf-avatar-level">Lv {level}</div>
           </div>
 
           {/* Identity */}
-          <div className="sp-header-info">
-            <h1 className="sp-name">{form.firstName} {form.lastName}</h1>
-            <p className="sp-sub">
+          <div className="spf-header-info">
+            <h1 className="spf-name">{form.firstName} {form.lastName}</h1>
+            <p className="spf-sub">
               <span>@{form.username}</span>
-              <span className="sp-dot">·</span>
+              <span className="spf-dot">·</span>
               <span>{user?.schoolId}</span>
-              <span className="sp-dot">·</span>
-              <span className={blockName ? '' : 'sp-muted'}>{blockName ?? 'No section assigned'}</span>
+              <span className="spf-dot">·</span>
+              <span className={blockName ? '' : 'spf-muted'}>{blockName ?? 'No section assigned'}</span>
             </p>
-            {form.yearCourse && <p className="sp-course">{form.yearCourse}</p>}
+            {form.yearCourse && <p className="spf-course">{form.yearCourse}</p>}
           </div>
 
-          <button className="sp-edit-btn" onClick={() => setEditing(true)}>
+          <button className="spf-edit-btn" onClick={() => setEditing(true)}>
             <Edit3 size={13} /> Edit
           </button>
         </div>
 
         {/* XP bar */}
-        <div className="sp-xp">
-          <div className="sp-xp-track">
-            <motion.div className="sp-xp-fill"
+        <div className="spf-xp">
+          <div className="spf-xp-track">
+            <motion.div className="spf-xp-fill"
               initial={{ width: 0 }} animate={{ width: `${xpPct}%` }}
               transition={{ duration: 1, delay: 0.3, ease: easeOut }}
             />
           </div>
-          <span className="sp-xp-text">{xpCurrent.toLocaleString()} / {xpNeeded.toLocaleString()} XP to Level {level + 1}</span>
+          <span className="spf-xp-text">{xpCurrent.toLocaleString()} / {xpNeeded.toLocaleString()} XP to Level {level + 1}</span>
         </div>
       </motion.div>
 
       {/* ── Stats ── */}
-      <div className="sp-stats-grid">
+      <div className="spf-stats-grid">
         {[
           { icon: <Zap size={16} color="#FFB830" />, val: xp.toLocaleString(), label: 'Total XP', color: '#FFB830' },
           { icon: <Flame size={16} color="#FF6B8A" />, val: `${streak}d`, label: 'Streak', color: '#FF6B8A' },
           { icon: <BookOpen size={16} color="#00D4AA" />, val: stats.lessonsCompleted, label: 'Lessons', color: '#00D4AA' },
           { icon: <Target size={16} color="#9B7ED4" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#9B7ED4' },
         ].map((s, i) => (
-          <div key={i} className="sp-stat-card">
-            <div className="sp-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
-            <span className="sp-stat-val" style={{ color: s.color }}>{s.val}</span>
-            <span className="sp-stat-label">{s.label}</span>
+          <div key={i} className="spf-stat-card">
+            <div className="spf-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
+            <span className="spf-stat-val" style={{ color: s.color }}>{s.val}</span>
+            <span className="spf-stat-label">{s.label}</span>
           </div>
         ))}
       </div>
 
       {/* ── Account info ── */}
-      <motion.div className="sp-info-card"
+      <motion.div className="spf-info-card"
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.3, ease: easeOut }}
       >
-        <h2 className="sp-section-title"><User size={14} /> Account Information</h2>
-        <div className="sp-info-grid">
+        <h2 className="spf-section-title"><User size={14} /> Account Information</h2>
+        <div className="spf-info-grid">
           {[
             { label: 'Email', val: `${user?.schoolId}@psu.edu.ph` },
             { label: 'Year & Course', val: form.yearCourse || '—' },
@@ -309,9 +309,9 @@ export default function StudentProfile() {
             { label: 'Average Score', val: stats.avgScore ? `${stats.avgScore}%` : '—' },
             { label: 'Leaderboard Rank', val: stats.rank ? `#${stats.rank}` : '—' },
           ].map((row, i) => (
-            <div key={i} className="sp-info-row">
-              <span className="sp-info-label">{row.label}</span>
-              <span className="sp-info-val">{row.val}</span>
+            <div key={i} className="spf-info-row">
+              <span className="spf-info-label">{row.label}</span>
+              <span className="spf-info-val">{row.val}</span>
             </div>
           ))}
         </div>
@@ -320,47 +320,47 @@ export default function StudentProfile() {
       {/* ── Edit modal ── */}
       <AnimatePresence>
         {editing && (
-          <motion.div className="sp-overlay"
+          <motion.div className="spf-overlay"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setEditing(false)}
           >
-            <motion.div className="sp-modal"
+            <motion.div className="spf-modal"
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
               transition={{ duration: 0.2, ease: easeOut }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="sp-modal-header">
+              <div className="spf-modal-header">
                 <h2><Edit3 size={15} /> Edit Profile</h2>
-                <button className="sp-modal-close" onClick={() => setEditing(false)}><X size={15} /></button>
+                <button className="spf-modal-close" onClick={() => setEditing(false)}><X size={15} /></button>
               </div>
 
-              <div className="sp-modal-body">
-                <div className="sp-field-row">
-                  <div className="sp-field">
+              <div className="spf-modal-body">
+                <div className="spf-field-row">
+                  <div className="spf-field">
                     <label>First Name</label>
                     <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First name" />
                   </div>
-                  <div className="sp-field">
+                  <div className="spf-field">
                     <label>Last Name</label>
                     <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last name" />
                   </div>
                 </div>
-                <div className="sp-field">
+                <div className="spf-field">
                   <label>Username</label>
                   <input value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} placeholder="Username" />
                 </div>
-                <div className="sp-field">
+                <div className="spf-field">
                   <label>Year & Course</label>
                   <input value={form.yearCourse} onChange={e => setForm(f => ({ ...f, yearCourse: e.target.value }))} placeholder="e.g. 2nd Year — BSIT" />
                 </div>
               </div>
 
-              <div className="sp-modal-footer">
-                <button className="sp-btn-cancel" onClick={() => setEditing(false)}><X size={13} /> Cancel</button>
-                <button className="sp-btn-save" onClick={handleSave} disabled={saving}>
-                  {saving ? <span className="sp-spin" /> : <Save size={13} />}
+              <div className="spf-modal-footer">
+                <button className="spf-btn-cancel" onClick={() => setEditing(false)}><X size={13} /> Cancel</button>
+                <button className="spf-btn-save" onClick={handleSave} disabled={saving}>
+                  {saving ? <span className="spf-spin" /> : <Save size={13} />}
                   {saving ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
@@ -372,7 +372,7 @@ export default function StudentProfile() {
       {/* ── Toast ── */}
       <AnimatePresence>
         {toast && (
-          <motion.div className={`sp-toast ${toast.ok ? 'ok' : 'err'}`}
+          <motion.div className={`spf-toast ${toast.ok ? 'ok' : 'err'}`}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
           >
             {toast.ok ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}

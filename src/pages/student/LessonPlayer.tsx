@@ -1,17 +1,28 @@
-﻿import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ArrowLeft, BookOpen, Lightbulb, Code2,
+  ArrowLeft, BookOpen, Lightbulb, Code2, FileText, Target, Clock,
   CheckCircle2, Play, Zap, ChevronRight, ChevronLeft,
 } from 'lucide-react'
 import CodeEditor from '../../components/ui/CodeEditor'
 import ConceptVisualizer from '../../components/visualizers/ConceptVisualizer'
+import ContentBlocks from '../../components/lesson/ContentBlocks'
+import CodeBlock from '../../components/lesson/CodeBlock'
 import { LESSONS, getLessonsForModule } from '../../lessons/index'
+import { getCourseModule } from '../../lessons/course'
+import { completedLessonSet, isLessonOpen } from '../../lessons/progress'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import '../../components/visualizers/visualizers.css'
 import './LessonPlayer.css'
+
+const LESSON_XP = 30
+
+/** Remove Java comments so TODO notes in the starter code can't satisfy a check */
+function stripJavaComments(code: string): string {
+  return code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+}
 
 /* ─── helpers ─────────────────────────────────────────────────────────── */
 function CheckItem({ label, passed }: { label: string; passed: boolean }) {
@@ -26,69 +37,113 @@ function CheckItem({ label, passed }: { label: string; passed: boolean }) {
   )
 }
 
+const SECTION_KEYS = ['overview', 'guide', 'keypoints', 'check'] as const
+type SectionKey = typeof SECTION_KEYS[number]
+
+const SECTION_LABELS: Record<SectionKey, string> = {
+  overview:  'Overview',
+  guide:     'Study Guide',
+  keypoints: 'Key Points',
+  check:     'Check Your Understanding',
+}
+const SECTION_ICONS: Record<SectionKey, React.ReactNode> = {
+  overview:  <BookOpen size={14} />,
+  guide:     <FileText size={14} />,
+  keypoints: <Lightbulb size={14} />,
+  check:     <CheckCircle2 size={14} />,
+}
+
 /* ─── component ───────────────────────────────────────────────────────── */
 export default function LessonPlayer() {
   const { moduleId, lessonId } = useParams<{ moduleId: string; lessonId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
   const savedRef = useRef(false) // prevent double-save
+  const sectionTopRef = useRef<HTMLDivElement>(null)
 
   const lesson = LESSONS[lessonId ?? '']
-  // `moduleId` from the URL may be the static key ("module1".."module8")
-  // OR a real DB modules.id (uuid) — LearningMaterials.tsx passes whichever
-  // is on the merged Module object it's rendering. The static lesson data
-  // is always keyed by lesson.moduleId ("module1" etc.), so derive from
-  // there for anything that needs to match it (lookups, display), and keep
-  // the raw `moduleId` param only for building URLs / writing to Supabase.
-  const staticModuleId = lesson?.moduleId ?? moduleId ?? ''
-  const moduleNumber = staticModuleId.replace(/^module/i, '') || moduleId
-  const moduleLessons = getLessonsForModule(staticModuleId)
+  // `moduleId` in the URL may be the DB modules.id (uuid) or the module order.
+  // The static lesson data always knows its own module ("1".."7").
+  const courseModule = lesson ? getCourseModule(Number(lesson.moduleId)) : undefined
+  const moduleLessons = lesson ? getLessonsForModule(lesson.moduleId) : []
   const lessonIdx = moduleLessons.findIndex(l => l.id === lessonId)
   const prevLesson = lessonIdx > 0 ? moduleLessons[lessonIdx - 1] : null
   const nextLesson = lessonIdx >= 0 && lessonIdx < moduleLessons.length - 1
     ? moduleLessons[lessonIdx + 1]
     : null
 
-  /* section state */
-  const SECTION_KEYS = ['overview', 'keypoints', 'steps', 'challenge'] as const
-  type SectionKey = typeof SECTION_KEYS[number]
   const [section, setSection] = useState<SectionKey>('overview')
   const sectionIdx = SECTION_KEYS.indexOf(section)
 
-  /* practice state */
   const [showPractice, setShowPractice] = useState(false)
   const [code, setCode] = useState('')
   const [showHints, setShowHints] = useState(false)
+  const [completed, setCompleted] = useState<Set<string> | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!lesson) return
     setSection('overview')
     setShowPractice(false)
-    setCode(lesson.starterCode)
+    setCode(lesson.starterCode ?? '')
     setShowHints(false)
-    savedRef.current = false // reset save flag on new lesson
+    savedRef.current = false
   }, [lessonId, lesson])
 
-  // Mark lesson as complete in Supabase
+  // Load progress and block lessons that are still locked
+  useEffect(() => {
+    if (!user || !lesson) return
+    let cancelled = false
+    supabase
+      .from('student_progress')
+      .select('lesson_id, completed')
+      .eq('student_id', user.id)
+      .then(({ data }) => {
+        if (cancelled) return
+        const set = completedLessonSet(data)
+        setCompleted(set)
+        if (!isLessonOpen(lesson.id, set)) navigate('/student/courses', { replace: true })
+      })
+    return () => { cancelled = true }
+  }, [user, lesson, navigate])
+
+  const alreadyDone = !!(lesson && completed?.has(lesson.id))
+
+  const goToSection = (key: SectionKey) => {
+    setSection(key)
+    sectionTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  // Mark lesson as complete in Supabase (XP is only awarded the first time)
   const markLessonComplete = async () => {
     if (!user || !lessonId || savedRef.current) return
     savedRef.current = true
+    if (alreadyDone) return
+    setSaving(true)
     try {
-      // Upsert progress row
-      await supabase.from('student_progress').upsert({
+      const { error } = await supabase.from('student_progress').upsert({
         student_id: user.id,
         lesson_id: lessonId,
         module_id: moduleId,
         completed: true,
         completed_at: new Date().toISOString(),
       }, { onConflict: 'student_id,lesson_id' })
+      if (error) throw error
 
-      // Award XP (+30 per lesson)
-      await supabase.rpc('increment_xp', { p_user_id: user.id, p_amount: 30 })
+      await supabase.rpc('increment_xp', { p_user_id: user.id, p_amount: LESSON_XP })
+      setCompleted(prev => new Set([...(prev ?? []), lessonId]))
     } catch (e) {
       console.error('Failed to save progress:', e)
       savedRef.current = false
+    } finally {
+      setSaving(false)
     }
+  }
+
+  const finishAndContinue = async () => {
+    await markLessonComplete()
+    if (nextLesson) navigate(`/student/courses/${moduleId}/lessons/${nextLesson.id}`)
+    else navigate('/student/courses')
   }
 
   if (!lesson) {
@@ -102,35 +157,24 @@ export default function LessonPlayer() {
     )
   }
 
-  /* check-marks live-evaluated */
-  const checkResults = lesson.challenge.checks.map(c => ({
-    ...c,
-    passed: c.test(code),
-  }))
-  const allPassed = checkResults.every(c => c.passed)
-
-  /* section labels */
-  const SECTION_LABELS: Record<SectionKey, string> = {
-    overview:   'Overview',
-    keypoints:  'Key Points',
-    steps:      'Guided Steps',
-    challenge:  'Check Your Understanding',
-  }
-  const SECTION_ICONS: Record<SectionKey, React.ReactNode> = {
-    overview:  <BookOpen  size={14} />,
-    keypoints: <Lightbulb size={14} />,
-    steps:     <Code2     size={14} />,
-    challenge: <CheckCircle2 size={14} />,
-  }
+  const hasPractice = !!lesson.starterCode
+  const hasViz = lesson.visualizerType !== 'none'
+  const codeWithoutComments = stripJavaComments(code)
+  const checkResults = (lesson.challenge?.checks ?? []).map(c => ({ ...c, passed: c.test(codeWithoutComments) }))
+  const allPassed = checkResults.length > 0 && checkResults.every(c => c.passed)
 
   const goNext = () => {
     const next = SECTION_KEYS[sectionIdx + 1]
-    if (next) setSection(next)
+    if (next) goToSection(next)
   }
   const goPrev = () => {
     const prev = SECTION_KEYS[sectionIdx - 1]
-    if (prev) setSection(prev)
+    if (prev) goToSection(prev)
   }
+
+  const finishLabel = alreadyDone
+    ? (nextLesson ? `Next: ${nextLesson.title}` : 'Back to Modules')
+    : (nextLesson ? 'Mark complete & continue' : 'Finish module')
 
   return (
     <div className="lp-root">
@@ -146,7 +190,9 @@ export default function LessonPlayer() {
         </button>
 
         <div className="lp-header-center">
-          <span className="lp-module-badge">Module {moduleNumber}</span>
+          <span className="lp-module-badge">
+            Module {lesson.moduleId}{courseModule ? ` · ${courseModule.title}` : ''} · Lesson {lessonIdx + 1} of {moduleLessons.length}
+          </span>
           <h1 className="lp-lesson-title">{lesson.title}</h1>
           <p className="lp-lesson-summary">{lesson.summary}</p>
         </div>
@@ -156,6 +202,9 @@ export default function LessonPlayer() {
             <span className="lp-complexity-badge">
               <Zap size={11} />{lesson.complexityNote}
             </span>
+          )}
+          {alreadyDone && (
+            <span className="lp-done-badge"><CheckCircle2 size={11} /> Completed</span>
           )}
           <div className="lp-progress">
             <div
@@ -168,12 +217,11 @@ export default function LessonPlayer() {
       </motion.header>
 
       {/* ── Main grid ──────────────────────────────────────────────────── */}
-      <div className="lp-grid">
+      <div className={`lp-grid ${hasViz ? '' : 'no-viz'}`}>
 
         {/* Left — content panel */}
-        <div className="lp-content-col">
+        <div className="lp-content-col" ref={sectionTopRef}>
 
-          {/* Section tabs */}
           <div className="lp-tabs">
             {SECTION_KEYS.map(key => (
               <button
@@ -187,7 +235,6 @@ export default function LessonPlayer() {
             ))}
           </div>
 
-          {/* Section body */}
           <div className="lp-section-card">
             <AnimatePresence mode="wait">
               <motion.div
@@ -202,11 +249,27 @@ export default function LessonPlayer() {
                 {section === 'overview' && (
                   <>
                     <div className="lp-objective-badge">
-                      🎯 {lesson.objective}
+                      <Target size={13} /> Unit learning outcomes
                     </div>
-                    <p className="lp-description">{lesson.description}</p>
+                    <p className="lp-description">By the end of this lesson you should be able to:</p>
+                    <ul className="lp-keypoints">
+                      {lesson.unitOutcomes.map((o, i) => (
+                        <li key={i}><span className="lp-kp-bullet">▸</span>{o}</li>
+                      ))}
+                    </ul>
+                    <div className="lp-source-row">
+                      <span><FileText size={12} /> Study Guide {lesson.source.guide}, pp. {lesson.source.pages}</span>
+                      <span><Clock size={12} /> {lesson.durationMinutes} min</span>
+                      {hasPractice && <span><Code2 size={12} /> Java practice</span>}
+                      {courseModule && (
+                        <a href={courseModule.pdf} target="_blank" rel="noopener noreferrer">Open PDF</a>
+                      )}
+                    </div>
                   </>
                 )}
+
+                {/* STUDY GUIDE */}
+                {section === 'guide' && <ContentBlocks blocks={lesson.reading} />}
 
                 {/* KEY POINTS */}
                 {section === 'keypoints' && (
@@ -225,61 +288,67 @@ export default function LessonPlayer() {
                   </ul>
                 )}
 
-                {/* GUIDED STEPS */}
-                {section === 'steps' && (
-                  <ol className="lp-steps">
-                    {lesson.steps.map((step, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08 }}
-                      >
-                        <span className="lp-step-num">{i + 1}</span>
-                        {step}
-                      </motion.li>
-                    ))}
-                  </ol>
-                )}
-
-                {/* CHALLENGE */}
-                {section === 'challenge' && (
+                {/* CHECK YOUR UNDERSTANDING */}
+                {section === 'check' && (
                   <>
-                    <p className="lp-challenge-prompt">{lesson.challenge.prompt}</p>
-                    <div className="lp-checklist">
-                      {checkResults.map(c => (
-                        <CheckItem key={c.id} label={c.label} passed={c.passed} />
+                    <ol className="lp-exercises">
+                      {lesson.exercises.map((ex, i) => (
+                        <li key={i}>
+                          <span className="lp-step-num">{i + 1}</span>
+                          <div className="lp-exercise-body">
+                            {typeof ex === 'string' ? (
+                              <div className="lp-exercise-text">{ex}</div>
+                            ) : (
+                              <>
+                                <div className="lp-exercise-text">{ex.text}</div>
+                                <CodeBlock code={ex.code} lang={ex.lang} />
+                                {ex.after && <div className="lp-exercise-text">{ex.after}</div>}
+                              </>
+                            )}
+                          </div>
+                        </li>
                       ))}
-                    </div>
-                    {allPassed && (
-                      <motion.div
-                        className="lp-all-passed"
-                        initial={{ opacity: 0, scale: 0.85 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                      >
-                        ✅ All checks passed — great work!
-                      </motion.div>
-                    )}
-                    <button
-                      className="lp-hint-toggle"
-                      onClick={() => setShowHints(v => !v)}
-                    >
-                      {showHints ? 'Hide hints' : '💡 Show hints'}
-                    </button>
-                    <AnimatePresence>
-                      {showHints && (
-                        <motion.ul
-                          className="lp-hints"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          {lesson.hints.map((h, i) => (
-                            <li key={i}>{h}</li>
+                    </ol>
+
+                    {lesson.challenge && (
+                      <>
+                        <p className="lp-challenge-prompt"><Code2 size={13} /> {lesson.challenge.prompt}</p>
+                        <div className="lp-checklist">
+                          {checkResults.map(c => (
+                            <CheckItem key={c.id} label={c.label} passed={c.passed} />
                           ))}
-                        </motion.ul>
-                      )}
-                    </AnimatePresence>
+                        </div>
+                        {allPassed && (
+                          <motion.div
+                            className="lp-all-passed"
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                          >
+                            ✅ All checks passed — great work!
+                          </motion.div>
+                        )}
+                      </>
+                    )}
+
+                    {lesson.hints.length > 0 && (
+                      <>
+                        <button className="lp-hint-toggle" onClick={() => setShowHints(v => !v)}>
+                          {showHints ? 'Hide hints' : '💡 Show hints'}
+                        </button>
+                        <AnimatePresence>
+                          {showHints && (
+                            <motion.ul
+                              className="lp-hints"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                            >
+                              {lesson.hints.map((h, i) => <li key={i}>{h}</li>)}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
+                      </>
+                    )}
                   </>
                 )}
               </motion.div>
@@ -288,38 +357,49 @@ export default function LessonPlayer() {
 
           {/* Section navigation */}
           <div className="lp-section-nav">
-            <button
-              className="lp-nav-btn secondary"
-              onClick={goPrev}
-              disabled={sectionIdx === 0}
-            >
+            <button className="lp-nav-btn secondary" onClick={goPrev} disabled={sectionIdx === 0}>
               <ChevronLeft size={14} /> Previous
             </button>
 
-            {section !== 'challenge' ? (
+            {section !== 'check' ? (
               <button className="lp-nav-btn primary" onClick={goNext}>
                 Next <ChevronRight size={14} />
               </button>
-            ) : (
-              <button
-                className="lp-nav-btn primary"
-                onClick={() => setShowPractice(true)}
-              >
+            ) : hasPractice ? (
+              <button className="lp-nav-btn primary" onClick={() => setShowPractice(true)}>
                 <Code2 size={14} /> Practice
+              </button>
+            ) : (
+              <button className="lp-nav-btn primary" onClick={finishAndContinue} disabled={saving}>
+                <CheckCircle2 size={14} /> {saving ? 'Saving…' : finishLabel}
               </button>
             )}
           </div>
+
+          {/* Lesson navigation for lessons without a practice panel */}
+          {!hasPractice && section === 'check' && prevLesson && (
+            <div className="lp-lesson-nav">
+              <button
+                className="lp-nav-btn secondary"
+                onClick={() => navigate(`/student/courses/${moduleId}/lessons/${prevLesson.id}`)}
+              >
+                <ChevronLeft size={14} /> {prevLesson.title}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right — concept visualizer */}
-        <div className="lp-viz-col">
-          <ConceptVisualizer type={lesson.visualizerType} lessonId={lesson.id} />
-        </div>
+        {hasViz && (
+          <div className="lp-viz-col">
+            <ConceptVisualizer type={lesson.visualizerType} lessonId={lesson.id} />
+          </div>
+        )}
       </div>
 
       {/* ── Practice panel ─────────────────────────────────────────────── */}
       <AnimatePresence>
-        {showPractice && (
+        {hasPractice && showPractice && (
           <motion.div
             className="lp-practice"
             initial={{ opacity: 0, y: 24 }}
@@ -330,13 +410,12 @@ export default function LessonPlayer() {
             <div className="lp-practice-header">
               <div>
                 <h2>Practice <span className="lp-lang-badge">Java</span></h2>
-                <p>Write your solution and watch the checks update live.</p>
+                <p>{lesson.challenge?.prompt ?? 'Write your solution and watch the checks update live.'}</p>
               </div>
               <button className="lp-close-practice" onClick={() => setShowPractice(false)}>✕</button>
             </div>
 
             <div className="lp-practice-grid">
-              {/* Editor */}
               <div className="lp-editor-card">
                 <div className="lp-editor-topbar">
                   <div className="lp-editor-dots">
@@ -345,7 +424,7 @@ export default function LessonPlayer() {
                   <span className="lp-editor-filename">Main.java</span>
                   <button
                     className="lp-run-btn"
-                    onClick={() => setCode(lesson.starterCode)}
+                    onClick={() => setCode(lesson.starterCode ?? '')}
                     title="Reset to starter code"
                   >
                     <Play size={11} /> Reset
@@ -354,32 +433,30 @@ export default function LessonPlayer() {
                 <CodeEditor value={code} onChange={setCode} language="java" />
               </div>
 
-              {/* Right: expected output + live checks */}
               <div className="lp-output-col">
-                <div className="lp-output-card">
-                  <div className="lp-output-label">Expected Output</div>
-                  <pre className="lp-output-pre">{lesson.expectedOutput}</pre>
-                </div>
+                {lesson.expectedOutput && (
+                  <div className="lp-output-card">
+                    <div className="lp-output-label">Expected Output</div>
+                    <pre className="lp-output-pre">{lesson.expectedOutput}</pre>
+                  </div>
+                )}
 
-                <div className="lp-livechecks-card">
-                  <div className="lp-output-label">Live Checks</div>
-                  {checkResults.map(c => (
-                    <CheckItem key={c.id} label={c.label} passed={c.passed} />
-                  ))}
-                  {allPassed && (
-                    <motion.div
-                      className="lp-all-passed"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      ✅ All checks passed!
-                    </motion.div>
-                  )}
-                </div>
+                {checkResults.length > 0 && (
+                  <div className="lp-livechecks-card">
+                    <div className="lp-output-label">Live Checks</div>
+                    {checkResults.map(c => (
+                      <CheckItem key={c.id} label={c.label} passed={c.passed} />
+                    ))}
+                    {allPassed && (
+                      <motion.div className="lp-all-passed" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        ✅ All checks passed!
+                      </motion.div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Lesson navigation at the bottom */}
             <div className="lp-lesson-nav">
               {prevLesson ? (
                 <button
@@ -390,27 +467,14 @@ export default function LessonPlayer() {
                 </button>
               ) : <span />}
 
-              {nextLesson ? (
-                <button
-                  className="lp-nav-btn primary"
-                  onClick={async () => {
-                    await markLessonComplete()
-                    navigate(`/student/courses/${moduleId}/lessons/${nextLesson.id}`)
-                  }}
-                >
-                  {nextLesson.title} <ChevronRight size={14} />
-                </button>
-              ) : (
-                <button
-                  className="lp-nav-btn primary"
-                  onClick={async () => {
-                    await markLessonComplete()
-                    navigate('/student/courses')
-                  }}
-                >
-                  Finish Module ✓
-                </button>
-              )}
+              <button
+                className="lp-nav-btn primary"
+                onClick={finishAndContinue}
+                disabled={saving || (!alreadyDone && !allPassed)}
+                title={!alreadyDone && !allPassed ? 'Pass all live checks to complete this lesson' : undefined}
+              >
+                {saving ? 'Saving…' : finishLabel} <ChevronRight size={14} />
+              </button>
             </div>
           </motion.div>
         )}

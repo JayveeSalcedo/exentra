@@ -243,41 +243,41 @@ export default function TeacherProfile() {
   const initials = `${form.firstName[0] ?? ''}${form.lastName[0] ?? ''}`.toUpperCase()
 
   return (
-    <div className="tp-root">
+    <div className="tpf-root">
 
       {/* ── Header card ── */}
-      <motion.div className="tp-header"
+      <motion.div className="tpf-header"
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: easeOut }}
       >
-        <div className="tp-header-top">
+        <div className="tpf-header-top">
           {/* Avatar */}
-          <div className="tp-avatar-wrap">
+          <div className="tpf-avatar-wrap">
             <button
               type="button"
-              className="tp-avatar tp-avatar-btn"
+              className="tpf-avatar tpf-avatar-btn"
               onClick={handleAvatarClick}
               disabled={uploadingAvatar}
               title="Change profile picture"
             >
               {user?.avatarUrl
-                ? <img src={user.avatarUrl} alt="avatar" className="tp-avatar-img" />
-                : <span className="tp-avatar-initials">{initials}</span>}
-              <span className="tp-avatar-overlay">
-                {uploadingAvatar ? <span className="tp-spin" /> : <Camera size={16} />}
+                ? <img src={user.avatarUrl} alt="avatar" className="tpf-avatar-img" />
+                : <span className="tpf-avatar-initials">{initials}</span>}
+              <span className="tpf-avatar-overlay">
+                {uploadingAvatar ? <span className="tpf-spin" /> : <Camera size={16} />}
               </span>
             </button>
             <input
               ref={avatarInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
-              className="tp-avatar-input"
+              className="tpf-avatar-input"
               onChange={handleAvatarChange}
             />
             {user?.avatarUrl && (
               <button
                 type="button"
-                className="tp-avatar-remove"
+                className="tpf-avatar-remove"
                 onClick={handleAvatarRemove}
                 disabled={uploadingAvatar}
                 title="Remove profile picture"
@@ -288,55 +288,55 @@ export default function TeacherProfile() {
           </div>
 
           {/* Identity */}
-          <div className="tp-header-info">
-            <h1 className="tp-name">{form.firstName} {form.lastName}</h1>
-            <p className="tp-sub">
+          <div className="tpf-header-info">
+            <h1 className="tpf-name">{form.firstName} {form.lastName}</h1>
+            <p className="tpf-sub">
               <span>@{form.username}</span>
-              <span className="tp-dot">·</span>
+              <span className="tpf-dot">·</span>
               <span>{user?.schoolId}</span>
-              <span className="tp-dot">·</span>
-              <span className="tp-role-tag">Teacher</span>
+              <span className="tpf-dot">·</span>
+              <span className="tpf-role-tag">Teacher</span>
             </p>
           </div>
 
-          <button className="tp-edit-btn" onClick={() => setEditing(true)}>
+          <button className="tpf-edit-btn" onClick={() => setEditing(true)}>
             <Edit3 size={13} /> Edit
           </button>
         </div>
       </motion.div>
 
       {/* ── Stats ── */}
-      <div className="tp-stats-grid">
+      <div className="tpf-stats-grid">
         {[
           { icon: <Layers size={16} color="#4FC3F7" />, val: stats.blocks, label: 'Blocks', color: '#4FC3F7' },
           { icon: <Users size={16} color="#FFB830" />, val: stats.students, label: 'Students', color: '#FFB830' },
           { icon: <ClipboardList size={16} color="#00D4AA" />, val: stats.assessments, label: 'Assessments', color: '#00D4AA' },
           { icon: <BookOpen size={16} color="#9B7ED4" />, val: stats.materials, label: 'Materials', color: '#9B7ED4' },
         ].map((s, i) => (
-          <div key={i} className="tp-stat-card">
-            <div className="tp-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
-            <span className="tp-stat-val" style={{ color: s.color }}>{s.val}</span>
-            <span className="tp-stat-label">{s.label}</span>
+          <div key={i} className="tpf-stat-card">
+            <div className="tpf-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
+            <span className="tpf-stat-val" style={{ color: s.color }}>{s.val}</span>
+            <span className="tpf-stat-label">{s.label}</span>
           </div>
         ))}
       </div>
 
       {/* ── Account info ── */}
-      <motion.div className="tp-info-card"
+      <motion.div className="tpf-info-card"
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.3, ease: easeOut }}
       >
-        <h2 className="tp-section-title"><User size={14} /> Account Information</h2>
-        <div className="tp-info-grid">
+        <h2 className="tpf-section-title"><User size={14} /> Account Information</h2>
+        <div className="tpf-info-grid">
           {[
             { label: 'Login Email', val: `${user?.schoolId}@psu.edu.ph` },
             { label: 'Contact Email', val: form.contactEmail || '—' },
             { label: 'Role', val: 'Teacher' },
             { label: 'Blocks Handled', val: String(stats.blocks) },
           ].map((row, i) => (
-            <div key={i} className="tp-info-row">
-              <span className="tp-info-label">{row.label}</span>
-              <span className="tp-info-val">{row.val}</span>
+            <div key={i} className="tpf-info-row">
+              <span className="tpf-info-label">{row.label}</span>
+              <span className="tpf-info-val">{row.val}</span>
             </div>
           ))}
         </div>
@@ -345,38 +345,38 @@ export default function TeacherProfile() {
       {/* ── Edit modal ── */}
       <AnimatePresence>
         {editing && (
-          <motion.div className="tp-overlay"
+          <motion.div className="tpf-overlay"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setEditing(false)}
           >
-            <motion.div className="tp-modal"
+            <motion.div className="tpf-modal"
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
               transition={{ duration: 0.2, ease: easeOut }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="tp-modal-header">
+              <div className="tpf-modal-header">
                 <h2><Edit3 size={15} /> Edit Profile</h2>
-                <button className="tp-modal-close" onClick={() => setEditing(false)}><X size={15} /></button>
+                <button className="tpf-modal-close" onClick={() => setEditing(false)}><X size={15} /></button>
               </div>
 
-              <div className="tp-modal-body">
-                <div className="tp-field-row">
-                  <div className="tp-field">
+              <div className="tpf-modal-body">
+                <div className="tpf-field-row">
+                  <div className="tpf-field">
                     <label>First Name</label>
                     <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First name" />
                   </div>
-                  <div className="tp-field">
+                  <div className="tpf-field">
                     <label>Last Name</label>
                     <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last name" />
                   </div>
                 </div>
-                <div className="tp-field">
+                <div className="tpf-field">
                   <label>Username</label>
                   <input value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} placeholder="Username" />
                 </div>
-                <div className="tp-field">
+                <div className="tpf-field">
                   <label>Contact Email</label>
                   <input
                     type="email"
@@ -386,45 +386,45 @@ export default function TeacherProfile() {
                   />
                 </div>
 
-                <div className="tp-modal-divider">
+                <div className="tpf-modal-divider">
                   <KeyRound size={12} /> Login &amp; Security
                 </div>
 
-                <div className="tp-field">
+                <div className="tpf-field">
                   <label>School ID (Login Email)</label>
                   <input
                     value={form.schoolId}
                     onChange={e => setForm(f => ({ ...f, schoolId: e.target.value }))}
                     placeholder="e.g. 22as1000"
                   />
-                  <span className="tp-field-hint">Logs in as {form.schoolId || '—'}@psu.edu.ph</span>
+                  <span className="tpf-field-hint">Logs in as {form.schoolId || '—'}@psu.edu.ph</span>
                 </div>
 
-                <div className="tp-field-row">
-                  <div className="tp-field">
+                <div className="tpf-field-row">
+                  <div className="tpf-field">
                     <label>New Password</label>
-                    <div className="tp-pw-wrap">
+                    <div className="tpf-pw-wrap">
                       <input
                         type={showNewPw ? 'text' : 'password'}
                         value={form.newPassword}
                         onChange={e => setForm(f => ({ ...f, newPassword: e.target.value }))}
                         placeholder="Leave blank to keep current"
                       />
-                      <button type="button" className="tp-pw-toggle" onClick={() => setShowNewPw(v => !v)} tabIndex={-1}>
+                      <button type="button" className="tpf-pw-toggle" onClick={() => setShowNewPw(v => !v)} tabIndex={-1}>
                         {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
                   </div>
-                  <div className="tp-field">
+                  <div className="tpf-field">
                     <label>Confirm Password</label>
-                    <div className="tp-pw-wrap">
+                    <div className="tpf-pw-wrap">
                       <input
                         type={showConfirmPw ? 'text' : 'password'}
                         value={form.confirmPassword}
                         onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
                         placeholder="Repeat new password"
                       />
-                      <button type="button" className="tp-pw-toggle" onClick={() => setShowConfirmPw(v => !v)} tabIndex={-1}>
+                      <button type="button" className="tpf-pw-toggle" onClick={() => setShowConfirmPw(v => !v)} tabIndex={-1}>
                         {showConfirmPw ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
@@ -432,10 +432,10 @@ export default function TeacherProfile() {
                 </div>
               </div>
 
-              <div className="tp-modal-footer">
-                <button className="tp-btn-cancel" onClick={() => setEditing(false)}><X size={13} /> Cancel</button>
-                <button className="tp-btn-save" onClick={handleSave} disabled={saving}>
-                  {saving ? <span className="tp-spin" /> : <Save size={13} />}
+              <div className="tpf-modal-footer">
+                <button className="tpf-btn-cancel" onClick={() => setEditing(false)}><X size={13} /> Cancel</button>
+                <button className="tpf-btn-save" onClick={handleSave} disabled={saving}>
+                  {saving ? <span className="tpf-spin" /> : <Save size={13} />}
                   {saving ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
@@ -447,7 +447,7 @@ export default function TeacherProfile() {
       {/* ── Toast ── */}
       <AnimatePresence>
         {toast && (
-          <motion.div className={`tp-toast ${toast.ok ? 'ok' : 'err'}`}
+          <motion.div className={`tpf-toast ${toast.ok ? 'ok' : 'err'}`}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
           >
             {toast.ok ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}

@@ -1,21 +1,18 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   BookOpen, ChevronDown, Play, Download,
-  Lock, CheckCircle2, Clock, FileText, Video, Paperclip,
-  Zap, Search, ExternalLink, ArrowRight, Target, User
+  Lock, CheckCircle2, Clock, FileText, Paperclip,
+  Zap, Search, ExternalLink, ArrowRight, Target, User, ListChecks,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
+import { COURSE_MODULES, COURSE_NAME, TOTAL_MODULES } from '../../lessons/course'
+import { TOTAL_LESSONS } from '../../lessons/index'
+import { computeCourseProgress, completedLessonSet, type UnlockState } from '../../lessons/progress'
+import type { Lesson } from '../../lessons/types'
 import './LearningMaterials.css'
-
-interface Lesson {
-  id: string
-  title: string
-  duration_minutes: number
-  order_index: number
-}
 
 interface Material {
   id: string
@@ -25,149 +22,7 @@ interface Material {
   created_at: string
 }
 
-interface Module {
-  id: string
-  title: string
-  description: string
-  order_index: number
-  xp_reward: number
-  lessons: Lesson[]
-  materials: Material[]
-}
-
-interface StudentProgress {
-  lesson_id: string
-  completed: boolean
-}
-
-const YT_LINKS: Record<number, { title: string; url: string }[]> = {
-  1: [
-    { title: 'Learn Java Arrays in 9 Minutes', url: 'https://www.youtube.com/watch?v=9dr2mHYYoug' },
-    { title: 'Array vs ArrayList in Java', url: 'https://www.youtube.com/watch?v=VUcYAnJrglo' },
-  ],
-  2: [
-    { title: 'Introduction to Linked Lists – CS Dojo', url: 'https://www.youtube.com/watch?v=WwfhLC16bis' },
-    { title: 'Linked List: Singly + Doubly + Circular – Kunal Kushwaha', url: 'https://www.youtube.com/watch?v=58YbpRDc4yw' },
-  ],
-  3: [
-    { title: 'Push, Pop and Peek Operations on Stack', url: 'https://www.youtube.com/watch?v=uSl2joOs0d0' },
-    { title: 'Queue Data Structure Basics', url: 'https://www.youtube.com/watch?v=W-_60OXqwLk' },
-  ],
-  4: [
-    { title: 'Binary Trees – Neso Academy', url: 'https://www.youtube.com/watch?v=lAo9r_asiew' },
-    { title: 'Binary Search Tree (BST) – codebasics', url: 'https://www.youtube.com/watch?v=lFq5mYUWEBk' },
-  ],
-  5: [
-    { title: 'Introduction to Graphs – Apna College', url: 'https://www.youtube.com/watch?v=RpgyCJBbl5E' },
-    { title: 'BFS and DFS Graph Traversal Explained', url: 'https://www.youtube.com/watch?v=D8ZS32wGs0s' },
-  ],
-  6: [
-    { title: 'All the Sorting Algorithms', url: 'https://www.youtube.com/watch?v=GMV7ycKZ-mM' },
-    { title: 'Linear vs Jump vs Binary Search', url: 'https://www.youtube.com/watch?v=m1VOyAk7FCw' },
-  ],
-  7: [
-    { title: 'Learn Binary Search in 10 Minutes', url: 'https://www.youtube.com/watch?v=xrMppTpoqdw' },
-    { title: 'Linear Search vs Binary Search', url: 'https://www.youtube.com/watch?v=gJvhiR7Yi6Q' },
-  ],
-  8: [
-    { title: 'Learn Hash Tables in 13 Minutes', url: 'https://www.youtube.com/watch?v=FsfRsGFHuv4' },
-    { title: 'Introduction to Hash Tables and Dictionaries – CS Dojo', url: 'https://www.youtube.com/watch?v=sfWyugl4JWA' },
-  ],
-}
-
-const MOCK_MODULES: Module[] = [
-  {
-    id: '1', title: 'Arrays & Array Lists', order_index: 1, xp_reward: 380,
-    description: 'Understand contiguous memory storage, indexing, and dynamic resizing through ArrayList.',
-    lessons: [
-      { id: 'l1-1', title: 'Introduction to Arrays', duration_minutes: 15, order_index: 1 },
-      { id: 'l1-2', title: 'Array Operations (CRUD)', duration_minutes: 20, order_index: 2 },
-      { id: 'l1-3', title: 'Multi-dimensional Arrays', duration_minutes: 18, order_index: 3 },
-      { id: 'l1-4', title: 'ArrayList & Dynamic Arrays', duration_minutes: 22, order_index: 4 },
-    ],
-    materials: [],
-  },
-  {
-    id: '2', title: 'Lists & Linked Lists', order_index: 2, xp_reward: 350,
-    description: 'Master singly and doubly linked list structures, pointers, and common operations.',
-    lessons: [
-      { id: 'l2-1', title: 'Singly Linked Lists', duration_minutes: 20, order_index: 1 },
-      { id: 'l2-2', title: 'Doubly Linked Lists', duration_minutes: 22, order_index: 2 },
-      { id: 'l2-3', title: 'Circular Linked Lists', duration_minutes: 18, order_index: 3 },
-      { id: 'l2-4', title: 'List Operations & Complexity', duration_minutes: 15, order_index: 4 },
-    ],
-    materials: [],
-  },
-  {
-    id: '3', title: 'Stacks', order_index: 3, xp_reward: 350,
-    description: 'Explore LIFO structures, stack-based problem solving, and real-world applications.',
-    lessons: [
-      { id: 'l3-1', title: 'Stack Fundamentals', duration_minutes: 15, order_index: 1 },
-      { id: 'l3-2', title: 'Push, Pop, Peek Operations', duration_minutes: 18, order_index: 2 },
-      { id: 'l3-3', title: 'Stack Applications', duration_minutes: 20, order_index: 3 },
-    ],
-    materials: [],
-  },
-  {
-    id: '4', title: 'Queues', order_index: 4, xp_reward: 350,
-    description: 'Learn FIFO structures, circular queues, priority queues, and dequeues.',
-    lessons: [
-      { id: 'l4-1', title: 'Queue Fundamentals', duration_minutes: 15, order_index: 1 },
-      { id: 'l4-2', title: 'Circular Queue', duration_minutes: 18, order_index: 2 },
-      { id: 'l4-3', title: 'Priority Queue & Dequeue', duration_minutes: 20, order_index: 3 },
-    ],
-    materials: [],
-  },
-  {
-    id: '5', title: 'Trees', order_index: 5, xp_reward: 450,
-    description: 'Understand tree hierarchy, binary trees, BST, traversals, and balanced trees.',
-    lessons: [
-      { id: 'l5-1', title: 'Tree Terminology', duration_minutes: 12, order_index: 1 },
-      { id: 'l5-2', title: 'Binary Search Trees', duration_minutes: 25, order_index: 2 },
-      { id: 'l5-3', title: 'Tree Traversals (In/Pre/Post)', duration_minutes: 22, order_index: 3 },
-      { id: 'l5-4', title: 'AVL & Balanced Trees', duration_minutes: 28, order_index: 4 },
-    ],
-    materials: [],
-  },
-  {
-    id: '6', title: 'Graphs', order_index: 6, xp_reward: 480,
-    description: 'Explore graph representations, traversal algorithms (BFS/DFS), and shortest paths.',
-    lessons: [
-      { id: 'l6-1', title: 'Graph Representations', duration_minutes: 18, order_index: 1 },
-      { id: 'l6-2', title: 'BFS & DFS', duration_minutes: 25, order_index: 2 },
-      { id: 'l6-3', title: 'Shortest Path – Dijkstra', duration_minutes: 28, order_index: 3 },
-    ],
-    materials: [],
-  },
-  {
-    id: '7', title: 'Sorting & Searching', order_index: 7, xp_reward: 400,
-    description: 'Study classic sorting algorithms, their complexities, and searching strategies.',
-    lessons: [
-      { id: 'l7-1', title: 'Bubble & Selection Sort', duration_minutes: 18, order_index: 1 },
-      { id: 'l7-2', title: 'Merge Sort & Quick Sort', duration_minutes: 25, order_index: 2 },
-      { id: 'l7-3', title: 'Linear & Binary Search', duration_minutes: 18, order_index: 3 },
-    ],
-    materials: [],
-  },
-  {
-    id: '8', title: 'Hashing', order_index: 8, xp_reward: 420,
-    description: 'Understand hash functions, collision handling, and hash table applications.',
-    lessons: [
-      { id: 'l8-1', title: 'Hash Functions', duration_minutes: 18, order_index: 1 },
-      { id: 'l8-2', title: 'Collision Resolution', duration_minutes: 22, order_index: 2 },
-      { id: 'l8-3', title: 'Hash Tables in Practice', duration_minutes: 20, order_index: 3 },
-    ],
-    materials: [],
-  },
-]
-
-const MOCK_LESSONS_BY_ORDER: Record<number, Lesson[]> = Object.fromEntries(
-  MOCK_MODULES.map(m => [m.order_index, m.lessons])
-)
-
-const MODULE_ICONS: Record<number, string> = {
-  1: '[ ]', 2: '→', 3: '≡', 4: '⊏', 5: '△', 6: '◈', 7: '⇅', 8: '#',
-}
+type DetailTab = 'lessons' | 'materials' | 'guide'
 
 const easeOut = [0.16, 1, 0.3, 1] as const
 
@@ -178,12 +33,15 @@ export default function LearningMaterials() {
   const openMaterialId = searchParams.get('open')
   const [highlightMaterialId, setHighlightMaterialId] = useState<string | null>(null)
   const materialRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const [modules, setModules] = useState<Module[]>(MOCK_MODULES)
-  const [progress, setProgress] = useState<StudentProgress[]>([])
-  const [expandedModule, setExpandedModule] = useState<string | null>(MOCK_MODULES[0].id)
-  const [activeTab, setActiveTab] = useState<'lessons' | 'materials' | 'videos'>('lessons')
+
+  /** order_index → public.modules.id, so teacher uploads and progress rows line up */
+  const [dbModuleIds, setDbModuleIds] = useState<Record<number, string>>({})
+  const [materialsByOrder, setMaterialsByOrder] = useState<Record<number, Material[]>>({})
+  const [completed, setCompleted] = useState<Set<string>>(new Set())
+  /** Module the student opened; undefined until they pick one (then we show their current module) */
+  const [pickedOrder, setPickedOrder] = useState<number | null | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<DetailTab>('lessons')
   const [search, setSearch] = useState('')
-  const [, setLoading] = useState(true)
   const [instructorName, setInstructorName] = useState<string | null>(null)
 
   useEffect(() => {
@@ -191,19 +49,22 @@ export default function LearningMaterials() {
       try {
         const { data: dbModules, error: modErr } = await supabase
           .from('modules')
-          .select(`
-            id, title, description, order_index, xp_reward,
-            lessons (id, title, duration_minutes, order_index)
-          `)
+          .select('id, order_index')
           .order('order_index')
-
         if (modErr) console.error('modules error:', modErr)
+
+        const idByOrder: Record<number, string> = {}
+        const orderById: Record<string, number> = {}
+        ;(dbModules ?? []).forEach((m: any) => {
+          idByOrder[m.order_index] = m.id
+          orderById[m.id] = m.order_index
+        })
+        setDbModuleIds(idByOrder)
 
         const { data: dbMaterials, error: matErr } = await supabase
           .from('materials')
           .select('id, title, file_url, file_type, module_id, created_at, block_id')
           .order('created_at', { ascending: false })
-
         if (matErr) console.error('materials error:', matErr)
 
         let myBlockId: string | null = null
@@ -231,131 +92,76 @@ export default function LearningMaterials() {
               if (teacher) setInstructorName(`${teacher.first_name} ${teacher.last_name}`.trim())
             }
           }
-        }
 
-        const visibleMaterials = (dbMaterials ?? []).filter((mat: any) =>
-          !mat.block_id || mat.block_id === myBlockId
-        )
-
-        if (user) {
           const { data: dbProgress } = await supabase
             .from('student_progress')
             .select('lesson_id, completed')
             .eq('student_id', user.id)
-          if (dbProgress) setProgress(dbProgress)
+          setCompleted(completedLessonSet(dbProgress))
         }
 
-        if (dbModules && dbModules.length > 0) {
-          const merged = dbModules.map((m: any) => {
-            // Always use hardcoded lesson IDs so they match what LessonPlayer saves to student_progress
-            const lessons = MOCK_LESSONS_BY_ORDER[m.order_index] ?? m.lessons ?? []
-            return {
-              ...m,
-              lessons,
-              materials: visibleMaterials.filter((mat: any) => mat.module_id === m.id),
-            }
+        const grouped: Record<number, Material[]> = {}
+        ;(dbMaterials ?? [])
+          .filter((mat: any) => !mat.block_id || mat.block_id === myBlockId)
+          .forEach((mat: any) => {
+            const order = orderById[mat.module_id]
+            if (!order) return
+            ;(grouped[order] ??= []).push(mat)
           })
-          setModules(merged)
+        setMaterialsByOrder(grouped)
 
-          // Deep link from a notification (?open=<material_id>) — expand the
-          // module that contains it and jump straight to the Materials tab.
-          if (openMaterialId) {
-            const owningModule = merged.find((m: Module) =>
-              m.materials.some(mat => mat.id === openMaterialId)
-            )
-            if (owningModule) {
-              setExpandedModule(owningModule.id)
-              setActiveTab('materials')
-              setHighlightMaterialId(openMaterialId)
-              setTimeout(() => {
-                materialRefs.current[openMaterialId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }, 200)
-              setTimeout(() => setHighlightMaterialId(null), 2500)
-            } else {
-              setExpandedModule(merged[0].id)
-            }
-            searchParams.delete('open')
-            setSearchParams(searchParams, { replace: true })
-          } else {
-            setExpandedModule(merged[0].id)
+        // Deep link from a notification (?open=<material_id>) — expand the
+        // module that contains it and jump straight to the Materials tab.
+        if (openMaterialId) {
+          const owning = Object.entries(grouped).find(([, mats]) => mats.some(m => m.id === openMaterialId))
+          if (owning) {
+            setPickedOrder(Number(owning[0]))
+            setActiveTab('materials')
+            setHighlightMaterialId(openMaterialId)
+            setTimeout(() => {
+              materialRefs.current[openMaterialId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }, 200)
+            setTimeout(() => setHighlightMaterialId(null), 2500)
           }
+          searchParams.delete('open')
+          setSearchParams(searchParams, { replace: true })
         }
       } catch (err) {
         console.error('fetchData error:', err)
-      } finally {
-        setLoading(false)
       }
     }
     fetchData()
   }, [user])
 
-  const getModuleState = (mod: Module): 'done' | 'active' | 'locked' => {
-    const lessonIds = mod.lessons.map(l => l.id)
-    const completedCount = progress.filter(p => lessonIds.includes(p.lesson_id) && p.completed).length
-    if (lessonIds.length > 0 && completedCount === lessonIds.length) return 'done'
-    if (completedCount > 0) return 'active'
-    // Module 1 is always unlocked
-    if (mod.order_index === 1) return 'active'
-    // Unlock this module only if the previous module is fully done
-    const prevMod = modules.find(m => m.order_index === mod.order_index - 1)
-    if (prevMod) {
-      const prevLessonIds = prevMod.lessons.map(l => l.id)
-      const prevCompleted = progress.filter(p => prevLessonIds.includes(p.lesson_id) && p.completed).length
-      if (prevLessonIds.length > 0 && prevCompleted === prevLessonIds.length) return 'active'
-    }
-    return 'locked'
-  }
+  const progress = useMemo(() => computeCourseProgress(completed), [completed])
 
-  const getLessonState = (lesson: Lesson, mod: Module, modState: string): 'done' | 'active' | 'locked' => {
-    if (modState === 'locked') return 'locked'
-    if (progress.find(p => p.lesson_id === lesson.id && p.completed)) return 'done'
-    // Find first incomplete lesson in this module — only that one is active
-    const firstIncomplete = mod.lessons
-      .slice().sort((a, b) => a.order_index - b.order_index)
-      .find(l => !progress.find(p => p.lesson_id === l.id && p.completed))
-    if (firstIncomplete?.id === lesson.id) return 'active'
-    return 'locked'
-  }
+  // Until the student picks a module, open the first one that still has something to do
+  const expandedOrder = pickedOrder !== undefined
+    ? pickedOrder
+    : progress.find(p => p.state === 'active')?.module.order ?? 1
 
-  // Find the first incomplete lesson in a module for the Resume button
-  const getFirstIncompleteLesson = (mod: Module): Lesson | null => {
-    const state = getModuleState(mod)
-    if (state === 'locked') return null
-    return mod.lessons.find(l => !progress.find(p => p.lesson_id === l.id && p.completed)) ?? null
-  }
-
-  const filteredModules = modules.filter(m =>
-    m.title.toLowerCase().includes(search.toLowerCase()) ||
-    m.lessons.some(l => l.title.toLowerCase().includes(search.toLowerCase()))
+  const q = search.trim().toLowerCase()
+  const filtered = progress.filter(p =>
+    !q ||
+    p.module.title.toLowerCase().includes(q) ||
+    p.lessons.some(l => l.lesson.title.toLowerCase().includes(q))
   )
 
-  const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0)
-  const completedLessons = progress.filter(p => p.completed).length
-  const overallPct = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 13
+  const completedLessons = progress.reduce((acc, p) => acc + p.completedCount, 0)
+  const overallPct = TOTAL_LESSONS ? Math.round((completedLessons / TOTAL_LESSONS) * 100) : 0
+  const completedModulesCount = progress.filter(p => p.state === 'done').length
+  const completedMinutes = progress.reduce((acc, p) =>
+    acc + p.lessons.filter(l => l.state === 'done').reduce((a, l) => a + l.lesson.durationMinutes, 0), 0)
+  const hoursCompleted = Math.round((completedMinutes / 60) * 10) / 10
 
-  // Derived stats for the summary bar
-  const completedModulesCount = modules.filter(m => getModuleState(m) === 'done').length
-  const completedMinutes = modules.reduce((acc, m) => {
-    return acc + m.lessons
-      .filter(l => progress.find(p => p.lesson_id === l.id && p.completed))
-      .reduce((a, l) => a + l.duration_minutes, 0)
-  }, 0)
-  const hoursCompleted = Math.round(completedMinutes / 60 * 10) / 10
+  const expanded = progress.find(p => p.module.order === expandedOrder) ?? null
+  const expandedMaterials = expanded ? materialsByOrder[expanded.module.order] ?? [] : []
 
-  const expandedMod = modules.find(m => m.id === expandedModule)
-  const expandedState = expandedMod ? getModuleState(expandedMod) : 'locked'
+  const moduleKey = (order: number) => dbModuleIds[order] ?? String(order)
 
-  // First incomplete lesson in the detail panel's module
-  const detailFirstIncomplete = expandedMod ? getFirstIncompleteLesson(expandedMod) : null
-
-  // Completed lesson count for detail panel
-  const detailCompletedCount = expandedMod
-    ? progress.filter(p => expandedMod.lessons.some(l => l.id === p.lesson_id) && p.completed).length
-    : 0
-
-  const handleStartLesson = (moduleId: string, lessonId: string, lessonState: 'done' | 'active' | 'locked') => {
-    if (lessonState === 'locked') return
-    navigate(`/student/courses/${moduleId}/lessons/${lessonId}`)
+  const handleStartLesson = (order: number, lesson: Lesson, state: UnlockState) => {
+    if (state === 'locked') return
+    navigate(`/student/courses/${moduleKey(order)}/lessons/${lesson.id}`)
   }
 
   return (
@@ -372,7 +178,7 @@ export default function LearningMaterials() {
           </div>
           <div>
             <h1 className="lm-title">Learning Materials</h1>
-            <p className="lm-subtitle">CC 104 – Data Structures & Algorithms</p>
+            <p className="lm-subtitle">{COURSE_NAME}</p>
             {instructorName && (
               <p className="lm-instructor"><User size={12} /> {instructorName}</p>
             )}
@@ -384,11 +190,11 @@ export default function LearningMaterials() {
             <span className="lm-header-stat-label">Complete</span>
           </div>
           <div className="lm-header-stat">
-            <span className="lm-header-stat-val">{completedLessons || 6}/{totalLessons}</span>
+            <span className="lm-header-stat-val">{completedLessons}/{TOTAL_LESSONS}</span>
             <span className="lm-header-stat-label">Lessons</span>
           </div>
           <div className="lm-header-stat">
-            <span className="lm-header-stat-val">8</span>
+            <span className="lm-header-stat-val">{TOTAL_MODULES}</span>
             <span className="lm-header-stat-label">Modules</span>
           </div>
         </div>
@@ -401,10 +207,10 @@ export default function LearningMaterials() {
         transition={{ duration: 0.4, delay: 0.05, ease: easeOut }}
       >
         {[
-          { label: 'Modules Done',    value: `${completedModulesCount} / ${modules.length}`, color: '#00D4AA' },
-          { label: 'Lessons Done',    value: `${completedLessons || 6} / ${totalLessons}`,    color: '#6C8EF5' },
-          { label: 'Hours Completed', value: `${hoursCompleted}h`,                            color: '#FFB830' },
-          { label: 'Total XP',        value: (user?.xp ?? 0).toLocaleString(),                color: '#FF6B8A' },
+          { label: 'Modules Done',    value: `${completedModulesCount} / ${TOTAL_MODULES}`, color: '#00D4AA' },
+          { label: 'Lessons Done',    value: `${completedLessons} / ${TOTAL_LESSONS}`,     color: '#6C8EF5' },
+          { label: 'Hours Completed', value: `${hoursCompleted}h`,                          color: '#FFB830' },
+          { label: 'Total XP',        value: (user?.xp ?? 0).toLocaleString(),              color: '#FF6B8A' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -453,65 +259,48 @@ export default function LearningMaterials() {
           </div>
 
           <div className="lm-module-list">
-            {filteredModules.map((mod, i) => {
-              const state = getModuleState(mod)
-              const isExpanded = expandedModule === mod.id
-              const completedInMod = progress.filter(
-                p => mod.lessons.some(l => l.id === p.lesson_id) && p.completed
-              ).length
-              const pct = mod.lessons.length
-                ? Math.round((completedInMod / mod.lessons.length) * 100)
-                : state === 'done' ? 100 : 0
-              const firstIncomplete = getFirstIncompleteLesson(mod)
-              const remainingMins = mod.lessons
-                .filter(l => !progress.find(p => p.lesson_id === l.id && p.completed))
-                .reduce((a, l) => a + l.duration_minutes, 0)
-
-              // Locked hint: find the previous module's title
-              const prevMod = modules.find(m => m.order_index === mod.order_index - 1)
+            {filtered.map((mp, i) => {
+              const { module: mod, state, lessons, completedCount, nextLesson } = mp
+              const isExpanded = expandedOrder === mod.order
+              const pct = lessons.length ? Math.round((completedCount / lessons.length) * 100) : 0
+              const totalMins = lessons.reduce((a, l) => a + l.lesson.durationMinutes, 0)
+              const remainingMins = lessons.filter(l => l.state !== 'done').reduce((a, l) => a + l.lesson.durationMinutes, 0)
+              const prevMod = COURSE_MODULES.find(m => m.order === mod.order - 1)
 
               return (
                 <motion.div
-                  key={mod.id}
+                  key={mod.order}
                   className={`lm-mod-card ${state} ${isExpanded ? 'expanded' : ''}`}
                   initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.06, duration: 0.35, ease: easeOut }}
                 >
                   <button
                     className="lm-mod-header"
-                    onClick={() => { if (state !== 'locked') setExpandedModule(isExpanded ? null : mod.id) }}
-                    disabled={state === 'locked'}
+                    onClick={() => setPickedOrder(isExpanded ? null : mod.order)}
                   >
-                    <div className="lm-mod-icon">{MODULE_ICONS[mod.order_index]}</div>
+                    <div className="lm-mod-icon" style={{ color: state === 'locked' ? undefined : mod.color }}>{mod.icon}</div>
                     <div className="lm-mod-info">
                       <div className="lm-mod-top-row">
-                        <span className="lm-mod-num">Module {mod.order_index}</span>
+                        <span className="lm-mod-num">Module {mod.order}</span>
                         {state === 'done' && <CheckCircle2 size={13} color="#00D4AA" />}
                         {state === 'locked' && <Lock size={11} color="var(--text-muted)" />}
-                        {state === 'active' && <span className="lm-mod-active-badge">IN PROGRESS</span>}
+                        {state === 'active' && <span className="lm-mod-active-badge">{completedCount > 0 ? 'IN PROGRESS' : 'UNLOCKED'}</span>}
                       </div>
                       <span className="lm-mod-title">{mod.title}</span>
                       <div className="lm-mod-meta">
                         <span>
                           <Clock size={10} />
-                          {state === 'locked'
-                            ? `${mod.lessons.reduce((a, l) => a + l.duration_minutes, 0)} min total`
-                            : state === 'done'
-                            ? `${mod.lessons.reduce((a, l) => a + l.duration_minutes, 0)} min`
-                            : remainingMins > 0 ? `${remainingMins} min left` : 'Almost done'}
+                          {state === 'active' && completedCount > 0 ? `${remainingMins} min left` : `${totalMins} min`}
                         </span>
-                        <span><Zap size={10} color="#FFB830" /> {mod.xp_reward} XP</span>
-                        <span>{completedInMod}/{mod.lessons.length} lessons</span>
+                        <span><Zap size={10} color="#FFB830" /> {mod.xpReward} XP</span>
+                        <span>{completedCount}/{lessons.length} lessons</span>
                       </div>
                     </div>
-                    {state !== 'locked' && (
-                      <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.25 }} className="lm-mod-chevron">
-                        <ChevronDown size={16} />
-                      </motion.div>
-                    )}
+                    <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.25 }} className="lm-mod-chevron">
+                      <ChevronDown size={16} />
+                    </motion.div>
                   </button>
 
-                  {/* Locked hint */}
                   {state === 'locked' && prevMod && (
                     <div className="lm-mod-lock-hint">
                       Complete <strong>{prevMod.title}</strong> to unlock
@@ -529,24 +318,23 @@ export default function LearningMaterials() {
                     </div>
                   )}
 
-                  {/* Resume button — only on active modules, outside the accordion */}
-                  {state === 'active' && firstIncomplete && !isExpanded && (
+                  {state === 'active' && nextLesson && !isExpanded && (
                     <div className="lm-mod-resume-row">
                       <button
                         className="lm-mod-resume-btn"
                         onClick={e => {
                           e.stopPropagation()
-                          handleStartLesson(mod.id, firstIncomplete.id, 'active')
+                          handleStartLesson(mod.order, nextLesson, 'active')
                         }}
                       >
-                        <Play size={11} /> Resume — {firstIncomplete.title}
+                        <Play size={11} /> {completedCount > 0 ? 'Resume' : 'Start'} — {nextLesson.title}
                         <ArrowRight size={11} />
                       </button>
                     </div>
                   )}
 
                   <AnimatePresence initial={false}>
-                    {isExpanded && state !== 'locked' && (
+                    {isExpanded && (
                       <motion.div
                         className="lm-mod-lessons"
                         key="lessons-dropdown"
@@ -557,32 +345,29 @@ export default function LearningMaterials() {
                         style={{ overflow: 'hidden' }}
                       >
                         <div style={{ padding: '8px 14px 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          {mod.lessons.map(lesson => {
-                            const ls = getLessonState(lesson, mod, state)
-                            return (
-                              <div key={lesson.id} className={`lm-lesson-item ${ls}`}>
-                                <div className="lm-lesson-indicator">
-                                  {ls === 'done'    ? <CheckCircle2 size={14} color="#00D4AA" />
-                                   : ls === 'locked' ? <Lock size={12} color="var(--text-muted)" />
-                                   : <div className="lm-lesson-dot" />}
-                                </div>
-                                <div className="lm-lesson-body">
-                                  <span className="lm-lesson-title">{lesson.title}</span>
-                                  <span className="lm-lesson-meta">
-                                    <Clock size={10} /> {lesson.duration_minutes} min
-                                  </span>
-                                </div>
-                                {ls !== 'locked' && (
-                                  <button
-                                    className="lm-lesson-play"
-                                    onClick={() => handleStartLesson(mod.id, lesson.id, ls)}
-                                  >
-                                    <Play size={11} />
-                                  </button>
-                                )}
+                          {lessons.map(({ lesson, state: ls }) => (
+                            <div key={lesson.id} className={`lm-lesson-item ${ls}`}>
+                              <div className="lm-lesson-indicator">
+                                {ls === 'done'    ? <CheckCircle2 size={14} color="#00D4AA" />
+                                 : ls === 'locked' ? <Lock size={12} color="var(--text-muted)" />
+                                 : <div className="lm-lesson-dot" />}
                               </div>
-                            )
-                          })}
+                              <div className="lm-lesson-body">
+                                <span className="lm-lesson-title">{lesson.title}</span>
+                                <span className="lm-lesson-meta">
+                                  <Clock size={10} /> {lesson.durationMinutes} min
+                                </span>
+                              </div>
+                              {ls !== 'locked' && (
+                                <button
+                                  className="lm-lesson-play"
+                                  onClick={() => handleStartLesson(mod.order, lesson, ls)}
+                                >
+                                  <Play size={11} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </motion.div>
                     )}
@@ -595,28 +380,36 @@ export default function LearningMaterials() {
 
         {/* ── Detail panel ───────────────────────────────────────────────── */}
         <div className="lm-detail-panel">
-          {expandedMod ? (
-            <motion.div key={expandedMod.id}
+          {expanded ? (
+            <motion.div key={expanded.module.order}
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: easeOut }}
             >
               <div className="lm-detail-header">
-                <span className="lm-detail-icon">{MODULE_ICONS[expandedMod.order_index]}</span>
+                <span className="lm-detail-icon" style={{ color: expanded.module.color }}>{expanded.module.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <p className="lm-detail-module-num">Module {expandedMod.order_index} of 8</p>
-                  <h2 className="lm-detail-title">{expandedMod.title}</h2>
+                  <p className="lm-detail-module-num">Module {expanded.module.order} of {TOTAL_MODULES} · {expanded.module.tag}</p>
+                  <h2 className="lm-detail-title">{expanded.module.title}</h2>
                 </div>
-                {/* Lesson ratio badge */}
                 <div className="lm-detail-ratio-badge">
                   <Target size={11} />
-                  {detailCompletedCount} / {expandedMod.lessons.length} done
+                  {expanded.completedCount} / {expanded.lessons.length} done
                 </div>
               </div>
 
-              <p className="lm-detail-desc">{expandedMod.description}</p>
+              <p className="lm-detail-desc">{expanded.module.description}</p>
 
-              {/* Continue CTA — only when module is active and has an incomplete lesson */}
-              {expandedState === 'active' && detailFirstIncomplete && (
+              <a
+                className="lm-guide-pdf-btn"
+                href={expanded.module.pdf}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FileText size={13} /> Open Study Guide (PDF)
+                <ExternalLink size={12} />
+              </a>
+
+              {expanded.state === 'active' && expanded.nextLesson && (
                 <motion.div
                   className="lm-detail-cta"
                   initial={{ opacity: 0, y: 6 }}
@@ -625,42 +418,50 @@ export default function LearningMaterials() {
                 >
                   <div className="lm-detail-cta-left">
                     <span className="lm-detail-cta-label">Up next</span>
-                    <span className="lm-detail-cta-lesson">{detailFirstIncomplete.title}</span>
+                    <span className="lm-detail-cta-lesson">{expanded.nextLesson.title}</span>
                     <span className="lm-detail-cta-meta">
-                      <Clock size={10} /> {detailFirstIncomplete.duration_minutes} min
+                      <Clock size={10} /> {expanded.nextLesson.durationMinutes} min
                     </span>
                   </div>
                   <button
                     className="lm-detail-cta-btn"
-                    onClick={() => handleStartLesson(expandedMod.id, detailFirstIncomplete.id, 'active')}
+                    onClick={() => handleStartLesson(expanded.module.order, expanded.nextLesson!, 'active')}
                   >
-                    <Play size={13} /> Continue
+                    <Play size={13} /> {expanded.completedCount > 0 ? 'Continue' : 'Start'}
                     <ArrowRight size={13} />
                   </button>
                 </motion.div>
               )}
 
-              {/* Done CTA — all lessons complete */}
-              {expandedState === 'done' && (
+              {expanded.state === 'done' && (
                 <div className="lm-detail-cta lm-detail-cta--done">
                   <CheckCircle2 size={16} color="#00D4AA" />
                   <span className="lm-detail-cta-done-text">Module complete! All lessons finished.</span>
                 </div>
               )}
 
+              {expanded.state === 'locked' && (
+                <div className="lm-detail-cta lm-detail-cta--locked">
+                  <Lock size={15} color="var(--text-muted)" />
+                  <span className="lm-detail-cta-done-text">
+                    Finish Module {expanded.module.order - 1} to unlock these lessons. You can still read the study guide.
+                  </span>
+                </div>
+              )}
+
               <div className="lm-tabs">
-                {(['lessons', 'materials', 'videos'] as const).map(tab => (
+                {(['lessons', 'materials', 'guide'] as const).map(tab => (
                   <button key={tab} className={`lm-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                    {tab === 'lessons'   && <><Play size={12} /> Lessons</>}
+                    {tab === 'lessons' && <><Play size={12} /> Lessons</>}
                     {tab === 'materials' && (
                       <>
-                        <FileText size={12} /> Materials
-                        {expandedMod.materials.length > 0 && (
-                          <span className="lm-tab-badge">{expandedMod.materials.length}</span>
+                        <Paperclip size={12} /> Materials
+                        {expandedMaterials.length > 0 && (
+                          <span className="lm-tab-badge">{expandedMaterials.length}</span>
                         )}
                       </>
                     )}
-                    {tab === 'videos'    && <><Video size={12} /> Video Links</>}
+                    {tab === 'guide' && <><ListChecks size={12} /> Study Guide</>}
                   </button>
                 ))}
               </div>
@@ -671,32 +472,37 @@ export default function LearningMaterials() {
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
                   >
-                    {expandedMod.lessons.map((lesson, i) => {
-                      const ls = getLessonState(lesson, expandedMod, expandedState)
-                      return (
-                        <div key={lesson.id} className={`lm-detail-lesson ${ls}`}>
-                          <div className="lm-detail-lesson-num">{i + 1}</div>
-                          <div className="lm-detail-lesson-info">
-                            <span className="lm-detail-lesson-title">{lesson.title}</span>
-                            <div className="lm-detail-lesson-meta">
-                              <Clock size={11} /> {lesson.duration_minutes} min
-                            </div>
-                          </div>
-                          <div className="lm-detail-lesson-right">
-                            {ls === 'done'   && <CheckCircle2 size={16} color="#00D4AA" />}
-                            {ls === 'active' && (
-                              <button
-                                className="lm-detail-play-btn"
-                                onClick={() => handleStartLesson(expandedMod.id, lesson.id, ls)}
-                              >
-                                <Play size={12} /> Start
-                              </button>
-                            )}
-                            {ls === 'locked' && <Lock size={14} color="var(--text-muted)" />}
+                    {expanded.lessons.map(({ lesson, state: ls }, i) => (
+                      <div key={lesson.id} className={`lm-detail-lesson ${ls}`}>
+                        <div className="lm-detail-lesson-num">{i + 1}</div>
+                        <div className="lm-detail-lesson-info">
+                          <span className="lm-detail-lesson-title">{lesson.title}</span>
+                          <div className="lm-detail-lesson-meta">
+                            <Clock size={11} /> {lesson.durationMinutes} min · Study Guide pp. {lesson.source.pages}
                           </div>
                         </div>
-                      )
-                    })}
+                        <div className="lm-detail-lesson-right">
+                          {ls === 'done' && (
+                            <button
+                              className="lm-detail-review-btn"
+                              onClick={() => handleStartLesson(expanded.module.order, lesson, ls)}
+                              title="Review lesson"
+                            >
+                              <CheckCircle2 size={16} color="#00D4AA" />
+                            </button>
+                          )}
+                          {ls === 'active' && (
+                            <button
+                              className="lm-detail-play-btn"
+                              onClick={() => handleStartLesson(expanded.module.order, lesson, ls)}
+                            >
+                              <Play size={12} /> Start
+                            </button>
+                          )}
+                          {ls === 'locked' && <Lock size={14} color="var(--text-muted)" />}
+                        </div>
+                      </div>
+                    ))}
                   </motion.div>
                 )}
 
@@ -705,14 +511,14 @@ export default function LearningMaterials() {
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
                   >
-                    {expandedMod.materials.length === 0 ? (
+                    {expandedMaterials.length === 0 ? (
                       <div className="lm-empty-state">
                         <Paperclip size={28} color="var(--text-muted)" />
                         <p>No materials uploaded yet for this module.</p>
                         <span>Your instructor will upload files here.</span>
                       </div>
                     ) : (
-                      expandedMod.materials.map(mat => (
+                      expandedMaterials.map(mat => (
                         <div
                           key={mat.id}
                           ref={el => { materialRefs.current[mat.id] = el }}
@@ -736,25 +542,34 @@ export default function LearningMaterials() {
                   </motion.div>
                 )}
 
-                {activeTab === 'videos' && (
-                  <motion.div key="videos" className="lm-tab-content"
+                {activeTab === 'guide' && (
+                  <motion.div key="guide" className="lm-tab-content lm-guide-content"
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
                   >
-                    {(YT_LINKS[expandedMod.order_index] ?? []).map((vid, i) => (
-                      <a key={i} href={vid.url} target="_blank" rel="noopener noreferrer" className="lm-video-item">
-                        <div className="lm-video-thumb"><Play size={18} color="white" /></div>
-                        <span className="lm-video-title">{vid.title}</span>
-                        <ExternalLink size={13} color="var(--text-muted)" className="lm-video-ext" />
-                      </a>
-                    ))}
+                    <section className="lm-guide-section">
+                      <h4>Module Overview</h4>
+                      <p>{expanded.module.overview}</p>
+                    </section>
+                    <section className="lm-guide-section">
+                      <h4>Learning Objectives</h4>
+                      <ul>{expanded.module.objectives.map((o, i) => <li key={i}>{o}</li>)}</ul>
+                    </section>
+                    <section className="lm-guide-section">
+                      <h4>Learning Points</h4>
+                      <ul>{expanded.module.learningPoints.map((o, i) => <li key={i}>{o}</li>)}</ul>
+                    </section>
+                    <section className="lm-guide-section">
+                      <h4>Learning Activities</h4>
+                      <ol>{expanded.module.learningActivities.map((o, i) => <li key={i}>{o}</li>)}</ol>
+                    </section>
                   </motion.div>
                 )}
               </AnimatePresence>
 
               <div className="lm-detail-reward">
                 <Zap size={14} color="#FFB830" />
-                <span>Complete all lessons to earn <strong>{expandedMod.xp_reward} XP</strong></span>
+                <span>Earn <strong>30 XP</strong> for each lesson you complete</span>
               </div>
             </motion.div>
           ) : (

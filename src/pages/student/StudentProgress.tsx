@@ -8,18 +8,11 @@ import {
   TrendingUp, Brain, Flame, BookOpen, RefreshCw,
   Lock, Star
 } from 'lucide-react'
+import { COURSE_MODULES, TOTAL_MODULES, moduleForTopic } from '../../lessons/course'
+import { computeCourseProgress, completedLessonSet } from '../../lessons/progress'
 import './StudentProgress.css'
 
-const MODULES = [
-  { order: 1, title: 'Arrays & Array Lists',   topic: 'Arrays',             icon: '[ ]', color: '#6C8EF5' },
-  { order: 2, title: 'Lists & Linked Lists',   topic: 'Linked Lists',       icon: '→',   color: '#00D4AA' },
-  { order: 3, title: 'Stacks',                 topic: 'Stacks',             icon: '≡',   color: '#FFB830' },
-  { order: 4, title: 'Queues',                 topic: 'Queues',             icon: '⊏',   color: '#FF6B8A' },
-  { order: 5, title: 'Trees',                  topic: 'Trees',              icon: '△',   color: '#4FC3F7' },
-  { order: 6, title: 'Graphs',                 topic: 'Graphs',             icon: '◈',   color: '#81C784' },
-  { order: 7, title: 'Sorting & Searching',    topic: 'Sorting Algorithms', icon: '⇅',   color: '#FFB830' },
-  { order: 8, title: 'Hashing',                topic: 'Hashing',            icon: '#',   color: '#FF6B8A' },
-]
+const MODULES = COURSE_MODULES
 
 const stagger = (i: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -54,17 +47,12 @@ export default function StudentProgress() {
       // 1. Completed modules
       const { data: progress } = await supabase
         .from('student_progress')
-        .select('module_id, completed, modules(order_index)')
+        .select('lesson_id, completed')
         .eq('student_id', user!.id)
-        .eq('completed', true)
 
       const completedSet = new Set<number>()
-      if (progress) {
-        progress.forEach((p: any) => {
-          const idx = p.modules?.order_index
-          if (idx) completedSet.add(idx)
-        })
-      }
+      computeCourseProgress(completedLessonSet(progress))
+        .forEach(p => { if (p.state === 'done') completedSet.add(p.module.order) })
       setCompletedModules(completedSet)
 
       // 2. Submission scores grouped by module_topic
@@ -76,10 +64,11 @@ export default function StudentProgress() {
         .not('percentage', 'is', null)
 
       // 3. All published assessments count
-      const { count: totalCount } = await supabase
+      const { data: publishedRows } = await supabase
         .from('assessments')
-        .select('*', { count: 'exact', head: true })
+        .select('*')
         .eq('is_published', true)
+      const totalCount = (publishedRows ?? []).filter((a: { is_archived?: boolean | null }) => !a.is_archived).length
 
       const { count: doneCount } = await supabase
         .from('submissions')
@@ -94,7 +83,8 @@ export default function StudentProgress() {
       const scoreMap = new Map<string, ModuleScore>()
       if (subs) {
         subs.forEach((s: any) => {
-          const topic = s.assessments?.module_topic
+          // Map legacy topic labels (e.g. "Sorting Algorithms") onto the study guide modules
+          const topic = moduleForTopic(s.assessments?.module_topic)?.topic
           const pct = s.percentage
           if (!topic || pct == null) return
           if (!scoreMap.has(topic)) {
@@ -126,7 +116,7 @@ export default function StudentProgress() {
 
 Student profile:
 - XP: ${user?.xp ?? 0} | Level: ${user?.level ?? 1} | Streak: ${user?.streak ?? 0} days
-- Modules completed: ${completedModules.size} / 8
+- Modules completed: ${completedModules.size} / ${TOTAL_MODULES}
 - Assessments done: ${totalDone} / ${totalAssessments}
 - Scores by topic:
 ${scoreData}
@@ -193,7 +183,7 @@ Do NOT use bullet points. Just flowing, friendly prose.`
       {/* Top stats */}
       <motion.div className="sp-stats-row" {...stagger(1)}>
         {[
-          { label: 'Modules Done',     value: `${completedModules.size}/8`,               color: '#6C8EF5', icon: BookOpen      },
+          { label: 'Modules Done',     value: `${completedModules.size}/${TOTAL_MODULES}`,               color: '#6C8EF5', icon: BookOpen      },
           { label: 'Assessments Done', value: `${totalDone}/${totalAssessments}`,          color: '#00D4AA', icon: CheckCircle2  },
           { label: 'Overall Avg',      value: overallAvg != null ? `${overallAvg}%` : '—', color: '#FFB830', icon: TrendingUp    },
           { label: 'Current Streak',   value: `${user?.streak ?? 0}d`,                     color: '#FF6B8A', icon: Flame         },

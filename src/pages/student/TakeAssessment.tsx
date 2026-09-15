@@ -46,7 +46,7 @@ type Assessment = {
   total_questions: number | null
 }
 
-type Phase = 'loading' | 'lobby' | 'quiz' | 'file_submission' | 'submitting' | 'results' | 'error' | 'already_done'
+type Phase = 'loading' | 'lobby' | 'quiz' | 'file_submission' | 'submitting' | 'results' | 'error' | 'already_done' | 'unavailable'
 
 const TYPE_COLOR: Record<string, string> = {
   quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
@@ -161,6 +161,10 @@ export default function TakeAssessment() {
           .select('*')
           .eq('id', id)
           .single()
+        if (aData?.is_archived) {
+          setPhase('unavailable')
+          return
+        }
         if (aData) setAssessment(aData)
 
         // Load questions only for quiz/exam types
@@ -206,6 +210,10 @@ export default function TakeAssessment() {
         .eq('id', id)
         .single()
       if (aErr) throw aErr
+      if (aData.is_archived) {
+        setPhase('unavailable')
+        return
+      }
       setAssessment(aData)
 
       // Only load questions for quiz/exam types
@@ -508,6 +516,14 @@ export default function TakeAssessment() {
     <div className="ta-loading">
       <span className="ta-spinner" />
       <p>Loading assessment…</p>
+    </div>
+  )
+
+  if (phase === 'unavailable') return (
+    <div className="ta-error">
+      <XCircle size={40} color="#FF6B8A" />
+      <p>This assessment is no longer available.</p>
+      <button onClick={() => navigate('/student/assessments')}>Go back</button>
     </div>
   )
 

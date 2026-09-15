@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 1200px;
+  width: 100%;
+  min-width: 0;
 }
 
 .tp-header {
@@ -374,7 +375,7 @@
 
 .tp-student-head {
   display: grid;
-  grid-template-columns: 36px 1fr 110px 90px 90px 1fr;
+  grid-template-columns: 36px 1fr 100px 100px 1fr;
   align-items: center;
   padding: 10px 16px;
   border-bottom: 1px solid var(--surface-05);
@@ -407,7 +408,7 @@
 
 .tp-student-row {
   display: grid;
-  grid-template-columns: 36px 1fr 110px 90px 90px 1fr;
+  grid-template-columns: 36px 1fr 100px 100px 1fr;
   align-items: center;
   padding: 11px 16px;
   border-bottom: 1px solid var(--surface-04);

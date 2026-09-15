@@ -7,6 +7,7 @@ import {
   ArrowLeft, Lightbulb, Eye, EyeOff, CheckCircle2,
   Code2, ListChecks, Flame, Zap, Loader2, RotateCcw,
 } from 'lucide-react'
+import { moduleForTopic } from '../../lessons/course'
 import './ProblemBank.css'
 
 interface ProblemChoice { text: string; is_correct: boolean }
@@ -144,7 +145,7 @@ export default function SolveProblem() {
               <span className="pb-diff-badge" style={{ color: diffColor, borderColor: diffColor + '44', background: diffColor + '11' }}>
                 {problem.difficulty === 'Hard' ? <Flame size={11} /> : <Zap size={11} />} {problem.difficulty}
               </span>
-              <span className="pb-topic-badge">{problem.topic}</span>
+              <span className="pb-topic-badge">{moduleForTopic(problem.topic)?.topic ?? problem.topic}</span>
               {problem.is_solved && (
                 <span className="pb-solved-badge"><CheckCircle2 size={11} /> Solved</span>
               )}

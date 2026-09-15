@@ -135,7 +135,7 @@ export default function StudentAssessments() {
 
       const subMap = new Map(subs?.map(s => [s.assessment_id, s]) ?? [])
 
-      const merged: Assessment[] = (raw ?? []).map(a => ({
+      const merged: Assessment[] = (raw ?? []).filter(a => !a.is_archived).map(a => ({
         ...a,
         submission: subMap.get(a.id) ?? null,
         blockArchived: !!a.block_id && a.block_id === myBlockId && myBlockArchived,

@@ -5,11 +5,12 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
   ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2,
-  Save, RefreshCw, BookOpen, Clock, Zap, AlignLeft,
+  Save, RefreshCw, BookOpen, Clock, AlignLeft,
   ToggleLeft, List, Type, ChevronDown, GripVertical,
   AlertCircle, Eye, Calendar, Award, Upload, Layers
 } from 'lucide-react'
 import './CreateAssessment.css'
+import { COURSE_MODULES } from '../../lessons/course'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type QuestionType = 'multiple_choice' | 'identification' | 'true_false' | 'essay'
@@ -48,10 +49,7 @@ interface AssessmentMeta {
   block_id: string
 }
 
-const DSA_TOPICS = [
-  'Arrays & Array Lists', 'Lists & Linked Lists', 'Stacks', 'Queues',
-  'Trees', 'Graphs', 'Sorting & Searching', 'Hashing',
-]
+const DSA_TOPICS = COURSE_MODULES.map(m => m.topic)
 
 const TYPE_COLOR: Record<AssessmentType, string> = {
   quiz: '#6C8EF5', activity: '#00D4AA', assignment: '#FFB830', exam: '#FF6B8A',
@@ -412,11 +410,6 @@ export default function CreateAssessment() {
             </select>
             <ChevronDown size={13} className="ca-select-arrow" />
           </div>
-        </div>
-
-        <div className="ca-field">
-          <label className="ca-label"><Zap size={12} /> XP Reward</label>
-          <input className="ca-input" type="number" min={0} placeholder="100" value={meta.xp_reward} onChange={e => setM('xp_reward', e.target.value)} />
         </div>
 
         {/* Total points for file-upload types */}

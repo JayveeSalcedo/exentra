@@ -1,0 +1,88 @@
+.lsp-root { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.lsp-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.lsp-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.lsp-select-wrap { position: relative; }
+.lsp-select {
+  width: 100%;
+  background: var(--surface-05);
+  border: 1px solid var(--surface-09);
+  border-radius: 10px;
+  padding: 9px 32px 9px 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.lsp-select:focus { border-color: rgba(59, 91, 219, 0.45); }
+.lsp-select option { background: var(--bg-card); color: var(--text-primary); }
+.lsp-select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.lsp-lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-15, rgba(255, 255, 255, 0.15)) transparent;
+}
+.lsp-lesson-list::-webkit-scrollbar { width: 6px; }
+.lsp-lesson-list::-webkit-scrollbar-track { background: transparent; }
+.lsp-lesson-list::-webkit-scrollbar-thumb { background: var(--surface-15, rgba(255, 255, 255, 0.15)); border-radius: 99px; }
+.lsp-lesson-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-07);
+  background: var(--surface-02);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lsp-lesson-option:hover { background: var(--surface-04); }
+.lsp-lesson-option.active {
+  border-color: rgba(59, 91, 219, 0.45);
+  background: rgba(59, 91, 219, 0.08);
+  color: var(--text-primary);
+}
+.lsp-lesson-option input { accent-color: #3B5BDB; margin: 0; flex-shrink: 0; }
+.lsp-lesson-option span { flex: 1; min-width: 0; }
+.lsp-lesson-option em {
+  font-style: normal;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.lsp-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}

@@ -6,9 +6,10 @@ import { useAuth } from '../../store/AuthContext'
 import {
   Sparkles, ClipboardList, Eye, EyeOff, Trash2,
   ChevronDown, ChevronUp, CheckCircle2, Clock,
-  BookOpen, Zap, AlertTriangle, Plus, RefreshCw,
+  BookOpen, AlertTriangle, Plus, RefreshCw,
   Users, BarChart2, UserCheck, Award, XCircle,
-  Paperclip, FileText, Download, Save, Upload, X, Loader2, ArrowLeft, Layers
+  Paperclip, FileText, Download, Save, Upload, X, Loader2, ArrowLeft, Layers,
+  Archive, ArchiveRestore, CalendarClock,
 } from 'lucide-react'
 import './TeacherAssessments.css'
 
@@ -61,6 +62,8 @@ type Assessment = {
   time_limit: number | null
   due_date: string | null
   is_published: boolean
+  /** Hidden from students; needs migration_005 (treated as false until then) */
+  is_archived?: boolean | null
   created_at: string
   difficulty: string | null
   module_topic: string | null
@@ -97,6 +100,23 @@ function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-PH', {
     month: 'short', day: 'numeric', year: 'numeric',
   })
+}
+
+function fmtDateTime(dateStr: string) {
+  return new Date(dateStr).toLocaleString('en-PH', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  })
+}
+
+/** Published, not archived, and its due date is in the past */
+function isPastDue(a: { is_published: boolean; is_archived?: boolean | null; due_date: string | null }) {
+  return a.is_published && !a.is_archived && !!a.due_date && new Date(a.due_date) < new Date()
+}
+
+/** Value for a datetime-local input, in local time */
+function toLocalInput(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function ScoreBadge({ percentage }: { percentage: number | null }) {
@@ -167,7 +187,7 @@ export default function TeacherAssessments() {
   const [loading, setLoading]         = useState(true)
   const [myBlocks, setMyBlocks]       = useState<{ id: string; name: string }[]>([])
   const [selectedTarget, setSelectedTarget] = useState<Target | null>(null)
-  const [filter, setFilter]           = useState<'all' | 'published' | 'draft'>('all')
+  const [filter, setFilter]           = useState<'all' | 'published' | 'draft' | 'archived'>('all')
   const [toggling, setToggling]       = useState<string | null>(null)
   const [deleting, setDeleting]       = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -176,6 +196,11 @@ export default function TeacherAssessments() {
   const [previewing, setPreviewing]   = useState<string | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null)
+  const [archiving, setArchiving]     = useState<string | null>(null)
+  const [reopenId, setReopenId]       = useState<string | null>(null)
+  const [reopenDate, setReopenDate]   = useState('')
+  const [reopening, setReopening]     = useState(false)
+  const [actionError, setActionError] = useState<{ id: string; message: string } | null>(null)
 
   useEffect(() => { if (user) fetchAssessments() }, [user])
 
@@ -298,21 +323,79 @@ export default function TeacherAssessments() {
     }
   }
 
-  const togglePublish = async (a: Assessment) => {
+  /** Drafts can be published; once published an assessment can't go back to draft */
+  const publish = async (a: Assessment) => {
     setToggling(a.id)
+    setActionError(null)
     try {
       const { error } = await supabase
         .from('assessments')
-        .update({ is_published: !a.is_published })
+        .update({ is_published: true })
         .eq('id', a.id)
       if (error) throw error
-      setAssessments(prev =>
-        prev.map(x => x.id === a.id ? { ...x, is_published: !x.is_published } : x)
-      )
+      setAssessments(prev => prev.map(x => x.id === a.id ? { ...x, is_published: true } : x))
     } catch (err) {
       console.error(err)
+      setActionError({ id: a.id, message: "Couldn't publish this assessment." })
     } finally {
       setToggling(null)
+    }
+  }
+
+  const setArchived = async (a: Assessment, archived: boolean) => {
+    setArchiving(a.id)
+    setActionError(null)
+    try {
+      const { error } = await supabase
+        .from('assessments')
+        .update({ is_archived: archived })
+        .eq('id', a.id)
+      if (error) throw error
+      setAssessments(prev => prev.map(x => x.id === a.id ? { ...x, is_archived: archived } : x))
+    } catch (err) {
+      console.error(err)
+      const missingColumn = /is_archived/.test((err as { message?: string })?.message ?? '')
+      setActionError({
+        id: a.id,
+        message: missingColumn
+          ? 'Archiving needs the database update in src/migrations/migration_005_assessment_archive.sql.'
+          : `Couldn't ${archived ? 'archive' : 'unarchive'} this assessment.`,
+      })
+    } finally {
+      setArchiving(null)
+    }
+  }
+
+  const startReopen = (a: Assessment) => {
+    setActionError(null)
+    setReopenId(a.id)
+    // Default: one week from now
+    const nextWeek = new Date()
+    nextWeek.setDate(nextWeek.getDate() + 7)
+    setReopenDate(toLocalInput(nextWeek))
+  }
+
+  const reopen = async (a: Assessment) => {
+    const newDue = new Date(reopenDate)
+    if (!reopenDate || isNaN(newDue.getTime()) || newDue <= new Date()) {
+      setActionError({ id: a.id, message: 'Choose a new due date in the future.' })
+      return
+    }
+    setReopening(true)
+    setActionError(null)
+    try {
+      const { error } = await supabase
+        .from('assessments')
+        .update({ due_date: newDue.toISOString() })
+        .eq('id', a.id)
+      if (error) throw error
+      setAssessments(prev => prev.map(x => x.id === a.id ? { ...x, due_date: newDue.toISOString() } : x))
+      setReopenId(null)
+    } catch (err) {
+      console.error(err)
+      setActionError({ id: a.id, message: "Couldn't update the due date." })
+    } finally {
+      setReopening(false)
     }
   }
 
@@ -483,15 +566,17 @@ export default function TeacherAssessments() {
   }, [assessments, selectedTarget])
 
   const filtered = targetScoped.filter(a => {
+    if (filter === 'archived') return !!a.is_archived
+    if (a.is_archived) return false
     if (filter === 'published') return a.is_published
     if (filter === 'draft') return !a.is_published
     return true
   })
 
   const stats = {
-    total:     targetScoped.length,
-    published: targetScoped.filter(a => a.is_published).length,
-    drafts:    targetScoped.filter(a => !a.is_published).length,
+    total:     targetScoped.filter(a => !a.is_archived).length,
+    published: targetScoped.filter(a => a.is_published && !a.is_archived).length,
+    drafts:    targetScoped.filter(a => !a.is_published && !a.is_archived).length,
     submissions: targetScoped.reduce((s, a) => s + (a.submissions?.filter(sub => sub.is_submitted).length ?? 0), 0),
   }
 
@@ -605,7 +690,7 @@ export default function TeacherAssessments() {
 
           {/* Filters */}
           <motion.div className="ta2-filters" {...stagger(3)}>
-            {(['all', 'published', 'draft'] as const).map(f => (
+            {(['all', 'published', 'draft', 'archived'] as const).map(f => (
               <button
                 key={f}
                 className={`ta2-filter-btn ${filter === f ? 'active' : ''}`}
@@ -660,7 +745,7 @@ export default function TeacherAssessments() {
                     <motion.div
                       key={a.id}
                       ref={el => { cardRefs.current[a.id] = el }}
-                      className={`ta2-card ${a.is_published ? 'published' : 'draft'} ${a.id === highlightId ? 'ta2-card-highlight' : ''}`}
+                      className={`ta2-card ${a.is_archived ? 'archived' : a.is_published ? 'published' : 'draft'} ${a.id === highlightId ? 'ta2-card-highlight' : ''}`}
                       {...stagger(i + 5)}
                       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                       layout
@@ -692,34 +777,67 @@ export default function TeacherAssessments() {
                           </div>
 
                           <div className="ta2-card-actions">
-                            <motion.button
-                              className={`ta2-publish-btn ${a.is_published ? 'unpublish' : 'publish'}`}
-                              onClick={() => togglePublish(a)}
-                              disabled={toggling === a.id}
-                              whileTap={{ scale: 0.95 }}
-                              title={a.is_published ? 'Unpublish' : 'Publish to students'}
-                            >
-                              {toggling === a.id ? (
-                                <RefreshCw size={13} className="ta2-spin" />
-                              ) : a.is_published ? (
-                                <><EyeOff size={13} /> Unpublish</>
-                              ) : (
-                                <><Eye size={13} /> Publish</>
-                              )}
-                            </motion.button>
-
-                            {confirmDelete === a.id ? (
-                              <div className="ta2-confirm-delete">
-                                <span>Delete?</span>
-                                <button className="ta2-confirm-yes" onClick={() => deleteAssessment(a.id)} disabled={deleting === a.id}>
-                                  {deleting === a.id ? <RefreshCw size={11} className="ta2-spin" /> : 'Yes'}
-                                </button>
-                                <button className="ta2-confirm-no" onClick={() => { setConfirmDelete(null); setDeleteError(null) }}>No</button>
-                              </div>
+                            {a.is_archived ? (
+                              /* Archived: can only be restored */
+                              <motion.button
+                                className="ta2-action-btn restore"
+                                onClick={() => setArchived(a, false)}
+                                disabled={archiving === a.id}
+                                whileTap={{ scale: 0.95 }}
+                                title="Show this assessment to students again"
+                              >
+                                {archiving === a.id ? <RefreshCw size={13} className="ta2-spin" /> : <><ArchiveRestore size={13} /> Unarchive</>}
+                              </motion.button>
+                            ) : a.is_published ? (
+                              /* Published: archive, plus reopen once the due date has passed */
+                              <>
+                                {isPastDue(a) && (
+                                  <motion.button
+                                    className="ta2-action-btn reopen"
+                                    onClick={() => reopenId === a.id ? setReopenId(null) : startReopen(a)}
+                                    whileTap={{ scale: 0.95 }}
+                                    title="Set a new due date and reopen for students"
+                                  >
+                                    <CalendarClock size={13} /> Edit & reopen
+                                  </motion.button>
+                                )}
+                                <motion.button
+                                  className="ta2-action-btn archive"
+                                  onClick={() => setArchived(a, true)}
+                                  disabled={archiving === a.id}
+                                  whileTap={{ scale: 0.95 }}
+                                  title="Hide from students; grades and submissions are kept"
+                                >
+                                  {archiving === a.id ? <RefreshCw size={13} className="ta2-spin" /> : <><Archive size={13} /> Archive</>}
+                                </motion.button>
+                              </>
                             ) : (
-                              <button className="ta2-delete-btn" onClick={() => setConfirmDelete(a.id)} title="Delete assessment">
-                                <Trash2 size={14} />
-                              </button>
+                              /* Draft: publish or delete */
+                              <>
+                                <motion.button
+                                  className="ta2-publish-btn publish"
+                                  onClick={() => publish(a)}
+                                  disabled={toggling === a.id}
+                                  whileTap={{ scale: 0.95 }}
+                                  title="Publish to students"
+                                >
+                                  {toggling === a.id ? <RefreshCw size={13} className="ta2-spin" /> : <><Eye size={13} /> Publish</>}
+                                </motion.button>
+
+                                {confirmDelete === a.id ? (
+                                  <div className="ta2-confirm-delete">
+                                    <span>Delete?</span>
+                                    <button className="ta2-confirm-yes" onClick={() => deleteAssessment(a.id)} disabled={deleting === a.id}>
+                                      {deleting === a.id ? <RefreshCw size={11} className="ta2-spin" /> : 'Yes'}
+                                    </button>
+                                    <button className="ta2-confirm-no" onClick={() => { setConfirmDelete(null); setDeleteError(null) }}>No</button>
+                                  </div>
+                                ) : (
+                                  <button className="ta2-delete-btn" onClick={() => setConfirmDelete(a.id)} title="Delete draft">
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
+                              </>
                             )}
 
                             <button className="ta2-expand-btn" onClick={() => toggleExpand(a.id)} title={a.expanded ? 'Collapse' : 'View details'}>
@@ -731,8 +849,12 @@ export default function TeacherAssessments() {
                         {/* Title + status */}
                         <div className="ta2-card-title-row">
                           <h3 className="ta2-card-title">{a.title}</h3>
-                          <span className={`ta2-status-badge ${a.is_published ? 'pub' : 'draft'}`}>
-                            {a.is_published
+                          <span className={`ta2-status-badge ${a.is_archived ? 'archived' : isPastDue(a) ? 'closed' : a.is_published ? 'pub' : 'draft'}`}>
+                            {a.is_archived
+                              ? <><Archive size={11} /> Archived</>
+                              : isPastDue(a)
+                              ? <><Clock size={11} /> Past due</>
+                              : a.is_published
                               ? <><CheckCircle2 size={11} /> Published</>
                               : <><Clock size={11} /> Draft</>}
                           </span>
@@ -749,7 +871,11 @@ export default function TeacherAssessments() {
                           {a.time_limit && (
                             <span><Clock size={11} /> {a.time_limit} min</span>
                           )}
-                          <span><Zap size={11} /> {a.xp_reward} XP</span>
+                          {a.due_date && (
+                            <span className={isPastDue(a) ? 'ta2-meta-overdue' : undefined}>
+                              <CalendarClock size={11} /> Due {fmtDateTime(a.due_date)}
+                            </span>
+                          )}
                           <span>Created {fmt(a.created_at)}</span>
                           {submittedCount > 0 && (
                             <span><Users size={11} /> {submittedCount} submitted</span>
@@ -758,6 +884,38 @@ export default function TeacherAssessments() {
                             <span><BarChart2 size={11} /> Avg {avgScore}%</span>
                           )}
                         </div>
+
+                        <AnimatePresence>
+                          {reopenId === a.id && (
+                            <motion.div
+                              className="ta2-reopen"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                            >
+                              <label className="ta2-reopen-label" htmlFor={`reopen-${a.id}`}>
+                                <CalendarClock size={12} /> New due date
+                              </label>
+                              <input
+                                id={`reopen-${a.id}`}
+                                type="datetime-local"
+                                className="ta2-reopen-input"
+                                value={reopenDate}
+                                onChange={e => setReopenDate(e.target.value)}
+                              />
+                              <button className="ta2-reopen-save" onClick={() => reopen(a)} disabled={reopening}>
+                                {reopening ? <RefreshCw size={12} className="ta2-spin" /> : 'Reopen'}
+                              </button>
+                              <button className="ta2-confirm-no" onClick={() => setReopenId(null)}>Cancel</button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {actionError?.id === a.id && (
+                          <p className="ta2-delete-error">
+                            <AlertTriangle size={12} /> {actionError.message}
+                          </p>
+                        )}
 
                         {deleteError?.id === a.id && (
                           <p className="ta2-delete-error">

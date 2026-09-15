@@ -1,19 +1,20 @@
 ﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { generateQuiz, type QuizQuestion, DSA_TOPICS } from '../../lib/groq'
+import { generateQuiz, type QuizQuestion } from '../../lib/groq'
+import { useLessonScope } from '../../lessons/useLessonScope'
+import LessonScopePicker from '../../components/lesson/LessonScopePicker'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import {
   Sparkles, ChevronDown, Trash2, CheckCircle2,
   RefreshCw, Save, ArrowLeft, BookOpen, Clock,
-  Calendar, Zap, Eye, Pencil, X, Check,
+  Calendar, Eye, Pencil, X, Check,
   AlertCircle, Settings2, Layers
 } from 'lucide-react'
 import './GenerateQuiz.css'
 
 // ── Types ────────────────────────────────────────────────────────────────────
-type NumQ = 5 | 10 | 15
 type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed'
 type AssessmentType = 'Quiz' | 'Activity' | 'Exam'
 
@@ -37,7 +38,8 @@ interface AssessmentSettings {
 
 const DIFFICULTY_OPTIONS: Difficulty[] = ['Easy', 'Medium', 'Hard', 'Mixed']
 const TYPE_OPTIONS: AssessmentType[] = ['Quiz', 'Activity', 'Exam']
-const NUM_OPTIONS: NumQ[] = [5, 10, 15]
+const MIN_QUESTIONS = 1
+const MAX_QUESTIONS = 50
 
 const diffClass = (d: string) =>
   d === 'Easy' ? 'easy' : d === 'Medium' ? 'medium' : d === 'Hard' ? 'hard' : 'mixed'
@@ -65,8 +67,14 @@ export default function GenerateQuiz() {
   const [searchParams] = useSearchParams()
 
   // ── Generation config ────────────────────────────────────────────────────
-  const [module, setModule] = useState(DSA_TOPICS[0])
-  const [numQuestions, setNumQuestions] = useState<NumQ>(10)
+  /** Study guide module + lessons the questions are based on */
+  const scope = useLessonScope()
+  const courseModule = scope.courseModule
+  const module = courseModule.title
+  const [numInput, setNumInput] = useState('10')
+  const parsedNum = Number(numInput)
+  const numValid = Number.isInteger(parsedNum) && parsedNum >= MIN_QUESTIONS && parsedNum <= MAX_QUESTIONS
+  const numQuestions = numValid ? parsedNum : 10
   const [difficulty, setDifficulty] = useState<Difficulty>('Mixed')
   const [assessmentType, setAssessmentType] = useState<AssessmentType>('Quiz')
   const [blockId, setBlockId] = useState(() => searchParams.get('block') ?? '')
@@ -115,7 +123,13 @@ export default function GenerateQuiz() {
     setShowSettings(false)
 
     try {
-      const result = await generateQuiz(module, numQuestions, difficulty, assessmentType)
+      const result = await generateQuiz(
+        scope.scopeLabel,
+        numQuestions,
+        difficulty,
+        assessmentType,
+        scope.buildContext(),
+      )
       setQuestions(result.map(toEditable))
       setSettings(prev => ({
         ...prev,
@@ -190,7 +204,7 @@ export default function GenerateQuiz() {
           title: settings.title || `${assessmentType}: ${module}`,
           description: settings.description || null,
           type: assessmentType.toLowerCase(),
-          module_topic: module,
+          module_topic: courseModule.topic,
           difficulty,
           time_limit: settings.time_limit ? parseInt(settings.time_limit) : null,
           due_date: toUTC(settings.due_date),
@@ -261,7 +275,7 @@ export default function GenerateQuiz() {
           <h1 className="gq-page-title">
             <Sparkles size={20} color="#6C8EF5" /> AI Quiz Generator
           </h1>
-          <p className="gq-page-sub">Generate DSA assessments instantly with Llama 3 AI</p>
+          <p className="gq-page-sub">Generate DSA assessments instantly with AI</p>
         </div>
       </div>
 
@@ -315,37 +329,35 @@ export default function GenerateQuiz() {
             )}
           </div>
 
-          {/* Module */}
-          <div className="gq-field">
-            <label className="gq-label">DSA Module</label>
-            <div className="gq-select-wrap">
-              <select
-                className="gq-select"
-                value={module}
-                onChange={e => setModule(e.target.value)}
-              >
-                {DSA_TOPICS.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="gq-select-arrow" />
-            </div>
-          </div>
+          {/* Study guide module + lessons */}
+          <LessonScopePicker
+            scope={scope}
+            hint="Questions are generated from the study guide content of the selected lessons."
+          />
 
           {/* Number of questions */}
           <div className="gq-field">
             <label className="gq-label">Number of Questions</label>
-            <div className="gq-btn-group">
-              {NUM_OPTIONS.map(n => (
-                <button
-                  key={n}
-                  className={`gq-toggle-btn ${numQuestions === n ? 'active' : ''}`}
-                  onClick={() => setNumQuestions(n)}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+            <input
+              className="gq-input"
+              type="number"
+              inputMode="numeric"
+              min={MIN_QUESTIONS}
+              max={MAX_QUESTIONS}
+              step={1}
+              value={numInput}
+              onChange={e => setNumInput(e.target.value)}
+              onBlur={() => {
+                if (numInput !== '' && !numValid) {
+                  const n = Math.round(Number(numInput))
+                  setNumInput(String(Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, isNaN(n) ? 10 : n))))
+                }
+              }}
+              aria-invalid={!numValid}
+            />
+            <p className="gq-field-hint" style={!numValid ? { color: 'var(--error)' } : undefined}>
+              {numValid ? `Between ${MIN_QUESTIONS} and ${MAX_QUESTIONS} questions.` : `Enter a whole number from ${MIN_QUESTIONS} to ${MAX_QUESTIONS}.`}
+            </p>
           </div>
 
           {/* Difficulty */}
@@ -383,7 +395,7 @@ export default function GenerateQuiz() {
           <motion.button
             className="gq-generate-btn"
             onClick={handleGenerate}
-            disabled={generating || !blockId}
+            disabled={generating || !blockId || !numValid}
             whileTap={{ scale: 0.97 }}
           >
             {generating ? (
@@ -443,19 +455,6 @@ export default function GenerateQuiz() {
                       placeholder="e.g. 30"
                       value={settings.time_limit}
                       onChange={e => setS('time_limit', e.target.value)}
-                    />
-                  </div>
-
-                  {/* XP Reward */}
-                  <div className="gq-field">
-                    <label className="gq-label"><Zap size={10} /> XP Reward</label>
-                    <input
-                      className="gq-input"
-                      type="number"
-                      min={0}
-                      placeholder="100"
-                      value={settings.xp_reward}
-                      onChange={e => setS('xp_reward', e.target.value)}
                     />
                   </div>
 
@@ -519,7 +518,7 @@ export default function GenerateQuiz() {
           {generating && (
             <div className="gq-generating">
               <RefreshCw size={20} className="gq-spin" />
-              <p>Llama 3 is generating {numQuestions} {difficulty} questions on <strong>{module}</strong>…</p>
+              <p>Generating {numQuestions} {difficulty} questions on <strong>{module}</strong>…</p>
             </div>
           )}
 

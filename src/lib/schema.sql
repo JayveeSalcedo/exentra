@@ -101,6 +101,7 @@ create table public.assessments (
   due_date        timestamptz,
   opens_at        timestamptz,
   is_published    boolean default false,
+  is_archived     boolean not null default false,
   created_at      timestamptz default now()
 );
 
@@ -237,14 +238,14 @@ create or replace view public.leaderboard as
   where p.role = 'student';
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- SEED: Insert the 8 DSA modules from the syllabus
+-- SEED: The 7 CC 104 study guide modules (courses/CC-104-SG-1..7.pdf)
+-- Lessons are seeded by src/migrations/migration_004_study_guide_course.sql
 -- ─────────────────────────────────────────────────────────────────────────────
 insert into public.modules (order_index, title, description, type, xp_reward, is_locked) values
-(1, 'Arrays & Array Lists',        'Array Class Implementation, Insert/Delete Operations, Sorting and Searching Algorithms', 'Fundamentals', 380, false),
-(2, 'Lists & Linked Lists',        'List Definition, Operations, Singly and Doubly Linked Lists, Traversal',                 'Linear',       350, true),
-(3, 'Stacks',                      'Stack Definition, Operations, Array and Linked List Implementation, Applications',       'Linear',       350, true),
-(4, 'Queues',                      'Queue Definition, Operations, Array and Linked List Implementation, Applications',       'Linear',       350, true),
-(5, 'Trees',                       'Binary Trees, Binary Search Trees (BST), AVL Trees',                                     'Non-Linear',   450, true),
-(6, 'Graphs',                      'Graph Representation, DFS/BFS, Minimum Spanning Trees, Dijkstra, Floyd',                 'Non-Linear',   480, true),
-(7, 'Sorting & Searching',         'Merge Sort, Quick Sort, Sequential Search, Binary Search',                               'Algorithms',   400, true),
-(8, 'Hashing',                     'Hash Tables, Hashing Concepts, Collision Resolution Techniques, Dynamic Hashing',        'Advanced',     420, true);
+(1, 'Basic Concepts and Notation',       'Algorithms and their properties, the problem solving process, mathematical functions, and Big-Oh complexity.',                'Fundamentals', 120, false),
+(2, 'Arrays, Lists and Linked List',     'Declaring and accessing arrays, Java ArrayList operations, lists, and singly and doubly linked lists.',                        'Linear',       120, true),
+(3, 'Stacks and Queues',                 'Stack and queue ADTs with array and linked-list implementations, infix to postfix, circular queues, and topological sorting.', 'Linear',       150, true),
+(4, 'Trees',                             'Tree definitions, binary trees and traversals, sequential representations, the equivalence problem, BSTs and AVL trees.',     'Non-Linear',   210, true),
+(5, 'Graphs',                            'Graph terminology, adjacency matrix and list representations, DFS and BFS, minimum cost spanning trees, and shortest paths.', 'Non-Linear',   150, true),
+(6, 'Sorting and Searching Algorithms',  'Merge sort and quick sort with their complexities, and the linear and binary search algorithms.',                              'Algorithms',   120, true),
+(7, 'Hash Table and Hashing Techniques', 'Hashing concepts, the division and folding methods, collision resolution, and dynamic hashing.',                               'Advanced',     120, true);

@@ -7,6 +7,8 @@ import {
   ChevronDown, ChevronUp, ChevronsUpDown,
   TrendingUp
 } from 'lucide-react'
+import { TOTAL_MODULES } from '../../lessons/course'
+import { computeCourseProgress, completedLessonSet } from '../../lessons/progress'
 import './TeacherStudents.css'
 
 interface Student {
@@ -16,9 +18,6 @@ interface Student {
   last_name: string
   avatar_url?: string | null
   username: string
-  xp: number
-  level: number
-  streak: number
   created_at: string
   modulesCompleted?: number
   assessmentsDone?: number
@@ -29,13 +28,8 @@ interface Student {
 
 interface BlockOption { id: string; name: string }
 
-type SortKey = 'school_id' | 'last_name' | 'xp' | 'level' | 'streak' | 'avgScore' | 'modulesCompleted'
+type SortKey = 'school_id' | 'last_name' | 'avgScore' | 'modulesCompleted'
 type SortDir = 'asc' | 'desc'
-
-const RANK_COLORS: Record<number, string> = {
-  1: 'var(--text-secondary)', 2: '#00D4AA', 3: '#4FC3F7', 4: '#3B5BDB',
-  5: '#FFB830', 6: '#FF6B8A', 7: '#00D4AA', 8: '#FFB830', 9: '#FF6B8A', 10: 'var(--text-primary)',
-}
 
 const stagger = (i: number) => ({
   initial: { opacity: 0, y: 14 },
@@ -43,7 +37,7 @@ const stagger = (i: number) => ({
   transition: { duration: 0.28, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] as const },
 })
 
-function rankColor(level: number) { return RANK_COLORS[Math.min(level, 10)] ?? 'var(--text-primary)' }
+const AVATAR_COLOR = '#6C8EF5'
 
 export default function TeacherStudents() {
   const { user } = useAuth()
@@ -51,8 +45,8 @@ export default function TeacherStudents() {
   const [filtered, setFiltered] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('xp')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [sortKey, setSortKey] = useState<SortKey>('last_name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [blocks, setBlocks] = useState<BlockOption[]>([])
   const [blockFilter, setBlockFilter] = useState<string>('all') // 'all' | 'unassigned' | block id
 
@@ -63,9 +57,9 @@ export default function TeacherStudents() {
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, school_id, first_name, last_name, username, avatar_url, xp, level, streak, created_at')
+        .select('id, school_id, first_name, last_name, username, avatar_url, created_at')
         .eq('role', 'student')
-        .order('xp', { ascending: false })
+        .order('last_name')
 
       if (!profiles) { setLoading(false); return }
 
@@ -77,7 +71,7 @@ export default function TeacherStudents() {
 
       const { data: progress } = await supabase
         .from('student_progress')
-        .select('student_id')
+        .select('student_id, lesson_id, completed')
         .eq('completed', true)
 
       const subMap: Record<string, number[]> = {}
@@ -86,9 +80,13 @@ export default function TeacherStudents() {
         subMap[s.student_id].push(s.percentage)
       })
 
-      const moduleMap: Record<string, number> = {}
+      const lessonsByStudent: Record<string, { lesson_id: string; completed: boolean }[]> = {}
       progress?.forEach((p: any) => {
-        moduleMap[p.student_id] = (moduleMap[p.student_id] ?? 0) + 1
+        ;(lessonsByStudent[p.student_id] ??= []).push(p)
+      })
+      const moduleMap: Record<string, number> = {}
+      Object.entries(lessonsByStudent).forEach(([id, rows]) => {
+        moduleMap[id] = computeCourseProgress(completedLessonSet(rows)).filter(m => m.state === 'done').length
       })
 
       // Blocks owned by this teacher + who's enrolled where
@@ -271,7 +269,7 @@ export default function TeacherStudents() {
         ) : (
           <AnimatePresence>
             {filtered.map((s, i) => {
-              const color = rankColor(s.level)
+              const color = AVATAR_COLOR
               const scoreColor = s.avgScore == null ? 'var(--text-muted)' : s.avgScore >= 80 ? '#00D4AA' : s.avgScore >= 60 ? '#FFB830' : '#FF6B8A'
 
               return (
@@ -302,7 +300,7 @@ export default function TeacherStudents() {
                   </div>
 
                   {/* Modules */}
-                  <span className="ts-modules"><BookOpen size={11} color="#6C8EF5" /> {s.modulesCompleted}/8</span>
+                  <span className="ts-modules"><BookOpen size={11} color="#6C8EF5" /> {s.modulesCompleted}/{TOTAL_MODULES}</span>
 
                   {/* Avg score */}
                   <span className="ts-avg-score" style={{ color: scoreColor }}>

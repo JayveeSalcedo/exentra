@@ -1,6 +1,7 @@
 .msub-root {
   padding: 2rem;
-  max-width: 880px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -131,6 +132,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+}
+
+/* Wide screens: submission cards in columns instead of very wide rows */
+@media (min-width: 1200px) {
+  .msub-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+    align-items: start;
+  }
 }
 
 /* Card */

@@ -9,16 +9,10 @@ import {
   BookOpen, Brain, Target, TrendingUp, Star, Play, Lock,
   Lightbulb, Send, RefreshCw, Layers, XCircle, Clock, X, User
 } from 'lucide-react'
+import { TOTAL_MODULES } from '../../lessons/course'
+import { computeCourseProgress, completedLessonSet, type ModuleProgress } from '../../lessons/progress'
 import './StudentDashboard.css'
 
-const MODULE_ICONS: Record<number, string> = {
-  1: '[ ]', 2: '→', 3: '≡', 4: '⊏', 5: '△', 6: '◈', 7: '⇅', 8: '#',
-}
-
-const MODULE_TYPES: Record<number, string> = {
-  1: 'Fundamentals', 2: 'Linear', 3: 'Linear', 4: 'Linear',
-  5: 'Non-Linear', 6: 'Non-Linear', 7: 'Algorithms', 8: 'Advanced',
-}
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -43,15 +37,6 @@ const stagger = (i: number) => ({
   transition: { duration: 0.4, delay: i * 0.08, ease: easeOut },
 })
 
-interface Module {
-  id: string
-  order_index: number
-  title: string
-  description: string
-  xp_reward: number
-  type: string
-}
-
 interface LeaderboardEntry {
   id: string
   first_name: string
@@ -74,9 +59,8 @@ interface ActivityItem {
 export default function StudentDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [modules, setModules] = useState<Module[]>([])
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [completedModules, setCompletedModules] = useState<string[]>([])
+  const [courseProgress, setCourseProgress] = useState<ModuleProgress[]>(() => computeCourseProgress(new Set()))
   const [loading, setLoading] = useState(true)
   const [blockName, setBlockName] = useState<string | null>(null)
   const [instructorName, setInstructorName] = useState<string | null>(null)
@@ -98,12 +82,6 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch modules
-      const { data: mods } = await supabase
-        .from('modules')
-        .select('*')
-        .order('order_index')
-
       // Fetch leaderboard top 5
       const { data: lb } = await supabase
         .from('leaderboard')
@@ -115,16 +93,12 @@ export default function StudentDashboard() {
       if (user) {
         const { data: progress } = await supabase
           .from('student_progress')
-          .select('module_id, completed')
+          .select('lesson_id, completed')
           .eq('student_id', user.id)
-          .eq('completed', true)
 
-        if (progress) {
-          setCompletedModules([...new Set(progress.map((p: any) => p.module_id))])
-        }
+        setCourseProgress(computeCourseProgress(completedLessonSet(progress)))
       }
 
-      if (mods) setModules(mods)
       if (lb && lb.length) {
         const { data: avatarRows } = await supabase
           .from('profiles')
@@ -263,8 +237,12 @@ export default function StudentDashboard() {
   }
 
   // Derive current quest (first non-completed module)
-  const currentQuest = modules.find(m => !completedModules.includes(m.id))
-  const completedCount = completedModules.length
+  const currentProgress = courseProgress.find(p => p.state !== 'done')
+  const currentQuest = currentProgress?.module
+  const completedCount = courseProgress.filter(p => p.state === 'done').length
+  const questPct = currentProgress && currentProgress.lessons.length
+    ? Math.round((currentProgress.completedCount / currentProgress.lessons.length) * 100)
+    : completedCount === TOTAL_MODULES ? 100 : 0
 
   // User rank from leaderboard
   const myRank = leaderboard.find(e => e.id === user?.id)?.global_rank ?? '—'
@@ -273,14 +251,8 @@ export default function StudentDashboard() {
     { label: 'Total XP',  value: (user?.xp ?? 0).toLocaleString(), sub: `Level ${user?.level ?? 1} Learner`,  icon: Zap,         color: '#FFB830' },
     { label: 'Global Rank', value: `#${myRank}`, sub: 'Class leaderboard', icon: Trophy,      color: '#00D4AA' },
     { label: 'Streak',    value: `${user?.streak ?? 0} days`,       sub: `Best: ${user?.streak ?? 0} days`,   icon: Flame,       color: '#FF6B8A' },
-    { label: 'Completed', value: `${completedCount} / 8`,           sub: 'Modules finished', icon: CheckCircle2, color: '#6C8EF5' },
+    { label: 'Completed', value: `${completedCount} / ${TOTAL_MODULES}`,           sub: 'Modules finished', icon: CheckCircle2, color: '#6C8EF5' },
   ]
-
-  const getModuleState = (mod: Module, index: number) => {
-    if (completedModules.includes(mod.id)) return 'done'
-    if (index === 0 || completedModules.includes(modules[index - 1]?.id)) return 'active'
-    return 'locked'
-  }
 
   const diffClass = (d: string) =>
     d === 'Easy' ? 'easy' : d === 'Medium' ? 'medium' : 'hard'
@@ -354,7 +326,7 @@ export default function StudentDashboard() {
                 <Target size={11} /> CURRENT QUEST
               </span>
               <span className="sd-quest-completion">
-                COMPLETION <strong>{completedCount > 0 ? Math.round((completedCount / 8) * 100) : 0}%</strong>
+                COMPLETION <strong>{questPct}%</strong>
               </span>
             </div>
             <h2 className="sd-quest-title">
@@ -367,7 +339,7 @@ export default function StudentDashboard() {
               <motion.div
                 className="sd-quest-bar-fill"
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.round((completedCount / 8) * 100)}%` }}
+                animate={{ width: `${questPct}%` }}
                 transition={{ duration: 1, delay: 0.5, ease: easeOut }}
               />
             </div>
@@ -381,7 +353,7 @@ export default function StudentDashboard() {
               </motion.button>
               {currentQuest && (
                 <span className="sd-quest-xp">
-                  <Zap size={12} color="#FFB830" /> {currentQuest.xp_reward} XP available
+                  <Zap size={12} color="#FFB830" /> {currentQuest.xpReward} XP available
                 </span>
               )}
             </div>
@@ -398,14 +370,14 @@ export default function StudentDashboard() {
               </button>
             </div>
             <div className="sd-modules-grid">
-              {(loading ? Array(8).fill(null) : modules).map((mod, i) => {
-                if (!mod) return (
+              {(loading ? Array(TOTAL_MODULES).fill(null) : courseProgress).map((mp: ModuleProgress | null, i) => {
+                if (!mp) return (
                   <div key={i} className="sd-module-card skeleton" />
                 )
-                const state = getModuleState(mod, i)
+                const { module: mod, state } = mp
                 return (
                   <motion.div
-                    key={mod.id}
+                    key={mod.order}
                     className={`sd-module-card ${state}`}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -414,14 +386,14 @@ export default function StudentDashboard() {
                     onClick={() => state !== 'locked' && navigate('/student/courses')}
                   >
                     <div className="sd-module-top">
-                      <span className="sd-module-type-badge">{MODULE_TYPES[mod.order_index]}</span>
+                      <span className="sd-module-type-badge">{mod.tag}</span>
                       {state === 'locked' && <Lock size={11} className="sd-module-lock" />}
                       {state === 'done' && <CheckCircle2 size={13} color="#00D4AA" />}
                     </div>
-                    <div className="sd-module-icon">{MODULE_ICONS[mod.order_index]}</div>
+                    <div className="sd-module-icon">{mod.icon}</div>
                     <p className="sd-module-title">{mod.title}</p>
                     <span className="sd-module-xp">
-                      <Zap size={10} color="#FFB830" /> {mod.xp_reward} XP
+                      <Zap size={10} color="#FFB830" /> {mod.xpReward} XP
                     </span>
                   </motion.div>
                 )
