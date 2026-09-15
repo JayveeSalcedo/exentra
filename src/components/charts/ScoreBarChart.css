@@ -1,0 +1,133 @@
+.sbc-root {
+  --sbc-good: #0ca30c;
+  --sbc-critical: #d03b3b;
+  --sbc-series: #3987e5;
+  --sbc-grid: var(--surface-06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+:root.light-mode .sbc-root { --sbc-series: #2a78d6; }
+
+.sbc-toolbar { display: flex; align-items: center; gap: 12px; min-height: 22px; }
+.sbc-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--text-secondary); }
+.sbc-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sbc-key { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.sbc-key.pass { background: var(--sbc-good); }
+.sbc-key.fail { background: var(--sbc-critical); }
+.sbc-view-toggle {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--surface-10);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.sbc-view-toggle:hover { color: var(--text-primary); background: var(--surface-04); }
+
+.sbc-empty { margin: 0; padding: 48px 0; text-align: center; font-size: 12px; color: var(--text-muted); }
+
+.sbc-plot {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  grid-template-rows: 200px auto;
+  column-gap: 8px;
+  row-gap: 8px;
+}
+.sbc-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  transform: translateY(-6px);
+  height: calc(100% + 12px);
+}
+.sbc-area { position: relative; }
+.sbc-grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--sbc-grid); }
+.sbc-threshold {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 55%, transparent);
+}
+.sbc-bars { position: absolute; inset: 0; display: grid; gap: 2px; }
+.sbc-slot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+  border-radius: 6px;
+}
+.sbc-slot.hover, .sbc-slot:focus-visible { background: var(--surface-03); outline: none; }
+.sbc-bar {
+  width: min(24px, 70%);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease, filter 0.15s;
+}
+.sbc-bar.pass { background: var(--sbc-good); }
+.sbc-bar.fail { background: var(--sbc-critical); }
+.sbc-bar.series { background: var(--sbc-series); }
+.sbc-bar.none { background: var(--surface-10); }
+.sbc-slot.hover .sbc-bar { filter: brightness(1.15); }
+.sbc-cap {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sbc-labels { display: grid; gap: 2px; }
+.sbc-labels span {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sbc-tooltip {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-width: 140px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-elevated, #151a33);
+  border: 1px solid var(--surface-10);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+.sbc-tooltip strong { font-size: 14px; color: var(--text-primary); }
+.sbc-tooltip span { font-size: 11px; color: var(--text-secondary); }
+.sbc-tooltip em { font-style: normal; font-size: 10px; color: var(--text-muted); }
+
+.sbc-table-wrap { overflow-x: auto; }
+.sbc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sbc-table th, .sbc-table td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--surface-06); }
+.sbc-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+.sbc-table td { color: var(--text-secondary); }
+.sbc-table td.num { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }

@@ -14,6 +14,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/teacher/assessments/create':   'Create Assessment',
   '/teacher/students':             'Student Roster',
   '/teacher/progress':             'Class Progress',
+  '/teacher/analytics':            'Analytics',
   '/teacher/activity-log':         'Activity Log',
   '/teacher/profile':              'Profile',
 }
@@ -22,7 +23,8 @@ export default function TeacherLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
-  const pageTitle = PAGE_TITLES[location.pathname] ?? 'Exentra'
+  const pageTitle = PAGE_TITLES[location.pathname]
+    ?? (location.pathname.startsWith('/teacher/analytics/') ? 'Learner Report' : 'Exentra')
 
   // Close the mobile drawer automatically whenever the route changes
   useEffect(() => {
