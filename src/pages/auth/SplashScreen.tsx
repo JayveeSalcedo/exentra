@@ -369,7 +369,7 @@ export default function SplashScreen() {
               filter: drop-shadow(0 10px 22px rgba(0,0,0,0.35));
             }
             :root.light-mode .splash-mascot-img {
-              filter: drop-shadow(0 10px 20px rgba(40,30,10,0.18));
+              filter: drop-shadow(0 10px 20px rgba(16,32,70,0.18));
             }
             .mascot-glow {
               position: absolute;

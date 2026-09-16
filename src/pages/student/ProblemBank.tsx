@@ -206,7 +206,7 @@ export default function ProblemBank() {
           { icon: <Code2 size={16} />, value: coding, label: 'Coding', color: '#FFB830' },
           { icon: <Layers size={16} />, value: decks.length, label: 'Decks', color: '#00D4AA' },
         ].map((s, i) => (
-          <div className="pb-stat" key={i}>
+          <div className="pb-stat" key={i} style={{ '--tile-accent': s.color } as React.CSSProperties}>
             <div className="pb-stat-icon" style={{ background: s.color + '22', color: s.color }}>{s.icon}</div>
             <div>
               <p className="pb-stat-value">{s.value}</p>

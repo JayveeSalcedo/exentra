@@ -197,7 +197,7 @@ export default function StudentAssessments() {
           <div
             key={label}
             className={`sa-stat-card ${label === 'Missed' && stats.missed > 0 ? 'sa-stat-card--alert' : ''}`}
-            style={label === 'Missed' && stats.missed > 0 ? { borderColor: `${color}40` } : {}}
+            style={{ '--tile-accent': color, ...(label === 'Missed' && stats.missed > 0 ? { borderColor: `${color}40` } : {}) } as React.CSSProperties}
           >
             <div className="sa-stat-icon" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
               <Icon size={16} color={color} />

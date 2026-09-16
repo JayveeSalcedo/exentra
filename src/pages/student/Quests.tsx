@@ -113,7 +113,10 @@ export default function Quests() {
               </div>
 
               {/* Card body */}
-              <div className={`qst-body ${isLocked ? 'locked' : ''}`}>
+              <div
+                className={`qst-body ${isLocked ? 'locked' : ''}`}
+                style={isLocked ? undefined : ({ '--tile-accent': q.color } as React.CSSProperties)}
+              >
                 <div className="qst-body-left">
                   {/* Icon + tag */}
                   <div className="qst-icon-row">

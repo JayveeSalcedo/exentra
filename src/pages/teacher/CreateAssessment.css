@@ -83,12 +83,12 @@
   transition: all 0.2s;
 }
 .ca-step-pill.active {
-  border-color: rgba(59,91,219,0.5);
+  border-color: var(--accent-border);
   color: var(--purple-light);
-  box-shadow: 0 0 12px rgba(59,91,219,0.12);
+  box-shadow: var(--glow-accent);
 }
 .ca-step-pill.done {
-  border-color: rgba(0,212,170,0.3);
+  border-color: var(--success-border);
   color: var(--cyan);
 }
 
@@ -104,8 +104,8 @@
   font-size: 10px;
   font-weight: 700;
 }
-.ca-step-pill.active .ca-step-num { background: rgba(59,91,219,0.2); color: var(--purple-light); }
-.ca-step-pill.done   .ca-step-num { background: rgba(0,212,170,0.15); color: var(--cyan); }
+.ca-step-pill.active .ca-step-num { background: var(--accent-tint); color: var(--purple-light); }
+.ca-step-pill.done   .ca-step-num { background: var(--success-tint); color: var(--cyan); }
 
 /* ── Content ────────────────────────────────────────────────────────────────── */
 .ca-content {
@@ -177,7 +177,7 @@
   transition: border-color 0.15s;
   width: 100%;
 }
-.ca-input:focus { border-color: rgba(59,91,219,0.4); }
+.ca-input:focus { border-color: var(--accent-border); }
 
 .ca-textarea {
   background: var(--bg-input);
@@ -193,7 +193,7 @@
   transition: border-color 0.15s;
   width: 100%;
 }
-.ca-textarea:focus { border-color: rgba(59,91,219,0.4); }
+.ca-textarea:focus { border-color: var(--accent-border); }
 
 .ca-select-wrap { position: relative; }
 .ca-select {
@@ -261,7 +261,7 @@
   overflow: hidden;
   transition: border-color 0.2s;
 }
-.ca-q-card.open { border-color: rgba(59,91,219,0.3); }
+.ca-q-card.open { border-color: var(--accent-border); }
 
 .ca-q-header {
   display: flex;
@@ -397,8 +397,8 @@
   transition: border-color 0.15s;
 }
 .ca-choice-row.correct {
-  border-color: rgba(0,212,170,0.25);
-  background: rgba(0,212,170,0.04);
+  border-color: var(--success-border);
+  background: var(--success-tint-weak);
 }
 
 .ca-correct-btn {
@@ -471,7 +471,7 @@
   width: 100%;
   justify-content: center;
 }
-.ca-add-choice-btn:hover { color: var(--purple-light); border-color: rgba(59,91,219,0.3); }
+.ca-add-choice-btn:hover { color: var(--purple-light); border-color: var(--accent-border); }
 
 /* ── True/False ─────────────────────────────────────────────────────────────── */
 .ca-tf-row { display: flex; gap: 10px; }
@@ -490,16 +490,16 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-.ca-tf-btn.active.true  { border-color: rgba(0,212,170,0.4); color: var(--cyan); background: rgba(0,212,170,0.08); }
-.ca-tf-btn.active.false { border-color: rgba(255,107,138,0.4); color: var(--error); background: rgba(255,107,138,0.08); }
+.ca-tf-btn.active.true  { border-color: var(--success-border); color: var(--cyan); background: var(--success-tint-weak); }
+.ca-tf-btn.active.false { border-color: var(--error-border); color: var(--error); background: var(--error-tint-weak); }
 
 /* ── Essay note ─────────────────────────────────────────────────────────────── */
 .ca-essay-note {
   display: flex;
   gap: 10px;
   padding: 12px 14px;
-  background: rgba(255,107,138,0.05);
-  border: 1px solid rgba(255,107,138,0.15);
+  background: var(--error-tint-weak);
+  border: 1px solid var(--error-border-soft);
   border-radius: 8px;
 }
 .ca-essay-note p {
@@ -546,8 +546,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: rgba(255,107,138,0.08);
-  border: 1px solid rgba(255,107,138,0.2);
+  background: var(--error-tint-weak);
+  border: 1px solid var(--error-border-soft);
   border-radius: 8px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
@@ -566,8 +566,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(0,212,170,0.07);
-  border: 1px solid rgba(0,212,170,0.2);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 10px;
   font-family: 'Syne', sans-serif;
   font-size: 14px;

@@ -9,8 +9,8 @@
 
 /* ── Podium section ────────────────────────────────────────────────────────── */
 .lb-podium-section {
-  background: linear-gradient(135deg, var(--bg-card) 50%, rgba(255,184,48,0.04));
-  border: 1px solid rgba(255,184,48,0.12);
+  background: linear-gradient(135deg, var(--bg-card) 50%, var(--xp-tint-weak));
+  border: 1px solid var(--xp-border-soft);
   border-radius: 18px;
   padding: 28px 28px 0;
   overflow: hidden;
@@ -67,8 +67,8 @@
 .lb-scope-btn:hover { border-color: var(--surface-15); color: var(--text-soft); }
 
 .lb-scope-btn.active {
-  background: rgba(255,184,48,0.12);
-  border-color: rgba(255,184,48,0.35);
+  background: var(--xp-tint);
+  border-color: var(--xp-border);
   color: var(--xp);
 }
 
@@ -114,7 +114,7 @@
   height: 64px;
   font-size: 17px;
   background: linear-gradient(135deg, var(--xp), #FF8C00);
-  box-shadow: 0 0 24px rgba(255,184,48,0.4);
+  box-shadow: var(--glow-xp);
 }
 
 .lb-pod-avatar-2 {
@@ -180,8 +180,8 @@
 
 .lb-pod-stand-1 {
   height: 90px;
-  background: linear-gradient(180deg, rgba(255,184,48,0.2) 0%, rgba(255,184,48,0.05) 100%);
-  border: 1px solid rgba(255,184,48,0.2);
+  background: linear-gradient(180deg, var(--xp-tint) 0%, var(--xp-tint-weak) 100%);
+  border: 1px solid var(--xp-border-soft);
   border-bottom: none;
 }
 
@@ -201,8 +201,8 @@
 
 /* ── My rank card ──────────────────────────────────────────────────────────── */
 .lb-my-rank {
-  background: linear-gradient(135deg, rgba(0,212,170,0.06), rgba(59,91,219,0.06));
-  border: 1px solid rgba(0,212,170,0.2);
+  background: linear-gradient(135deg, var(--success-tint-weak), var(--accent-tint-weak));
+  border: 1px solid var(--success-border-soft);
   border-radius: 14px;
   padding: 16px 20px;
   display: flex;
@@ -368,8 +368,8 @@
 }
 
 .lb-filter-pill.active {
-  background: rgba(0,212,170,0.1);
-  border-color: rgba(0,212,170,0.3);
+  background: var(--success-tint);
+  border-color: var(--success-border);
   color: var(--cyan);
 }
 
@@ -445,11 +445,11 @@
 }
 
 .lb-row-you {
-  background: rgba(0,212,170,0.05) !important;
-  border-color: rgba(0,212,170,0.18) !important;
+  background: var(--success-tint-weak) !important;
+  border-color: var(--success-border-soft) !important;
 }
 
-.lb-row-top1 { background: rgba(255,184,48,0.04); border-color: rgba(255,184,48,0.12); }
+.lb-row-top1 { background: var(--xp-tint-weak); border-color: var(--xp-border-soft); }
 .lb-row-top2 { background: rgba(136,146,176,0.04); border-color: rgba(136,146,176,0.1); }
 .lb-row-top3 { background: rgba(205,127,50,0.04);  border-color: rgba(205,127,50,0.1); }
 
@@ -518,8 +518,8 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 8px;
   letter-spacing: 1px;
-  background: rgba(0,212,170,0.12);
-  border: 1px solid rgba(0,212,170,0.3);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
   color: var(--cyan);
   border-radius: 99px;
   padding: 1px 6px;

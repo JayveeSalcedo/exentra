@@ -215,6 +215,7 @@ export default function LearningMaterials() {
           <motion.div
             key={stat.label}
             className="lm-stat-card"
+            style={{ '--tile-accent': stat.color } as React.CSSProperties}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.07, duration: 0.35, ease: easeOut }}

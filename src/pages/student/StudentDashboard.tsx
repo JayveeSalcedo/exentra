@@ -300,7 +300,7 @@ export default function StudentDashboard() {
 
       <div className="sd-stats-row">
         {stats.map((stat, i) => (
-          <motion.div key={stat.label} className="sd-stat-card" {...stagger(i)}>
+          <motion.div key={stat.label} className="sd-stat-card" style={{ '--tile-accent': stat.color } as React.CSSProperties} {...stagger(i)}>
             <div className="sd-stat-icon" style={{ background: `${stat.color}18`, border: `1px solid ${stat.color}30` }}>
               <stat.icon size={16} color={stat.color} />
             </div>

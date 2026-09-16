@@ -81,6 +81,7 @@
 .pb-stat {
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
+  border-top: 3px solid var(--tile-accent, var(--accent-border));
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
@@ -203,6 +204,7 @@
 }
 
 .pb-card {
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -214,8 +216,9 @@
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
-.pb-card:hover { border-color: var(--border-accent); background: var(--bg-elevated-soft); }
-.pb-card.solved { border-color: rgba(0,212,170,0.15); }
+.pb-card:hover {
+  box-shadow: var(--shadow-card-hover); border-color: var(--border-accent); background: var(--bg-elevated-soft); }
+.pb-card.solved { border-color: var(--success-border-soft); }
 
 .pb-card-left {
   display: flex;
@@ -261,13 +264,13 @@
 }
 .pb-type-badge[data-type="coding"] {
   color: var(--xp);
-  background: rgba(255,184,48,0.1);
-  border-color: rgba(255,184,48,0.25);
+  background: var(--xp-tint);
+  border-color: var(--xp-border);
 }
 .pb-type-badge[data-type="multiple_choice"] {
   color: var(--purple-light);
-  background: rgba(108,142,245,0.1);
-  border-color: rgba(108,142,245,0.25);
+  background: var(--accent-tint);
+  border-color: var(--accent-border);
 }
 
 .pb-diff-badge {
@@ -297,8 +300,8 @@
   font-size: 11px;
   font-weight: 600;
   color: var(--cyan);
-  background: rgba(0,212,170,0.1);
-  border: 1px solid rgba(0,212,170,0.25);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
   border-radius: 6px;
   padding: 2px 8px;
 }
@@ -319,9 +322,9 @@
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .pb-delete-btn:hover {
-  background: rgba(255,107,138,0.12);
+  background: var(--error-tint);
   color: var(--error);
-  border-color: rgba(255,107,138,0.25);
+  border-color: var(--error-border);
 }
 .pb-delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -436,9 +439,9 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-.pb-diff-btn.active[data-diff="Easy"]   { color: var(--cyan); border-color: rgba(0,212,170,0.4); background: rgba(0,212,170,0.1); }
-.pb-diff-btn.active[data-diff="Medium"] { color: var(--xp); border-color: rgba(255,184,48,0.4); background: rgba(255,184,48,0.1); }
-.pb-diff-btn.active[data-diff="Hard"]   { color: var(--error); border-color: rgba(255,107,138,0.4); background: rgba(255,107,138,0.1); }
+.pb-diff-btn.active[data-diff="Easy"]   { color: var(--cyan); border-color: var(--success-border); background: var(--success-tint); }
+.pb-diff-btn.active[data-diff="Medium"] { color: var(--xp); border-color: var(--xp-border); background: var(--xp-tint); }
+.pb-diff-btn.active[data-diff="Hard"]   { color: var(--error); border-color: var(--error-border); background: var(--error-tint); }
 
 .pb-type-btn {
   flex: 1;
@@ -458,8 +461,8 @@
 }
 .pb-type-btn.active {
   color: var(--purple-light);
-  border-color: rgba(108,142,245,0.4);
-  background: rgba(108,142,245,0.1);
+  border-color: var(--accent-border);
+  background: var(--accent-tint);
 }
 
 .pb-divider {
@@ -479,8 +482,8 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  background: linear-gradient(135deg, rgba(108,142,245,0.25), rgba(0,212,170,0.15));
-  border: 1px solid rgba(108,142,245,0.35);
+  background: linear-gradient(135deg, var(--accent-tint-strong), var(--success-tint));
+  border: 1px solid var(--accent-border);
   border-radius: 10px;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -517,8 +520,8 @@
   transition: border-color 0.15s;
 }
 .pb-choice-row.correct {
-  border-color: rgba(0,212,170,0.25);
-  background: rgba(0,212,170,0.04);
+  border-color: var(--success-border);
+  background: var(--success-tint-weak);
 }
 
 .pb-choice-radio {
@@ -607,7 +610,7 @@
 
 .pb-problem-text {
   font-size: 14px;
-  color: #CCD6F6;
+  color: var(--text-soft);
   line-height: 1.75;
   margin: 0;
   white-space: pre-wrap;
@@ -626,36 +629,36 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--xp);
-  background: rgba(255,184,48,0.08);
-  border: 1px solid rgba(255,184,48,0.2);
+  background: var(--xp-tint-weak);
+  border: 1px solid var(--xp-border-soft);
   border-radius: 8px;
   padding: 0.35rem 0.8rem;
   cursor: pointer;
   transition: background 0.15s;
 }
-.pb-hint-toggle:hover { background: rgba(255,184,48,0.14); }
+.pb-hint-toggle:hover { background: var(--xp-tint); }
 
 .pb-hint-text {
   font-size: 13px;
-  color: #CCD6F6;
+  color: var(--text-soft);
   line-height: 1.65;
   margin: 10px 0 0;
   padding: 10px 14px;
-  background: rgba(255,184,48,0.06);
-  border-left: 3px solid rgba(255,184,48,0.4);
+  background: var(--xp-tint-weak);
+  border-left: 3px solid var(--xp-border);
   border-radius: 0 8px 8px 0;
   overflow: hidden;
 }
 
 /* Solution */
 .pb-solution-block {
-  border-top: 1px solid rgba(0,212,170,0.15);
+  border-top: 1px solid var(--success-border-soft);
   padding-top: 14px;
 }
 
 .pb-solution-text {
   font-size: 13px;
-  color: #CCD6F6;
+  color: var(--text-soft);
   line-height: 1.7;
   margin: 0;
   white-space: pre-wrap;
@@ -696,9 +699,9 @@
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 .pb-mc-option:hover:not(:disabled) { border-color: var(--purple-light); color: var(--text-primary); }
-.pb-mc-option.selected { border-color: var(--purple-light); background: rgba(108,142,245,0.1); color: var(--text-primary); }
-.pb-mc-option.correct  { border-color: var(--cyan); background: rgba(0,212,170,0.1); color: var(--cyan); }
-.pb-mc-option.wrong    { border-color: var(--error); background: rgba(255,107,138,0.08); color: var(--error); }
+.pb-mc-option.selected { border-color: var(--purple-light); background: var(--accent-tint); color: var(--text-primary); }
+.pb-mc-option.correct  { border-color: var(--cyan); background: var(--success-tint); color: var(--cyan); }
+.pb-mc-option.wrong    { border-color: var(--error); background: var(--error-tint-weak); color: var(--error); }
 .pb-mc-option:disabled { cursor: not-allowed; }
 
 .pb-mc-letter {
@@ -726,8 +729,8 @@
   padding: 10px 14px;
   border-radius: 10px;
 }
-.pb-feedback.correct { color: var(--cyan); background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); }
-.pb-feedback.wrong   { color: var(--error); background: rgba(255,107,138,0.08); border: 1px solid rgba(255,107,138,0.2); }
+.pb-feedback.correct { color: var(--cyan); background: var(--success-tint); border: 1px solid var(--success-border-soft); }
+.pb-feedback.wrong   { color: var(--error); background: var(--error-tint-weak); border: 1px solid var(--error-border-soft); }
 
 /* Answer actions */
 .pb-answer-actions {
@@ -764,13 +767,13 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--cyan);
-  background: rgba(0,212,170,0.1);
-  border: 1px solid rgba(0,212,170,0.3);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s;
 }
-.pb-mark-solved-btn:hover { background: rgba(0,212,170,0.18); }
+.pb-mark-solved-btn:hover { background: var(--success-tint); }
 .pb-mark-solved-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .pb-reset-btn {
@@ -899,10 +902,10 @@
 
 /* ── Deck card row (in ProblemBank list) ──────────────────────────────────── */
 .pb-card.deck-row {
-  border-color: rgba(0,212,170,0.1);
+  border-color: var(--success-border-soft);
 }
 .pb-card.deck-row:hover {
-  border-color: rgba(0,212,170,0.25);
+  border-color: var(--success-border);
   background: var(--bg-deep);
 }
 
@@ -910,7 +913,7 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: rgba(0,212,170,0.1);
+  background: var(--success-tint);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -918,8 +921,8 @@
 
 .pb-type-badge.deck-type-badge {
   color: var(--cyan);
-  background: rgba(0,212,170,0.1);
-  border-color: rgba(0,212,170,0.25);
+  background: var(--success-tint);
+  border-color: var(--success-border);
 }
 
 .deck-count-badge {
@@ -940,14 +943,14 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--cyan);
-  background: rgba(0,212,170,0.1);
-  border: 1px solid rgba(0,212,170,0.25);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s;
 }
-.deck-study-btn:hover { background: rgba(0,212,170,0.18); }
+.deck-study-btn:hover { background: var(--success-tint); }
 
 /* ── Create Deck — card list ──────────────────────────────────────────────── */
 .deck-card-list {
@@ -1106,13 +1109,13 @@
 
 .deck-flipcard-front {
   background: var(--bg-card);
-  border: 1px solid rgba(108,142,245,0.25);
+  border: 1px solid var(--accent-border);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 .deck-flipcard-back {
   background: var(--bg-deep);
-  border: 1px solid rgba(0,212,170,0.25);
+  border: 1px solid var(--success-border);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   transform: rotateY(180deg);
 }
@@ -1169,17 +1172,17 @@
 
 .deck-verdict-btn.known {
   color: var(--cyan);
-  background: rgba(0,212,170,0.1);
-  border-color: rgba(0,212,170,0.3);
+  background: var(--success-tint);
+  border-color: var(--success-border);
 }
-.deck-verdict-btn.known:hover { background: rgba(0,212,170,0.18); }
+.deck-verdict-btn.known:hover { background: var(--success-tint); }
 
 .deck-verdict-btn.unknown {
   color: var(--error);
-  background: rgba(255,107,138,0.08);
-  border-color: rgba(255,107,138,0.25);
+  background: var(--error-tint-weak);
+  border-color: var(--error-border);
 }
-.deck-verdict-btn.unknown:hover { background: rgba(255,107,138,0.14); }
+.deck-verdict-btn.unknown:hover { background: var(--error-tint); }
 
 /* ── Done screen ──────────────────────────────────────────────────────────── */
 .deck-done-panel {
@@ -1226,8 +1229,8 @@
   border-radius: 14px;
   border: 1px solid;
 }
-.deck-done-stat.known   { color: var(--cyan); background: rgba(0,212,170,0.08); border-color: rgba(0,212,170,0.2); }
-.deck-done-stat.unknown { color: var(--error); background: rgba(255,107,138,0.06); border-color: rgba(255,107,138,0.18); }
+.deck-done-stat.known   { color: var(--cyan); background: var(--success-tint-weak); border-color: var(--success-border-soft); }
+.deck-done-stat.unknown { color: var(--error); background: var(--error-tint-weak); border-color: var(--error-border-soft); }
 
 .deck-done-stat-num {
   font-family: 'Orbitron', monospace;

@@ -145,6 +145,7 @@
 
 /* Card */
 .msub-card {
+  box-shadow: var(--shadow-card);
   background: var(--bg-soft);
   border: 1px solid var(--bg-elevated);
   border-radius: 16px;
@@ -153,6 +154,7 @@
 }
 
 .msub-card:hover {
+  box-shadow: var(--shadow-card-hover);
   border-color: var(--border-accent);
 }
 
@@ -272,8 +274,8 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--xp);
-  background: rgba(255, 184, 48, 0.1);
-  border: 1px solid rgba(255, 184, 48, 0.25);
+  background: var(--xp-tint);
+  border: 1px solid var(--xp-border);
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
   white-space: nowrap;
@@ -416,8 +418,8 @@
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--cyan);
-  background: rgba(0, 212, 170, 0.1);
-  border: 1px solid rgba(0, 212, 170, 0.25);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
   border-radius: 8px;
   padding: 0.35rem 0.75rem;
   cursor: pointer;
@@ -426,7 +428,7 @@
 }
 
 .msub-view-btn:hover {
-  background: rgba(0, 212, 170, 0.2);
+  background: var(--success-tint);
 }
 
 .msub-view-btn:disabled {
@@ -504,9 +506,9 @@
 }
 
 .msub-modal-close:hover {
-  background: rgba(255, 107, 138, 0.15);
+  background: var(--error-tint);
   color: var(--error);
-  border-color: rgba(255, 107, 138, 0.3);
+  border-color: var(--error-border);
 }
 
 .msub-modal-body {

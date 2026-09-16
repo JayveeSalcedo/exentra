@@ -676,7 +676,7 @@ export default function TeacherAssessments() {
               { label: 'Drafts',      value: stats.drafts,      icon: EyeOff,        color: '#FFB830' },
               { label: 'Submissions', value: stats.submissions, icon: Users,         color: '#FF6B8A' },
             ].map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="ta2-stat">
+              <div key={label} className="ta2-stat" style={{ '--tile-accent': color } as React.CSSProperties}>
                 <div className="ta2-stat-icon" style={{ background: `${color}14`, border: `1px solid ${color}25` }}>
                   <Icon size={15} color={color} />
                 </div>

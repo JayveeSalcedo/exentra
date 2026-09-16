@@ -41,7 +41,7 @@
   justify-content: center;
   padding: 60px 56px;
   border-right: 1px solid var(--border);
-  background: linear-gradient(135deg, rgba(59,91,219,0.05) 0%, transparent 60%);
+  background: linear-gradient(135deg, var(--accent-tint-weak) 0%, transparent 60%);
 }
 
 :root.light-mode .login-root .login-brand {
@@ -151,7 +151,7 @@
 .login-root .attempt-dot.used {
   background: var(--error);
   border-color: var(--error);
-  box-shadow: 0 0 8px rgba(255,107,138,0.5);
+  box-shadow: var(--glow-error);
 }
 
 :root.light-mode .login-root .attempt-dot.used {
@@ -203,8 +203,8 @@
 }
 
 .login-root .field-input:focus {
-  border-color: rgba(0,212,170,0.4);
-  box-shadow: 0 0 0 3px rgba(0,212,170,0.08);
+  border-color: var(--success-border);
+  box-shadow: 0 0 0 3px var(--success-tint-weak);
 }
 
 :root.light-mode .login-root .field-input:focus {
@@ -213,7 +213,7 @@
 }
 
 .login-root .field-input.field-error {
-  border-color: rgba(255,107,138,0.5);
+  border-color: var(--error-border);
 }
 
 :root.light-mode .login-root .field-input.field-error {
@@ -258,8 +258,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,107,138,0.08);
-  border: 1px solid rgba(255,107,138,0.2);
+  background: var(--error-tint-weak);
+  border: 1px solid var(--error-border-soft);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 13px;
@@ -309,7 +309,7 @@
 
 .login-root .submit-btn:hover:not(:disabled) {
   opacity: 0.92;
-  box-shadow: 0 4px 20px rgba(59,91,219,0.35);
+  box-shadow: 0 4px 20px var(--accent-tint-strong);
 }
 
 :root.light-mode .login-root .submit-btn:hover:not(:disabled) {
@@ -437,7 +437,7 @@
 }
 
 :root.light-mode .login-root .signup-modal {
-  box-shadow: 0 20px 60px rgba(40,30,10,0.16);
+  box-shadow: var(--shadow-lg);
 }
 
 .login-root .signup-modal-close {
@@ -482,8 +482,8 @@
 .login-root .locked-icon {
   width: 72px;
   height: 72px;
-  background: rgba(255,107,138,0.1);
-  border: 1px solid rgba(255,107,138,0.2);
+  background: var(--error-tint);
+  border: 1px solid var(--error-border-soft);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -510,8 +510,8 @@
 }
 
 .login-root .locked-badge {
-  background: rgba(255,107,138,0.1);
-  border: 1px solid rgba(255,107,138,0.25);
+  background: var(--error-tint);
+  border: 1px solid var(--error-border);
   border-radius: 20px;
   padding: 6px 16px;
   font-family: 'JetBrains Mono', monospace;
@@ -557,12 +557,12 @@
 .login-root .mascot-bubble {
   position: relative;
   background: var(--bg-card);
-  border: 1px solid rgba(0,212,170,0.3);
+  border: 1px solid var(--success-border);
   border-radius: 14px;
   padding: 10px 14px;
   margin-bottom: 8px;
   max-width: 180px;
-  box-shadow: 0 4px 20px rgba(0,212,170,0.1);
+  box-shadow: 0 4px 20px var(--success-tint);
 }
 
 :root.light-mode .login-root .mascot-bubble {
@@ -589,7 +589,7 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid rgba(0,212,170,0.3);
+  border-top: 8px solid var(--success-border);
 }
 
 :root.light-mode .login-root .bubble-tail {
@@ -612,7 +612,7 @@
   width: 150px;
   height: auto;
   display: block;
-  filter: drop-shadow(0 0 20px rgba(0,212,170,0.2));
+  filter: drop-shadow(0 0 20px var(--success-tint));
 }
 
 :root.light-mode .login-root .mascot-img {

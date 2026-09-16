@@ -7,8 +7,8 @@
 }
 
 .ts-header {
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(108,142,245,0.06));
-  border: 1px solid rgba(108,142,245,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, var(--accent-tint-weak));
+  border: 1px solid var(--accent-border-soft);
   border-radius: 16px;
   padding: 24px 28px;
 }
@@ -43,6 +43,7 @@
 }
 
 .ts-stat-card {
+  box-shadow: var(--shadow-card);
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
   border-radius: 14px;
@@ -116,7 +117,7 @@
 .ts-type-tab:hover { color: var(--text-secondary); background: var(--surface-03); }
 
 .ts-type-tab--active {
-  background: rgba(108,142,245,0.15);
+  background: var(--accent-tint);
   color: var(--purple-light);
 }
 
@@ -129,7 +130,7 @@
 }
 
 .ts-type-tab--active .ts-type-tab-count {
-  background: rgba(108,142,245,0.2);
+  background: var(--accent-tint);
 }
 
 .ts-search-wrap {
@@ -160,7 +161,7 @@
 }
 
 .ts-search::placeholder { color: var(--text-muted); }
-.ts-search:focus { border-color: rgba(108,142,245,0.4); }
+.ts-search:focus { border-color: var(--accent-border); }
 
 .ts-block-filter-wrap {
   display: flex;

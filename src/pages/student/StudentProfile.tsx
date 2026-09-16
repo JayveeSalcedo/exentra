@@ -287,7 +287,7 @@ export default function StudentProfile() {
           { icon: <BookOpen size={16} color="#00D4AA" />, val: stats.lessonsCompleted, label: 'Lessons', color: '#00D4AA' },
           { icon: <Target size={16} color="#9B7ED4" />, val: stats.assessmentsTaken, label: 'Assessments', color: '#9B7ED4' },
         ].map((s, i) => (
-          <div key={i} className="spf-stat-card">
+          <div key={i} className="spf-stat-card" style={{ '--tile-accent': s.color } as React.CSSProperties}>
             <div className="spf-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
             <span className="spf-stat-val" style={{ color: s.color }}>{s.val}</span>
             <span className="spf-stat-label">{s.label}</span>

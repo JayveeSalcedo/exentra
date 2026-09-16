@@ -5,6 +5,17 @@
     <link rel="icon" type="image/png" href="/exe_final.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Exentra - Gamified Learning Management for Data Structures and Algorithm</title>
+    <script>
+      // Apply the saved (or OS-preferred) theme before React mounts, so a
+      // light-mode user never sees a dark flash on load.
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          if (theme === 'light') document.documentElement.classList.add('light-mode');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

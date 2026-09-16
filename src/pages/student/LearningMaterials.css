@@ -24,8 +24,8 @@
 .lm-header-icon {
   width: 44px;
   height: 44px;
-  background: rgba(0, 212, 170, 0.08);
-  border: 1px solid rgba(0, 212, 170, 0.2);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -185,6 +185,7 @@
 
 /* ── Module card ───────────────────────────────────────────────────────────── */
 .lm-mod-card {
+  box-shadow: var(--shadow-card);
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
   border-radius: 12px;
@@ -193,7 +194,7 @@
 }
 
 .lm-mod-card.done {
-  border-color: rgba(0, 212, 170, 0.15);
+  border-color: var(--success-border-soft);
 }
 
 .lm-mod-card.active {
@@ -384,8 +385,8 @@
   font-size: 8px;
   letter-spacing: 1px;
   color: var(--xp);
-  background: rgba(255, 184, 48, 0.1);
-  border: 1px solid rgba(255, 184, 48, 0.2);
+  background: var(--xp-tint);
+  border: 1px solid var(--xp-border-soft);
   border-radius: 99px;
   padding: 1px 6px;
 }
@@ -526,8 +527,8 @@
 }
 
 .lm-detail-lesson.done {
-  border-color: rgba(0, 212, 170, 0.12);
-  background: rgba(0, 212, 170, 0.03);
+  border-color: var(--success-border-soft);
+  background: var(--success-tint-weak);
 }
 
 .lm-detail-lesson.locked {
@@ -610,14 +611,14 @@
 }
 
 .lm-material-highlight {
-  border-color: rgba(0, 212, 170, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+  border-color: var(--success-border) !important;
+  box-shadow: 0 0 0 3px var(--success-tint);
   animation: lm-material-pulse 1.2s ease-in-out 2;
 }
 
 @keyframes lm-material-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15); }
-  50% { box-shadow: 0 0 0 5px rgba(0, 212, 170, 0.3); }
+  0%, 100% { box-shadow: 0 0 0 3px var(--success-tint); }
+  50% { box-shadow: 0 0 0 5px var(--success-tint-strong); }
 }
 
 .lm-material-icon {
@@ -654,8 +655,8 @@
 .lm-material-dl {
   width: 32px;
   height: 32px;
-  background: rgba(0, 212, 170, 0.08);
-  border: 1px solid rgba(0, 212, 170, 0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -666,7 +667,7 @@
 }
 
 .lm-material-dl:hover {
-  background: rgba(0, 212, 170, 0.15);
+  background: var(--success-tint);
 }
 
 /* Video links */
@@ -683,8 +684,8 @@
 }
 
 .lm-video-item:hover {
-  border-color: rgba(255, 107, 138, 0.25);
-  background: rgba(255, 107, 138, 0.04);
+  border-color: var(--error-border);
+  background: var(--error-tint-weak);
 }
 
 .lm-video-thumb {
@@ -738,8 +739,8 @@
   gap: 8px;
   margin-top: 20px;
   padding: 12px 14px;
-  background: rgba(255, 184, 48, 0.05);
-  border: 1px solid rgba(255, 184, 48, 0.15);
+  background: var(--xp-tint-weak);
+  border: 1px solid var(--xp-border-soft);
   border-radius: 10px;
   font-size: 13px;
   color: var(--text-secondary);
@@ -792,8 +793,10 @@
 }
 
 .lm-stat-card {
+  box-shadow: var(--shadow-card);
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
+  border-top: 3px solid var(--tile-accent, var(--accent-border));
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
@@ -827,8 +830,8 @@
   align-items: center;
   gap: 6px;
   width: 100%;
-  background: rgba(0, 212, 170, 0.08);
-  border: 1px solid rgba(0, 212, 170, 0.2);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 8px;
   padding: 8px 12px;
   font-family: 'Syne', sans-serif;
@@ -850,8 +853,8 @@
 }
 
 .lm-mod-resume-btn:hover {
-  background: rgba(0, 212, 170, 0.14);
-  border-color: rgba(0, 212, 170, 0.35);
+  background: var(--success-tint);
+  border-color: var(--success-border);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -904,8 +907,8 @@
 }
 
 .lm-detail-cta--done {
-  background: rgba(0, 212, 170, 0.06);
-  border-color: rgba(0, 212, 170, 0.2);
+  background: var(--success-tint-weak);
+  border-color: var(--success-border-soft);
   justify-content: flex-start;
   gap: 10px;
 }
@@ -925,8 +928,8 @@
   margin: -6px 0 18px;
   padding: 7px 13px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 212, 170, 0.3);
-  background: rgba(0, 212, 170, 0.07);
+  border: 1px solid var(--success-border);
+  background: var(--success-tint-weak);
   color: var(--cyan);
   font-family: 'Syne', sans-serif;
   font-size: 12px;
@@ -934,7 +937,7 @@
   text-decoration: none;
   transition: background 0.15s;
 }
-.lm-guide-pdf-btn:hover { background: rgba(0, 212, 170, 0.14); }
+.lm-guide-pdf-btn:hover { background: var(--success-tint); }
 
 .lm-detail-review-btn {
   display: flex;
@@ -1029,7 +1032,7 @@
    NEW — Tab badge (already referenced in TSX but missing from CSS)
    ═══════════════════════════════════════════════════════════════════════════ */
 .lm-tab-badge {
-  background: rgba(0, 212, 170, 0.15);
+  background: var(--success-tint);
   color: var(--cyan);
   border-radius: 99px;
   font-size: 9px;

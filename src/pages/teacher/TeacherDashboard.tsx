@@ -171,6 +171,7 @@ export default function TeacherDashboard() {
               key={action.to}
               className={`td-action-tile ${action.featured ? 'featured' : ''}`}
               onClick={() => navigate(action.to)}
+              style={{ '--tile-accent': action.color } as React.CSSProperties}
               whileTap={{ scale: 0.97 }}
               whileHover={{ y: -3 }}
               {...stagger(i + 2)}

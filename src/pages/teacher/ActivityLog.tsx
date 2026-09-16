@@ -201,8 +201,10 @@ export default function ActivityLog() {
         ].map((stat, i) => (
           <motion.div key={stat.label} {...stagger(i + 1)} style={{
             background: 'var(--bg-card)', border: '1px solid var(--surface-06)',
+            borderTop: `3px solid ${stat.color}`,
             borderRadius: 14, padding: '16px 18px',
             display: 'flex', flexDirection: 'column', gap: 8,
+            boxShadow: 'var(--shadow-card)',
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: 9,

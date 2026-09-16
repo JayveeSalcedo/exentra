@@ -11,9 +11,13 @@ const ThemeContext = createContext<ThemeContextType | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Load from localStorage or default to dark
+    // Load from localStorage, else fall back to the OS preference.
+    // Mirrors the inline script in index.html that applies the class
+    // pre-hydration to avoid a flash of the wrong theme.
     const saved = localStorage.getItem('theme') as Theme | null
-    return saved || 'dark'
+    if (saved) return saved
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light'
+    return 'dark'
   })
 
   // Update document class and localStorage when theme changes

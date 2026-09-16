@@ -1,10 +1,14 @@
 .tan-root {
+  --tan-series: #3987e5;
+  --tan-good: #0ca30c;
+  --tan-critical: #d03b3b;
   display: flex;
   flex-direction: column;
   gap: 18px;
   width: 100%;
   min-width: 0;
 }
+:root.light-mode .tan-root { --tan-series: #2a78d6; }
 
 /* ── Hero ─────────────────────────────────────────── */
 .tan-hero {
@@ -36,7 +40,7 @@
   color: var(--text-muted);
 }
 .tan-eyebrow.light { color: rgba(255, 255, 255, 0.75); }
-.tan-hero-title { margin: 0; font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--text-primary); }
+.tan-hero-title { margin: 0; font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text-primary); }
 .tan-hero-sub { margin: 4px 0 0; font-size: 13px; color: var(--text-secondary); }
 
 /* Learner report header — blue gradient banner */
@@ -59,15 +63,15 @@
   place-items: center;
   overflow: hidden;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--surface-20);
   border: 2px solid rgba(255, 255, 255, 0.45);
   font-family: 'Syne', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 700;
 }
 .tan-report-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .tan-report-id { flex: 1; min-width: 200px; }
-.tan-report-id h1 { margin: 0; font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #fff; }
+.tan-report-id h1 { margin: 0; font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.2px; color: #fff; }
 .tan-report-id p:last-child { margin: 4px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.85); }
 .tan-back-btn {
   display: inline-flex;
@@ -137,7 +141,7 @@
 .tan-tile-icon.violet { background: rgba(139, 92, 246, 0.14); color: #8b5cf6; }
 .tan-tile-icon.red { background: rgba(208, 59, 59, 0.14); color: #d03b3b; }
 .tan-tile-label { margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
-.tan-tile-value { margin: 2px 0; font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--text-primary); }
+.tan-tile-value { margin: 4px 0 2px; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; line-height: 1.2; color: var(--text-primary); }
 .tan-tile-sub { margin: 0; font-size: 11px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Cards ────────────────────────────────────────── */
@@ -155,7 +159,7 @@
   align-items: center;
   gap: 8px;
   font-family: 'Syne', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -217,8 +221,8 @@
   place-items: center;
   overflow: hidden;
   border-radius: 50%;
-  background: rgba(57, 135, 229, 0.16);
-  color: #3987e5;
+  background: color-mix(in srgb, var(--tan-series) 16%, transparent);
+  color: var(--tan-series);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -234,14 +238,13 @@
   font-weight: 600;
   color: var(--text-primary);
 }
-.tan-score.pass { background: rgba(12, 163, 12, 0.14); box-shadow: inset 3px 0 0 #0ca30c; }
-.tan-score.fail { background: rgba(208, 59, 59, 0.14); box-shadow: inset 3px 0 0 #d03b3b; }
+.tan-score.pass { background: color-mix(in srgb, var(--tan-good) 14%, transparent); box-shadow: inset 3px 0 0 var(--tan-good); }
+.tan-score.fail { background: color-mix(in srgb, var(--tan-critical) 14%, transparent); box-shadow: inset 3px 0 0 var(--tan-critical); }
 
 .tan-meter { display: flex; align-items: center; gap: 8px; min-width: 120px; }
 .tan-meter.wide { min-width: 0; }
 .tan-meter-track { flex: 1; height: 6px; border-radius: 4px; background: var(--surface-06); overflow: hidden; }
-.tan-meter-fill { height: 100%; border-radius: 4px; background: #3987e5; transition: width 0.5s ease; }
-:root.light-mode .tan-meter-fill { background: #2a78d6; }
+.tan-meter-fill { height: 100%; border-radius: 4px; background: var(--tan-series); transition: width 0.5s ease; }
 .tan-meter span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); min-width: 34px; text-align: right; }
 
 .tan-flag {
@@ -262,27 +265,26 @@
 .tan-tile-value.tone-green { color: #0ca30c; }
 .tan-tile-value.tone-red { color: #d03b3b; }
 
-.tan-figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+/* Compact label/value rows */
+.tan-figures { display: flex; flex-direction: column; }
 .tan-figure {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--surface-03);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--surface-04);
   min-width: 0;
 }
+.tan-figure:last-child { border-bottom: none; padding-bottom: 0; }
+.tan-figure:first-child { padding-top: 0; }
+.tan-figure span { order: -1; font-size: 12px; color: var(--text-secondary); }
 .tan-figure strong {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-primary);
 }
-.tan-figure strong svg { color: var(--text-muted); }
-.tan-figure span { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
 
 .tan-ok { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
 .tan-ok svg { color: #0ca30c; }

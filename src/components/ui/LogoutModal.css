@@ -18,7 +18,7 @@
   padding: 32px 28px 28px;
   position: relative;
   text-align: center;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-lg);
 }
 
 .logout-modal-close {
@@ -28,8 +28,8 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: var(--surface-05, rgba(255,255,255,0.05));
-  border: 1px solid var(--surface-08, rgba(255,255,255,0.08));
+  background: var(--surface-05);
+  border: 1px solid var(--surface-08);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -40,8 +40,8 @@
 
 .logout-modal-close:hover {
   color: var(--text-primary);
-  border-color: var(--surface-20, rgba(255,255,255,0.2));
-  background: var(--surface-08, rgba(255,255,255,0.08));
+  border-color: var(--surface-20);
+  background: var(--surface-08);
 }
 
 .logout-modal-icon {
@@ -49,8 +49,8 @@
   height: 56px;
   margin: 0 auto 18px;
   border-radius: 50%;
-  background: rgba(255, 107, 138, 0.1);
-  border: 1px solid rgba(255, 107, 138, 0.22);
+  background: var(--error-tint);
+  border: 1px solid var(--error-border-soft);
   color: var(--error);
   display: flex;
   align-items: center;
@@ -97,19 +97,19 @@
 }
 
 .logout-modal-btn-cancel {
-  background: var(--surface-05, rgba(255,255,255,0.05));
+  background: var(--surface-05);
   border: 1px solid var(--border);
   color: var(--text-primary);
 }
 
 .logout-modal-btn-cancel:hover {
-  background: var(--surface-08, rgba(255,255,255,0.08));
+  background: var(--surface-08);
 }
 
 .logout-modal-btn-confirm {
   background: var(--error);
   border: 1px solid var(--error);
-  color: #0A0D1A;
+  color: var(--on-error);
 }
 
 .logout-modal-btn-confirm:hover {

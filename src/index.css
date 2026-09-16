@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -42,59 +42,162 @@
   --text-secondary: #8892B0;
   --text-muted: #4A5568;
   --error: #FF6B8A;
+  --on-error: #0A0D1A;
   --success: #00D4AA;
   --xp: #FFB830;
+  --on-xp: #1A1206;
   --preview-dark: rgba(8,11,24,0.9);
   --preview-dark-soft: rgba(8,11,24,0.55);
+
+  /* --- Elevation (dark: barely-there; the near-black page does the separating) --- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.45);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.50);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.30);
+  --shadow-card-hover: 0 6px 18px rgba(0,0,0,0.45);
+  --shadow-edge: 0 0 0 rgba(0,0,0,0);
+
+  /* --- Semantic tints. Dark values reproduce the literals they replace, so the
+         dark theme is unchanged; light mode re-tunes them to read on a pale page. --- */
+  --accent-tint-weak: rgba(59,91,219,0.08);
+  --accent-tint: rgba(59,91,219,0.15);
+  --accent-tint-strong: rgba(59,91,219,0.30);
+  --accent-border: rgba(59,91,219,0.50);
+  --accent-border-soft: rgba(59,91,219,0.25);
+  --accent-ring: 0 0 0 1px rgba(59,91,219,0.35);
+
+  --success-tint-weak: rgba(0,212,170,0.06);
+  --success-tint: rgba(0,212,170,0.12);
+  --success-tint-strong: rgba(0,212,170,0.25);
+  --success-border: rgba(0,212,170,0.40);
+  --success-border-soft: rgba(0,212,170,0.20);
+  --success-ring: 0 0 0 1px rgba(0,212,170,0.35);
+
+  --error-tint-weak: rgba(255,107,138,0.08);
+  --error-tint: rgba(255,107,138,0.15);
+  --error-tint-strong: rgba(255,107,138,0.28);
+  --error-border: rgba(255,107,138,0.45);
+  --error-border-soft: rgba(255,107,138,0.20);
+  --error-ring: 0 0 0 1px rgba(255,107,138,0.35);
+
+  --xp-tint-weak: rgba(255,184,48,0.08);
+  --xp-tint: rgba(255,184,48,0.15);
+  --xp-tint-strong: rgba(255,184,48,0.28);
+  --xp-border: rgba(255,184,48,0.45);
+  --xp-border-soft: rgba(255,184,48,0.20);
+  --xp-ring: 0 0 0 1px rgba(255,184,48,0.35);
+
+  /* --- The single "this one is picked" pair every selection state should use --- */
+  --selected-bg: var(--accent-tint);
+  --selected-border: var(--accent-border);
+  --selected-ring: none;
+
+  /* --- Glows: real outer glow on dark; a shadow + ring on light, where glow reads as nothing --- */
+  --glow-accent: 0 0 20px rgba(59,91,219,0.18);
+  --glow-success: 0 0 20px rgba(0,212,170,0.18);
+  --glow-error: 0 0 20px rgba(255,107,138,0.18);
+  --glow-xp: 0 0 20px rgba(255,184,48,0.18);
 }
 
-/* Light mode: warm cream surfaces (never stark white) + institution colorway
-   (royal blue / gold) standing in for the dark theme's purple/amber accents. */
+/* Light mode: a cool neutral surface ramp (white cards over a soft blue-grey page)
+   with royal blue / deep teal accents. Cards earn their separation from real
+   elevation here, since the light page can't provide it by contrast the way
+   the near-black dark page does. */
 :root.light-mode {
-  --bg-base: #FAF6EC;
-  --bg-sidebar: #FDFBF4;
-  --bg-card: #FDFBF4;
-  --bg-input: #F3EEDE;
-  --bg-elevated: #F1EBD9;
-  --bg-elevated-hover: #EAE2CB;
-  --bg-elevated-soft: #F5F0E1;
-  --bg-code: #17203B;
+  --bg-base: #F3F5FA;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-input: #EDF0F7;
+  --bg-elevated: #E8ECF5;
+  --bg-elevated-hover: #DFE5F1;
+  --bg-elevated-soft: #F0F3F9;
+  --bg-code: #17203B;          /* code panels stay dark in both themes */
   --bg-code-gutter: #1E2A4D;
-  --bg-deep: #F2EDDC;
-  --bg-soft: #F6F2E6;
-  --bg-viz: rgba(250,246,236,0.92);
-  --bg-viz-strong: rgba(241,235,217,0.96);
-  --border: rgba(40,30,10,0.10);
-  --border-accent: rgba(40,74,196,0.35);
-  --surface-01: rgba(40,30,10,0.015);
-  --surface-02: rgba(40,30,10,0.03);
-  --surface-03: rgba(40,30,10,0.045);
-  --surface-04: rgba(40,30,10,0.06);
-  --surface-05: rgba(40,30,10,0.07);
-  --surface-06: rgba(40,30,10,0.08);
-  --surface-07: rgba(40,30,10,0.09);
-  --surface-08: rgba(40,30,10,0.1);
-  --surface-09: rgba(40,30,10,0.11);
-  --surface-10: rgba(40,30,10,0.12);
-  --surface-12: rgba(40,30,10,0.14);
-  --surface-15: rgba(40,30,10,0.17);
-  --surface-20: rgba(40,30,10,0.22);
-  --surface-30: rgba(40,30,10,0.32);
-  --purple: #2A4AC4;
+  --bg-deep: #EBEEF6;
+  --bg-soft: #F7F9FC;
+  --bg-viz: rgba(243,245,250,0.92);
+  --bg-viz-strong: rgba(232,236,245,0.96);
+  --border: rgba(16,32,70,0.12);
+  --border-accent: rgba(47,75,196,0.35);
+  --surface-01: rgba(16,32,70,0.02);
+  --surface-02: rgba(16,32,70,0.035);
+  --surface-03: rgba(16,32,70,0.05);
+  --surface-04: rgba(16,32,70,0.06);
+  --surface-05: rgba(16,32,70,0.07);
+  --surface-06: rgba(16,32,70,0.09);
+  --surface-07: rgba(16,32,70,0.10);
+  --surface-08: rgba(16,32,70,0.11);
+  --surface-09: rgba(16,32,70,0.12);
+  --surface-10: rgba(16,32,70,0.13);
+  --surface-12: rgba(16,32,70,0.16);
+  --surface-15: rgba(16,32,70,0.20);
+  --surface-20: rgba(16,32,70,0.26);
+  --surface-30: rgba(16,32,70,0.38);
+  --purple: #2F4BC4;
   --purple-light: #4A66D6;
-  --accent: #2A4AC4;
-  --cyan: #0E8F72;
+  --accent: #2F4BC4;
+  --cyan: #0C8F6F;
   --cyan-light: #10A886;
-  --text-primary: #23201A;
-  --text-soft: #3D3826;
-  --text-viz: #2C2A20;
-  --text-secondary: #6B5F3E;
-  --text-muted: #7C7052;
-  --error: #C4302B;
-  --success: #0E8F72;
-  --xp: #B8860B;
-  --preview-dark: rgba(28,31,50,0.88);
-  --preview-dark-soft: rgba(28,31,50,0.5);
+  --text-primary: #101828;
+  --text-soft: #344054;
+  --text-viz: #1D2939;
+  --text-secondary: #5A6782;
+  --text-muted: #8A94A6;
+  --error: #D92D20;
+  --on-error: #FFFFFF;
+  --success: #0C8F6F;
+  --xp: #B54708;
+  --on-xp: #FFFFFF;
+  --preview-dark: rgba(16,25,48,0.88);
+  --preview-dark-soft: rgba(16,25,48,0.5);
+
+  /* --- Elevation: this is what makes cards read as cards on a light page --- */
+  --shadow-sm: 0 1px 2px rgba(16,32,70,0.06);
+  --shadow-md: 0 4px 12px rgba(16,32,70,0.10);
+  --shadow-lg: 0 12px 28px rgba(16,32,70,0.14);
+  --shadow-card: 0 1px 2px rgba(16,32,70,0.06), 0 1px 3px rgba(16,32,70,0.10);
+  --shadow-card-hover: 0 6px 16px rgba(16,32,70,0.12), 0 2px 4px rgba(16,32,70,0.08);
+  --shadow-edge: 0 1px 3px rgba(16,32,70,0.08);
+
+  /* --- Tints: stronger and more saturated than dark, so a selection reads as
+         genuinely filled rather than as a faint wash --- */
+  --accent-tint-weak: rgba(47,75,196,0.07);
+  --accent-tint: rgba(47,75,196,0.14);
+  --accent-tint-strong: rgba(47,75,196,0.24);
+  --accent-border: rgba(47,75,196,0.50);
+  --accent-border-soft: rgba(47,75,196,0.28);
+  --accent-ring: 0 0 0 2px rgba(47,75,196,0.22);
+
+  --success-tint-weak: rgba(12,143,111,0.08);
+  --success-tint: rgba(12,143,111,0.15);
+  --success-tint-strong: rgba(12,143,111,0.25);
+  --success-border: rgba(12,143,111,0.50);
+  --success-border-soft: rgba(12,143,111,0.28);
+  --success-ring: 0 0 0 2px rgba(12,143,111,0.22);
+
+  --error-tint-weak: rgba(217,45,32,0.07);
+  --error-tint: rgba(217,45,32,0.13);
+  --error-tint-strong: rgba(217,45,32,0.22);
+  --error-border: rgba(217,45,32,0.45);
+  --error-border-soft: rgba(217,45,32,0.25);
+  --error-ring: 0 0 0 2px rgba(217,45,32,0.20);
+
+  --xp-tint-weak: rgba(181,71,7,0.07);
+  --xp-tint: rgba(181,71,7,0.13);
+  --xp-tint-strong: rgba(181,71,7,0.22);
+  --xp-border: rgba(181,71,7,0.45);
+  --xp-border-soft: rgba(181,71,7,0.25);
+  --xp-ring: 0 0 0 2px rgba(181,71,7,0.20);
+
+  --selected-bg: var(--accent-tint);
+  --selected-border: var(--accent-border);
+  --selected-ring: 0 0 0 2px rgba(47,75,196,0.18);
+
+  /* Outer glows don't register on a light surface - trade them for lift + ring */
+  --glow-accent: 0 4px 14px rgba(47,75,196,0.20), 0 0 0 1px rgba(47,75,196,0.18);
+  --glow-success: 0 4px 14px rgba(12,143,111,0.20), 0 0 0 1px rgba(12,143,111,0.18);
+  --glow-error: 0 4px 14px rgba(217,45,32,0.18), 0 0 0 1px rgba(217,45,32,0.16);
+  --glow-xp: 0 4px 14px rgba(181,71,7,0.18), 0 0 0 1px rgba(181,71,7,0.16);
 }
 
 /* Box-sizing reset only — no blanket transition on * (causes layout jank on every state change) */

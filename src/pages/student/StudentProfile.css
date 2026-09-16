@@ -199,6 +199,7 @@
 .spf-stat-card {
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
+  border-top: 3px solid var(--tile-accent, var(--accent-border));
   border-radius: 12px;
   padding: 14px 12px;
   display: flex;
@@ -330,7 +331,7 @@
   justify-content: center;
   transition: all 0.15s;
 }
-.spf-modal-close:hover { background: rgba(255,107,138,0.1); color: var(--error); border-color: rgba(255,107,138,0.3); }
+.spf-modal-close:hover { background: var(--error-tint); color: var(--error); border-color: var(--error-border); }
 
 .spf-modal-body {
   padding: 18px 22px;
@@ -372,7 +373,7 @@
   width: 100%;
   box-sizing: border-box;
 }
-.spf-field input:focus { border-color: rgba(59,91,219,0.5); }
+.spf-field input:focus { border-color: var(--accent-border); }
 .spf-field input::placeholder { color: var(--text-muted); }
 
 .spf-modal-footer {
@@ -445,8 +446,8 @@
   z-index: 300;
   white-space: nowrap;
 }
-.spf-toast.ok { background: rgba(0,212,170,0.15); border: 1px solid rgba(0,212,170,0.35); color: var(--cyan); }
-.spf-toast.err { background: rgba(255,107,138,0.15); border: 1px solid rgba(255,107,138,0.35); color: var(--error); }
+.spf-toast.ok { background: var(--success-tint); border: 1px solid var(--success-border); color: var(--cyan); }
+.spf-toast.err { background: var(--error-tint); border: 1px solid var(--error-border); color: var(--error); }
 
 /* ── Wide screens: header across the top, stats and account info side by side ── */
 @media (min-width: 1100px) {

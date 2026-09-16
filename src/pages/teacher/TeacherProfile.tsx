@@ -313,7 +313,7 @@ export default function TeacherProfile() {
           { icon: <ClipboardList size={16} color="#00D4AA" />, val: stats.assessments, label: 'Assessments', color: '#00D4AA' },
           { icon: <BookOpen size={16} color="#9B7ED4" />, val: stats.materials, label: 'Materials', color: '#9B7ED4' },
         ].map((s, i) => (
-          <div key={i} className="tpf-stat-card">
+          <div key={i} className="tpf-stat-card" style={{ '--tile-accent': s.color } as React.CSSProperties}>
             <div className="tpf-stat-icon" style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>{s.icon}</div>
             <span className="tpf-stat-val" style={{ color: s.color }}>{s.val}</span>
             <span className="tpf-stat-label">{s.label}</span>

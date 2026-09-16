@@ -12,8 +12,8 @@
   align-items: center;
   gap: 7px;
   width: fit-content;
-  background: rgba(108,142,245,0.1);
-  border: 1px solid rgba(108,142,245,0.25);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
   border-radius: 99px;
   padding: 6px 14px;
   font-family: 'JetBrains Mono', monospace;
@@ -31,8 +31,10 @@
 }
 
 .sd-stat-card {
+  box-shadow: var(--shadow-card);
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
+  border-top: 3px solid var(--tile-accent, var(--accent-border));
   border-radius: 14px;
   padding: 16px 18px;
   display: flex;
@@ -42,6 +44,7 @@
 }
 
 .sd-stat-card:hover {
+  box-shadow: var(--shadow-card-hover);
   border-color: var(--surface-10);
 }
 
@@ -145,8 +148,9 @@
 
 /* ── Current Quest ─────────────────────────────────────────────────────────── */
 .sd-quest-card {
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(0,212,170,0.05));
-  border: 1px solid rgba(0,212,170,0.15);
+  box-shadow: var(--shadow-card);
+  background: linear-gradient(135deg, var(--bg-card) 60%, var(--success-tint-weak));
+  border: 1px solid var(--success-border-soft);
   border-radius: 16px;
   padding: 24px;
 }
@@ -166,8 +170,8 @@
   font-size: 10px;
   letter-spacing: 1.5px;
   color: var(--cyan);
-  background: rgba(0,212,170,0.08);
-  border: 1px solid rgba(0,212,170,0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 99px;
   padding: 4px 10px;
 }
@@ -256,7 +260,8 @@
 }
 
 .sd-module-card {
-  background: var(--surface-03);
+  box-shadow: var(--shadow-card);
+  background: var(--bg-elevated-soft);
   border: 1px solid var(--surface-07);
   border-radius: 12px;
   padding: 14px 12px;
@@ -268,19 +273,20 @@
 }
 
 .sd-module-card:hover:not(.locked) {
+  box-shadow: var(--shadow-card-hover);
   background: var(--surface-06);
   border-color: var(--surface-12);
 }
 
 .sd-module-card.done {
-  border-color: rgba(0,212,170,0.2);
-  background: rgba(0,212,170,0.04);
+  border-color: var(--success-border-soft);
+  background: var(--success-tint-weak);
 }
 
 .sd-module-card.active {
-  border-color: rgba(59,91,219,0.35);
-  background: rgba(59,91,219,0.08);
-  box-shadow: 0 0 20px rgba(59,91,219,0.1);
+  border-color: var(--accent-border);
+  background: var(--accent-tint-weak);
+  box-shadow: var(--glow-accent);
 }
 
 .sd-module-card.locked {
@@ -429,8 +435,9 @@
 
 /* ── Daily Challenge ───────────────────────────────────────────────────────── */
 .sd-challenge-card {
-  background: linear-gradient(135deg, var(--bg-card), rgba(59,91,219,0.08));
-  border: 1px solid rgba(59,91,219,0.2);
+  box-shadow: var(--shadow-card);
+  background: linear-gradient(135deg, var(--bg-card), var(--accent-tint-weak));
+  border: 1px solid var(--accent-border-soft);
   border-radius: 14px;
   padding: 18px;
   display: flex;
@@ -452,8 +459,8 @@
   font-size: 9px;
   letter-spacing: 1.5px;
   color: var(--purple-light);
-  background: rgba(59,91,219,0.1);
-  border: 1px solid rgba(59,91,219,0.2);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border-soft);
   border-radius: 99px;
   padding: 4px 10px;
 }
@@ -485,9 +492,9 @@
   padding: 3px 10px;
 }
 
-.sd-challenge-diff.easy   { background: rgba(0,212,170,0.1);   color: var(--cyan);  border: 1px solid rgba(0,212,170,0.2);   }
-.sd-challenge-diff.medium { background: rgba(255,184,48,0.1);  color: var(--xp);  border: 1px solid rgba(255,184,48,0.2);  }
-.sd-challenge-diff.hard   { background: rgba(255,107,138,0.1); color: var(--error);  border: 1px solid rgba(255,107,138,0.2); }
+.sd-challenge-diff.easy   { background: var(--success-tint);   color: var(--cyan);  border: 1px solid var(--success-border-soft);   }
+.sd-challenge-diff.medium { background: var(--xp-tint);  color: var(--xp);  border: 1px solid var(--xp-border-soft);  }
+.sd-challenge-diff.hard   { background: var(--error-tint); color: var(--error);  border: 1px solid var(--error-border-soft); }
 
 .sd-challenge-reward {
   display: flex;
@@ -538,8 +545,8 @@
 }
 
 .sd-lb-item.you {
-  background: rgba(0,212,170,0.06);
-  border-color: rgba(0,212,170,0.2);
+  background: var(--success-tint-weak);
+  border-color: var(--success-border-soft);
 }
 
 .sd-lb-rank {
@@ -665,8 +672,8 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.8px;
-  background: rgba(0,212,170,0.08);
-  border: 1px solid rgba(0,212,170,0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   color: var(--cyan);
   border-radius: 99px;
   padding: 3px 9px;
@@ -678,7 +685,7 @@
   align-items: center;
   gap: 5px;
   background: none;
-  border: 1px dashed rgba(255,184,48,0.3);
+  border: 1px dashed var(--xp-border);
   border-radius: 6px;
   padding: 5px 10px;
   font-family: 'JetBrains Mono', monospace;
@@ -690,13 +697,13 @@
 }
 
 .sd-hint-btn:hover {
-  background: rgba(255,184,48,0.06);
-  border-color: rgba(255,184,48,0.5);
+  background: var(--xp-tint-weak);
+  border-color: var(--xp-border);
 }
 
 .sd-hint-box {
-  background: rgba(255,184,48,0.06);
-  border: 1px solid rgba(255,184,48,0.15);
+  background: var(--xp-tint-weak);
+  border: 1px solid var(--xp-border-soft);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 12px;
@@ -729,21 +736,21 @@
 }
 
 .sd-attempt-input::placeholder { color: var(--text-muted); }
-.sd-attempt-input:focus { border-color: rgba(59,91,219,0.4); }
+.sd-attempt-input:focus { border-color: var(--accent-border); }
 
 .sd-challenge-done {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: rgba(0,212,170,0.06);
-  border: 1px solid rgba(0,212,170,0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 10px;
   padding: 12px;
 }
 
 .sd-challenge-done.incorrect {
-  background: rgba(255,107,138,0.06);
-  border-color: rgba(255,107,138,0.18);
+  background: var(--error-tint-weak);
+  border-color: var(--error-border-soft);
 }
 
 .sd-challenge-done-top {
@@ -830,8 +837,8 @@
 .sd-challenge-model-answer {
   margin-top: 8px;
   padding: 10px 12px;
-  background: rgba(0,212,170,0.05);
-  border: 1px solid rgba(0,212,170,0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 8px;
 }
 
@@ -858,8 +865,8 @@
   gap: 6px;
   width: 100%;
   box-sizing: border-box;
-  background: rgba(0,212,170,0.06);
-  border: 1px solid rgba(0,212,170,0.15);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 10px;
   padding: 10px 12px;
   cursor: pointer;
@@ -870,16 +877,16 @@
 }
 
 .sd-challenge-summary:hover {
-  background: rgba(0,212,170,0.1);
+  background: var(--success-tint);
 }
 
 .sd-challenge-summary.incorrect {
-  background: rgba(255,107,138,0.06);
-  border-color: rgba(255,107,138,0.18);
+  background: var(--error-tint-weak);
+  border-color: var(--error-border-soft);
 }
 
 .sd-challenge-summary.incorrect:hover {
-  background: rgba(255,107,138,0.1);
+  background: var(--error-tint);
 }
 
 .sd-challenge-summary-top {
@@ -941,8 +948,8 @@
   max-width: 460px;
   max-height: 85vh;
   overflow-y: auto;
-  background: linear-gradient(135deg, var(--bg-card), rgba(59,91,219,0.1));
-  border: 1px solid rgba(59,91,219,0.25);
+  background: linear-gradient(135deg, var(--bg-card), var(--accent-tint));
+  border: 1px solid var(--accent-border);
   border-radius: 16px;
   padding: 22px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.45);
@@ -977,8 +984,8 @@
   font-size: 9px;
   letter-spacing: 1.5px;
   color: var(--purple-light);
-  background: rgba(59,91,219,0.1);
-  border: 1px solid rgba(59,91,219,0.2);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border-soft);
   border-radius: 99px;
   padding: 4px 10px;
   width: fit-content;
@@ -1008,8 +1015,8 @@
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--xp);
-  background: rgba(255,184,48,0.12);
-  border: 1px solid rgba(255,184,48,0.3);
+  background: var(--xp-tint);
+  border: 1px solid var(--xp-border);
   border-radius: 999px;
 }
 
@@ -1018,8 +1025,8 @@
   align-items: center;
   gap: 7px;
   width: fit-content;
-  background: rgba(0,212,170,0.08);
-  border: 1px solid rgba(0,212,170,0.2);
+  background: var(--success-tint-weak);
+  border: 1px solid var(--success-border-soft);
   border-radius: 99px;
   padding: 6px 14px;
   font-family: 'JetBrains Mono', monospace;

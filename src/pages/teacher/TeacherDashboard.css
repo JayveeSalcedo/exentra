@@ -8,8 +8,8 @@
 
 /* Welcome */
 .td-welcome {
-  background: linear-gradient(135deg, var(--bg-card) 60%, rgba(59,91,219,0.08));
-  border: 1px solid rgba(59,91,219,0.2);
+  background: linear-gradient(135deg, var(--bg-card) 60%, var(--accent-tint-weak));
+  border: 1px solid var(--accent-border-soft);
   border-radius: 16px;
   padding: 26px 28px;
 }
@@ -56,11 +56,13 @@
 }
 
 .td-action-tile {
+  box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   gap: 14px;
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
+  border-top: 3px solid var(--tile-accent, var(--accent-border));
   border-radius: 14px;
   padding: 16px 16px;
   cursor: pointer;
@@ -70,18 +72,19 @@
 }
 
 .td-action-tile:hover {
+  box-shadow: var(--shadow-card-hover);
   border-color: var(--surface-15);
   background: var(--surface-02);
 }
 
 .td-action-tile.featured {
   grid-column: span 3;
-  background: linear-gradient(135deg, rgba(59,91,219,0.14), rgba(0,212,170,0.05));
-  border-color: rgba(59,91,219,0.35);
+  background: linear-gradient(135deg, var(--accent-tint), var(--success-tint-weak));
+  border-color: var(--accent-border);
 }
 
 .td-action-tile.featured:hover {
-  border-color: rgba(59,91,219,0.55);
+  border-color: var(--accent-border);
 }
 
 .td-action-icon {
@@ -115,8 +118,8 @@
 .td-ai-badge {
   font-size: 9px;
   font-family: 'JetBrains Mono', monospace;
-  background: rgba(108,142,245,0.15);
-  border: 1px solid rgba(108,142,245,0.3);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
   color: var(--purple-light);
   border-radius: 99px;
   padding: 1px 6px;
@@ -151,6 +154,7 @@
 }
 
 .td-widget {
+  box-shadow: var(--shadow-card);
   background: var(--bg-card);
   border: 1px solid var(--surface-06);
   border-radius: 14px;
@@ -308,8 +312,8 @@
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  background: rgba(108,142,245,0.15);
-  border: 1px solid rgba(108,142,245,0.25);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
   display: flex;
   align-items: center;
   justify-content: center;
