@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, BookOpen, Lightbulb, Code2, FileText, Target, Clock,
-  CheckCircle2, Play, Zap, ChevronRight, ChevronLeft,
+  CheckCircle2, Play, Zap, ChevronRight, ChevronLeft, Send, Loader2, XCircle, CircleDot, CircleHelp,
 } from 'lucide-react'
 import CodeEditor from '../../components/ui/CodeEditor'
 import ConceptVisualizer from '../../components/visualizers/ConceptVisualizer'
@@ -12,6 +12,7 @@ import CodeBlock from '../../components/lesson/CodeBlock'
 import { LESSONS, getLessonsForModule } from '../../lessons/index'
 import { getCourseModule } from '../../lessons/course'
 import { completedLessonSet, isLessonOpen } from '../../lessons/progress'
+import { useUnderstandingCheck, type StoredGrade } from '../../lessons/useUnderstandingCheck'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import '../../components/visualizers/visualizers.css'
@@ -37,7 +38,34 @@ function CheckItem({ label, passed }: { label: string; passed: boolean }) {
   )
 }
 
-const SECTION_KEYS = ['overview', 'guide', 'keypoints', 'check'] as const
+const VERDICTS = {
+  correct:   { label: 'Correct',        icon: <CheckCircle2 size={14} /> },
+  partial:   { label: 'Partly correct', icon: <CircleDot size={14} /> },
+  incorrect: { label: 'Incorrect',      icon: <XCircle size={14} /> },
+}
+
+function GradeFeedback({ grade }: { grade: StoredGrade }) {
+  if (grade.unchecked) {
+    return (
+      <div className="lp-cyu-feedback unchecked">
+        <span className="lp-cyu-verdict"><CircleHelp size={14} /> Submitted, not checked yet</span>
+      </div>
+    )
+  }
+  const v = VERDICTS[grade.verdict]
+  return (
+    <motion.div
+      className={`lp-cyu-feedback ${grade.verdict}`}
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <span className="lp-cyu-verdict">{v.icon} {v.label}<em>{grade.score_pct}%</em></span>
+      <p>{grade.feedback}</p>
+    </motion.div>
+  )
+}
+
+const SECTION_KEYS =['overview', 'guide', 'keypoints', 'check'] as const
 type SectionKey = typeof SECTION_KEYS[number]
 
 const SECTION_LABELS: Record<SectionKey, string> = {
@@ -108,6 +136,7 @@ export default function LessonPlayer() {
   }, [user, lesson, navigate])
 
   const alreadyDone = !!(lesson && completed?.has(lesson.id))
+  const check = useUnderstandingCheck(lesson, user?.id)
 
   const goToSection = (key: SectionKey) => {
     setSection(key)
@@ -171,6 +200,9 @@ export default function LessonPlayer() {
     const prev = SECTION_KEYS[sectionIdx - 1]
     if (prev) goToSection(prev)
   }
+
+  // A lesson can't be completed until its Check Your Understanding answers are submitted
+  const needsCheck = !alreadyDone && !check.submitted
 
   const finishLabel = alreadyDone
     ? (nextLesson ? `Next: ${nextLesson.title}` : 'Back to Modules')
@@ -291,24 +323,82 @@ export default function LessonPlayer() {
                 {/* CHECK YOUR UNDERSTANDING */}
                 {section === 'check' && (
                   <>
+                    {lesson.exercises.length > 0 && (
+                      <p className="lp-cyu-intro">
+                        Answer every item, then submit. Your answers are checked against this lesson’s study guide.
+                      </p>
+                    )}
                     <ol className="lp-exercises">
-                      {lesson.exercises.map((ex, i) => (
-                        <li key={i}>
-                          <span className="lp-step-num">{i + 1}</span>
-                          <div className="lp-exercise-body">
-                            {typeof ex === 'string' ? (
-                              <div className="lp-exercise-text">{ex}</div>
-                            ) : (
-                              <>
-                                <div className="lp-exercise-text">{ex.text}</div>
-                                <CodeBlock code={ex.code} lang={ex.lang} />
-                                {ex.after && <div className="lp-exercise-text">{ex.after}</div>}
-                              </>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                      {lesson.exercises.map((ex, i) => {
+                        const grade = check.grades[i]
+                        const current = check.isCurrent(i)
+                        return (
+                          <li key={i}>
+                            <span className="lp-step-num">{i + 1}</span>
+                            <div className="lp-exercise-body">
+                              {typeof ex === 'string' ? (
+                                <div className="lp-exercise-text">{ex}</div>
+                              ) : (
+                                <>
+                                  <div className="lp-exercise-text">{ex.text}</div>
+                                  <CodeBlock code={ex.code} lang={ex.lang} />
+                                  {ex.after && <div className="lp-exercise-text">{ex.after}</div>}
+                                </>
+                              )}
+                              <textarea
+                                className={`lp-cyu-answer ${typeof ex === 'string' ? '' : 'code'}`}
+                                value={check.answers[i]}
+                                onChange={e => check.setAnswer(i, e.target.value)}
+                                placeholder="Type your answer…"
+                                rows={typeof ex === 'string' ? 3 : 5}
+                                disabled={check.grading}
+                                aria-label={`Answer to item ${i + 1}`}
+                                spellCheck={typeof ex === 'string'}
+                              />
+                              {grade && current && <GradeFeedback grade={grade} />}
+                              {grade && !current && check.answers[i].trim() !== '' && (
+                                <p className="lp-cyu-stale">Answer changed. Submit again to recheck it.</p>
+                              )}
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ol>
+
+                    {lesson.exercises.length > 0 && (
+                      <div className="lp-cyu-bar">
+                        <div className="lp-cyu-status">
+                          {check.grading ? (
+                            <span><Loader2 size={13} className="lp-spin" /> Checking your answers…</span>
+                          ) : check.submitted && !check.hasPending ? (
+                            <span>
+                              <strong>{check.summary.correct}</strong> of {lesson.exercises.length} correct
+                              {check.summary.partial > 0 && <> · {check.summary.partial} partly correct</>}
+                              {check.summary.averagePct !== null && <> · score {check.summary.averagePct}%</>}
+                            </span>
+                          ) : check.submitted ? (
+                            <span>Submitted · {check.summary.unchecked} not checked yet</span>
+                          ) : !check.allAnswered ? (
+                            <span>{check.answers.filter(a => a.trim()).length} of {lesson.exercises.length} answered</span>
+                          ) : (
+                            <span>All items answered</span>
+                          )}
+                          {check.error && <span className="lp-cyu-error">{check.error}</span>}
+                        </div>
+                        <button
+                          className="lp-nav-btn primary"
+                          onClick={check.submit}
+                          disabled={check.grading || !check.allAnswered || !check.hasPending}
+                          title={!check.allAnswered ? 'Answer every item to submit' : undefined}
+                        >
+                          <Send size={13} />
+                          {check.grading ? 'Checking…'
+                            : check.summary.unchecked > 0 && check.submitted ? 'Check again'
+                            : check.grades.some(Boolean) ? 'Submit changes'
+                            : 'Submit answers'}
+                        </button>
+                      </div>
+                    )}
 
                     {lesson.challenge && (
                       <>
@@ -370,7 +460,12 @@ export default function LessonPlayer() {
                 <Code2 size={14} /> Practice
               </button>
             ) : (
-              <button className="lp-nav-btn primary" onClick={finishAndContinue} disabled={saving}>
+              <button
+                className="lp-nav-btn primary"
+                onClick={finishAndContinue}
+                disabled={saving || needsCheck}
+                title={needsCheck ? 'Submit your Check Your Understanding answers first' : undefined}
+              >
                 <CheckCircle2 size={14} /> {saving ? 'Saving…' : finishLabel}
               </button>
             )}
@@ -470,8 +565,10 @@ export default function LessonPlayer() {
               <button
                 className="lp-nav-btn primary"
                 onClick={finishAndContinue}
-                disabled={saving || (!alreadyDone && !allPassed)}
-                title={!alreadyDone && !allPassed ? 'Pass all live checks to complete this lesson' : undefined}
+                disabled={saving || (!alreadyDone && !allPassed) || needsCheck}
+                title={needsCheck
+                  ? 'Submit your Check Your Understanding answers first'
+                  : !alreadyDone && !allPassed ? 'Pass all live checks to complete this lesson' : undefined}
               >
                 {saving ? 'Saving…' : finishLabel} <ChevronRight size={14} />
               </button>

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  ArrowLeft, ClipboardCheck, Flag, TrendingUp, TrendingDown, Target, Gamepad2, Lightbulb,
-  Brain, AlertTriangle, CheckCircle2, BookOpen, Clock, Lock,
+  ArrowLeft, ClipboardCheck, Flag, TrendingUp, TrendingDown, Target,
+  AlertTriangle, CheckCircle2, BookOpen, Clock, Lock,
 } from 'lucide-react'
 import { PASSING_SCORE, TOTAL_LESSONS, TOTAL_MODULES, fetchLearnerReport, type LearnerReport as Report } from '../../lib/analytics'
 import ScoreBarChart from '../../components/charts/ScoreBarChart'
@@ -141,7 +141,7 @@ export default function LearnerReport() {
           <header className="tan-card-head"><h2><i className="tan-dot orange" /> Games</h2></header>
           {r.games.available ? (
             <div className="tan-figures">
-              <Figure value={r.games.sessions.toLocaleString()} label="Games played" icon={Gamepad2} />
+              <Figure value={r.games.sessions.toLocaleString()} label="Games played" />
               <Figure value={r.games.bestScore === null ? '—' : r.games.bestScore.toLocaleString()} label="Best score" />
               <Figure value={r.games.accuracy === null ? '—' : `${r.games.accuracy}%`} label="Rounds solved" />
             </div>
@@ -152,7 +152,7 @@ export default function LearnerReport() {
           <header className="tan-card-head"><h2><i className="tan-dot yellow" /> Daily Challenges</h2></header>
           {r.challenges.available ? (
             <div className="tan-figures">
-              <Figure value={r.challenges.attempts.toLocaleString()} label="Attempted" icon={Lightbulb} />
+              <Figure value={r.challenges.attempts.toLocaleString()} label="Attempted" />
               <Figure value={r.challenges.correct.toLocaleString()} label="Correct" />
               <Figure value={r.challenges.attempts ? `${Math.round(r.challenges.correct / r.challenges.attempts * 100)}%` : '—'} label="Accuracy" />
             </div>
@@ -162,7 +162,7 @@ export default function LearnerReport() {
         <motion.section className="tan-card" {...stagger(6)}>
           <header className="tan-card-head"><h2><i className="tan-dot violet" /> Problem Bank</h2></header>
           <div className="tan-figures">
-            <Figure value={r.practice.problems.toLocaleString()} label="Problems" icon={Brain} />
+            <Figure value={r.practice.problems.toLocaleString()} label="Problems" />
             <Figure value={r.practice.solved.toLocaleString()} label="Solved" />
             <Figure value={r.practice.decks.toLocaleString()} label="Decks" />
           </div>
@@ -239,10 +239,10 @@ export default function LearnerReport() {
   )
 }
 
-function Figure({ value, label, icon: Icon }: { value: string; label: string; icon?: typeof Gamepad2 }) {
+function Figure({ value, label }: { value: string; label: string }) {
   return (
     <div className="tan-figure">
-      <strong>{Icon && <Icon size={14} />}{value}</strong>
+      <strong>{value}</strong>
       <span>{label}</span>
     </div>
   )

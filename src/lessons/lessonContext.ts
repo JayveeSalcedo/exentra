@@ -29,7 +29,7 @@ function blockToText(block: ContentBlock, maxCodeLines: number): string {
   }
 }
 
-const exerciseToText = (ex: Exercise) =>
+export const exerciseToText = (ex: Exercise) =>
   typeof ex === 'string' ? ex : [ex.text, ex.code, ex.after].filter(Boolean).join('\n')
 
 function lessonToText(lesson: Lesson, maxCodeLines: number): string {
