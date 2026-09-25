@@ -325,13 +325,94 @@
   gap: 10px;
 }
 
-.cb-msg-text {
-  margin: 0;
-  white-space: pre-wrap;
-  line-height: 1.65;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.cb-markdown { min-width: 0; }
+.cb-markdown > *:first-child { margin-top: 0; }
+.cb-markdown > *:last-child { margin-bottom: 0; }
+
+.cb-markdown ul,
+.cb-markdown ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
+.cb-markdown li { line-height: 1.6; }
+.cb-markdown strong { font-weight: 700; }
+.cb-markdown hr { border: none; border-top: 1px solid var(--surface-10); margin: 10px 0; }
+
+/* Inline code (not part of a fenced ```block```) */
+.cb-markdown code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-10);
+}
+
+/* Fenced code blocks */
+.cb-codeblock {
+  margin: 6px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-code);
+  border: 1px solid var(--surface-08);
+}
+.cb-codeblock-header {
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid var(--surface-08);
+}
+.cb-codeblock-lang {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(245,158,11,0.85);
+}
+.cb-codeblock-pre {
+  margin: 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+}
+.cb-codeblock-pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #D7DCF0;
+  background: none;
+  padding: 0;
+  white-space: pre;
+}
+
+/* GFM tables */
+.cb-table-wrap {
+  margin: 6px 0;
+  overflow-x: auto;
+  border: 1px solid var(--surface-08);
+  border-radius: 8px;
+}
+.cb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.cb-table th,
+.cb-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--surface-08);
+  line-height: 1.5;
+}
+.cb-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: var(--surface-05);
+}
+.cb-table tr:last-child td { border-bottom: none; }
 
 /* Inline links inside text */
 .cb-inline-link {
@@ -446,6 +527,57 @@
   color: var(--error);
   margin-top: auto;
 }
+
+/* ── Tool result cards (lesson/assessment/problem/deck links) ───────────────── */
+.cb-tool-card {
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--accent-tint-weak);
+  border: 1px solid var(--accent-border-soft);
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.cb-tool-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+.cb-tool-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.cb-tool-card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cb-tool-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cb-tool-card-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.cb-tool-card-arrow { color: var(--accent); flex-shrink: 0; }
 
 /* ── Typing indicator ────────────────────────────────────────────────────── */
 .cb-typing {

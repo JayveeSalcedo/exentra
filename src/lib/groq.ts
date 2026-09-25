@@ -1,5 +1,18 @@
-﻿import Groq from 'groq-sdk'
-import type { ChatCompletionCreateParamsNonStreaming } from 'groq-sdk/resources/chat/completions'
+﻿import Groq, { RateLimitError } from 'groq-sdk'
+import type {
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionTool,
+  ChatCompletionMessageParam,
+} from 'groq-sdk/resources/chat/completions'
+import {
+  TOPIC_ENUM,
+  toolGetMyProgress,
+  toolOpenLesson,
+  toolOpenAssessment,
+  toolGeneratePracticeProblem,
+  toolGenerateFlashcards,
+  type ToolCard,
+} from './chatTools'
 
 const apiKey = import.meta.env.VITE_GROQ_API_KEY
 
@@ -37,6 +50,15 @@ You ONLY answer questions related to these topics:
 - Hashing (hash tables, hash functions, collision resolution)
 
 If a student asks about anything outside these topics, politely decline and redirect them to DSA topics.
+
+---
+
+TOOLS:
+You can call functions to look up the student's real progress and to act on their behalf:
+- get_my_progress: use before answering questions like "how am I doing" or "what should I study next" — never guess this.
+- open_lesson / open_assessment: use when the student wants to go study or take something for a topic. The UI shows the link as a card — do NOT also write out the URL or path yourself, just tell them briefly what it is (e.g. "Here's the next lesson on Trees:"). If open_lesson reports status "locked", there is no card — tell the student plainly that the module is locked and state the unlockRequirement it gives you, instead of pretending a lesson was opened.
+- generate_practice_problem / generate_flashcards: use when the student asks to practice, drill, or get flashcards on a topic. These save it to their account automatically; the UI shows a card to open it — don't repeat the link.
+If a tool call fails or finds nothing, say so plainly and suggest an alternative rather than making something up.
 
 ---
 
@@ -100,17 +122,156 @@ export interface ChatMessage {
   content: string
 }
 
-export async function chatWithGroq(messages: ChatMessage[]): Promise<string> {
-  const response = await groq.chat.completions.create({
+export interface ChatReply {
+  text: string
+  /** Lesson/assessment/problem/deck links to render as cards — never round-tripped through the model's own text */
+  cards: ToolCard[]
+}
+
+/** True for a Groq 429 — let the UI show a friendlier "I'm busy" message instead of a generic error */
+export function isRateLimitError(err: unknown): boolean {
+  return err instanceof RateLimitError || (err as { status?: number })?.status === 429
+}
+
+const CHAT_TOOLS: ChatCompletionTool[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_my_progress',
+      description: "Look up the student's own completed lessons and average assessment scores, per DSA topic. Use this before recommending what to study next.",
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'open_lesson',
+      description: 'Get a direct link to the lesson the student should study for a topic (their next incomplete lesson in that module).',
+      parameters: {
+        type: 'object',
+        properties: { topic: { type: 'string', enum: TOPIC_ENUM } },
+        required: ['topic'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'open_assessment',
+      description: 'Get a direct link to a published quiz/activity/assignment/exam for a topic.',
+      parameters: {
+        type: 'object',
+        properties: { topic: { type: 'string', enum: TOPIC_ENUM } },
+        required: ['topic'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'generate_practice_problem',
+      description: 'Generate a new practice problem for a topic and save it to the student\'s Problem Bank. Use when the student asks to practice, drill, or try a problem.',
+      parameters: {
+        type: 'object',
+        properties: {
+          topic: { type: 'string', enum: TOPIC_ENUM },
+          difficulty: { type: 'string', enum: ['Easy', 'Medium', 'Hard'] },
+          type: { type: 'string', enum: ['coding', 'multiple_choice'] },
+        },
+        required: ['topic', 'difficulty', 'type'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'generate_flashcards',
+      description: 'Generate a flashcard deck for a topic and save it to the student\'s account. Use when the student asks for flashcards or a study deck.',
+      parameters: {
+        type: 'object',
+        properties: {
+          topic: { type: 'string', enum: TOPIC_ENUM },
+          count: { type: 'number', description: 'Number of cards, 4-20. Defaults to 8.' },
+        },
+        required: ['topic'],
+      },
+    },
+  },
+]
+
+async function runTool(name: string, args: Record<string, unknown>, studentId: string) {
+  switch (name) {
+    case 'get_my_progress':
+      return toolGetMyProgress(studentId)
+    case 'open_lesson':
+      return toolOpenLesson(studentId, args.topic as string)
+    case 'open_assessment':
+      return toolOpenAssessment(studentId, args.topic as string)
+    case 'generate_practice_problem':
+      return toolGeneratePracticeProblem(
+        studentId,
+        args.topic as string,
+        args.difficulty as 'Easy' | 'Medium' | 'Hard',
+        args.type as 'coding' | 'multiple_choice',
+        generateStudentProblem,
+      )
+    case 'generate_flashcards':
+      return toolGenerateFlashcards(studentId, args.topic as string, args.count as number, generateFlashcards)
+    default:
+      return { result: { error: `Unknown tool "${name}"` } }
+  }
+}
+
+/**
+ * Single-round tool calling: the model may call one or more tools once, then
+ * must answer with the results — it cannot chain further tool calls after
+ * that. Keeps each chat turn to at most 2 Groq requests (most turns need
+ * only 1), which matters on the free tier's tight per-minute token budget.
+ */
+export async function chatWithGroq(messages: ChatMessage[], studentId: string): Promise<ChatReply> {
+  // Callers (ChatBot.tsx) attach extra UI-only fields like `cards` to their message
+  // objects; Groq's API rejects any message with an unrecognized property, so strip
+  // down to exactly {role, content} here rather than trusting the TS type alone.
+  const history: ChatCompletionMessageParam[] = [
+    { role: 'system', content: CHATBOT_SYSTEM_PROMPT },
+    ...messages.map(m => ({ role: m.role, content: m.content })),
+  ]
+
+  const first = await groq.chat.completions.create({
     model: MODEL,
-    messages: [
-      { role: 'system', content: CHATBOT_SYSTEM_PROMPT },
-      ...messages,
-    ],
+    messages: history,
+    tools: CHAT_TOOLS,
+    tool_choice: 'auto',
     max_tokens: 1024,
     temperature: 0.7,
   })
-  return response.choices[0]?.message?.content ?? 'Sorry, I could not generate a response.'
+
+  const choice = first.choices[0]?.message
+  const toolCalls = choice?.tool_calls
+  if (!choice || !toolCalls || toolCalls.length === 0) {
+    return { text: choice?.content ?? 'Sorry, I could not generate a response.', cards: [] }
+  }
+
+  const cards: ToolCard[] = []
+  const toolMessages: ChatCompletionMessageParam[] = []
+  for (const call of toolCalls) {
+    let args: Record<string, unknown> = {}
+    try { args = JSON.parse(call.function.arguments || '{}') } catch { /* leave empty */ }
+
+    const { result, card } = await runTool(call.function.name, args, studentId)
+    if (card) cards.push(card)
+    toolMessages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) })
+  }
+
+  const second = await groq.chat.completions.create({
+    model: MODEL,
+    // No `tools` here — the model must respond in text now, not call another tool.
+    messages: [...history, choice, ...toolMessages],
+    max_tokens: 1024,
+    temperature: 0.7,
+  })
+
+  return { text: second.choices[0]?.message?.content ?? 'Sorry, I could not generate a response.', cards }
 }
 
 // ── Daily challenge generation ──────────────────────────────────────────────

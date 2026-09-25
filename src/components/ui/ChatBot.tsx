@@ -1,7 +1,13 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, isValidElement, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, X, Send, Trash2, Play, ExternalLink } from 'lucide-react'
-import { chatWithGroq, type ChatMessage } from '../../lib/groq'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import { MessageSquare, X, Send, Trash2, Play, ExternalLink, BookOpen, ClipboardList, Sparkles, Layers, ArrowRight } from 'lucide-react'
+import { chatWithGroq, isRateLimitError, type ChatMessage } from '../../lib/groq'
+import type { ToolCard } from '../../lib/chatTools'
+import { useAuth } from '../../store/AuthContext'
 import './ChatBot.css'
 
 // ── Message renderer ────────────────────────────────────────────────────────
@@ -74,35 +80,71 @@ function VideoCard({ title, channel, url }: VideoPart) {
   )
 }
 
-// Render plain text: linkify bare https:// URLs
-function TextRenderer({ content }: { content: string }) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g
-  const lines = content.split('\n')
+const TOOL_CARD_ICON: Record<ToolCard['kind'], typeof BookOpen> = {
+  lesson: BookOpen,
+  assessment: ClipboardList,
+  problem: Sparkles,
+  deck: Layers,
+}
 
+function ToolCardView({ card, onOpen }: { card: ToolCard; onOpen: (path: string) => void }) {
+  const Icon = TOOL_CARD_ICON[card.kind]
   return (
-    <>
-      {lines.map((line, li) => {
-        const tokens = line.split(urlRegex)
-        return (
-          <span key={li}>
-            {tokens.map((tok, ti) =>
-              urlRegex.test(tok) ? (
-                <a key={ti} href={tok} target="_blank" rel="noopener noreferrer" className="cb-inline-link">
-                  {tok}
-                </a>
-              ) : (
-                <span key={ti}>{tok}</span>
-              )
-            )}
-            {li < lines.length - 1 && <br />}
-          </span>
-        )
-      })}
-    </>
+    <button className="cb-tool-card" onClick={() => onOpen(card.path)}>
+      <div className="cb-tool-card-icon"><Icon size={16} /></div>
+      <div className="cb-tool-card-info">
+        <p className="cb-tool-card-title">{card.title}</p>
+        <p className="cb-tool-card-subtitle">{card.subtitle}</p>
+      </div>
+      <ArrowRight size={14} className="cb-tool-card-arrow" />
+    </button>
   )
 }
 
-function MessageContent({ content }: { content: string }) {
+// Renders a fenced code block (the `pre` that wraps a code element with a
+// `language-xxx` class) as a labeled monospace block, matching the language
+// badge + block style used for code elsewhere in the app.
+function CodeBlock({ children }: { children?: ReactNode }) {
+  const codeEl = Array.isArray(children) ? children[0] : children
+  let lang = ''
+  let codeText: ReactNode = children
+  if (isValidElement<{ className?: string; children?: ReactNode }>(codeEl)) {
+    lang = /language-(\w+)/.exec(codeEl.props.className ?? '')?.[1] ?? ''
+    codeText = codeEl.props.children
+  }
+  return (
+    <div className="cb-codeblock">
+      <div className="cb-codeblock-header">
+        <span className="cb-codeblock-lang">{lang || 'text'}</span>
+      </div>
+      <pre className="cb-codeblock-pre"><code>{codeText}</code></pre>
+    </div>
+  )
+}
+
+// Renders markdown: paragraphs, bold/italic, inline code, fenced code blocks,
+// tables, and lists — this is what fixes tables/code showing up as raw
+// ```fences``` and | pipes | instead of formatted content.
+function MarkdownText({ content }: { content: string }) {
+  return (
+    <div className="cb-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkBreaks]}
+        components={{
+          a: ({ href, children }) => (
+            <a href={href} target="_blank" rel="noopener noreferrer" className="cb-inline-link">{children}</a>
+          ),
+          pre: CodeBlock,
+          table: ({ children }) => <div className="cb-table-wrap"><table className="cb-table">{children}</table></div>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  )
+}
+
+function MessageContent({ content, cards, onOpenCard }: { content: string; cards?: ToolCard[]; onOpenCard: (path: string) => void }) {
   const parts = parseMessage(content)
   return (
     <div className="cb-msg-content">
@@ -110,19 +152,24 @@ function MessageContent({ content }: { content: string }) {
         part.kind === 'video' ? (
           <VideoCard key={i} {...part} />
         ) : (
-          <p key={i} className="cb-msg-text">
-            <TextRenderer content={part.content} />
-          </p>
+          <MarkdownText key={i} content={part.content} />
         )
       )}
+      {cards?.map((card, i) => <ToolCardView key={i} card={card} onOpen={onOpenCard} />)}
     </div>
   )
 }
 
+interface DisplayMessage extends ChatMessage {
+  cards?: ToolCard[]
+}
+
 // ── Component ───────────────────────────────────────────────────────────────
 export default function ChatBot() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [justDragged, setJustDragged] = useState(false)
@@ -140,25 +187,31 @@ export default function ChatBot() {
 
   const sendMessage = async () => {
     const text = input.trim()
-    if (!text || loading) return
+    if (!text || loading || !user) return
 
-    const userMsg: ChatMessage = { role: 'user', content: text }
+    const userMsg: DisplayMessage = { role: 'user', content: text }
     const updated = [...messages, userMsg]
     setMessages(updated)
     setInput('')
     setLoading(true)
 
     try {
-      const reply = await chatWithGroq(updated)
-      setMessages([...updated, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages([
-        ...updated,
-        { role: 'assistant', content: 'Sorry, I ran into an error. Please try again!' },
-      ])
+      const { text: replyText, cards } = await chatWithGroq(updated, user.id)
+      setMessages([...updated, { role: 'assistant', content: replyText, cards }])
+    } catch (err) {
+      console.error('[Algie]', err)
+      const content = isRateLimitError(err)
+        ? "I'm getting a lot of questions right now — give me a minute and try again!"
+        : 'Sorry, I ran into an error. Please try again!'
+      setMessages([...updated, { role: 'assistant', content }])
     } finally {
       setLoading(false)
     }
+  }
+
+  const openCard = (path: string) => {
+    setOpen(false)
+    navigate(path)
   }
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -300,7 +353,7 @@ export default function ChatBot() {
                   )}
                   <div className="cb-msg-bubble">
                     {msg.role === 'assistant'
-                      ? <MessageContent content={msg.content} />
+                      ? <MessageContent content={msg.content} cards={msg.cards} onOpenCard={openCard} />
                       : <p>{msg.content}</p>
                     }
                   </div>
