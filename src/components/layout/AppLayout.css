@@ -16,6 +16,7 @@
   flex: 1;
   padding: 28px;
   overflow-y: scroll;           /* always show scrollbar — prevents layout shift when content height changes */
+  overflow-x: hidden;           /* without this, overflow-y:scroll auto-promotes overflow-x to a scrollable axis too */
   scrollbar-gutter: stable;     /* reserves gutter space even when scrollbar isn't needed */
 }
 
