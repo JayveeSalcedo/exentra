@@ -8,7 +8,7 @@ import {
   AlertTriangle, Trophy, XCircle, BookOpen,
   ShieldAlert, ChevronRight, Upload, FileText,
   Image, File, Paperclip, ArrowRight, ClipboardList,
-  CalendarClock, Info, Volume2, VolumeX
+  CalendarClock, Info, Volume2, VolumeX, Download
 } from 'lucide-react'
 import { sfx, music, useSfxToggle } from '../../lib/sfx'
 import './TakeAssessment.css'
@@ -44,6 +44,10 @@ type Assessment = {
   difficulty: string | null
   module_topic: string | null
   total_questions: number | null
+  reference_file_url: string | null
+  reference_file_name: string | null
+  reference_file_type: string | null
+  reference_file_size: number | null
 }
 
 type Phase = 'loading' | 'lobby' | 'quiz' | 'file_submission' | 'submitting' | 'results' | 'error' | 'already_done' | 'unavailable'
@@ -92,6 +96,41 @@ function fmtBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+// Reference file extensions are stored lowercase (e.g. 'pdf'), unlike the MIME
+// types above used for the student's own submitted files.
+function refFileIcon(ext: string) {
+  if (ext === 'pdf') return <FileText size={16} color="#FF6B8A" />
+  if (['doc', 'docx'].includes(ext)) return <FileText size={16} color="#6C8EF5" />
+  if (['ppt', 'pptx'].includes(ext)) return <FileText size={16} color="#FFB830" />
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return <Image size={16} color="#00D4AA" />
+  return <File size={16} color="var(--text-secondary)" />
+}
+
+// Teacher-attached reference file — shown wherever a student needs to view/download it
+function ReferenceFile({ assessment, color }: { assessment: Assessment; color: string }) {
+  if (!assessment.reference_file_url) return null
+  return (
+    <div className="ta-reffile-card" style={{ borderColor: `${color}30`, background: `${color}08` }}>
+      <div className="ta-reffile-icon">{refFileIcon(assessment.reference_file_type ?? '')}</div>
+      <div className="ta-reffile-info">
+        <span className="ta-reffile-label" style={{ color }}><Paperclip size={11} /> Reference File</span>
+        <span className="ta-reffile-name">{assessment.reference_file_name}</span>
+        {assessment.reference_file_size != null && (
+          <span className="ta-reffile-meta">{fmtBytes(assessment.reference_file_size)}</span>
+        )}
+      </div>
+      <div className="ta-reffile-actions">
+        <a href={assessment.reference_file_url} target="_blank" rel="noopener noreferrer" className="ta-reffile-btn" title="View">
+          <BookOpen size={14} />
+        </a>
+        <a href={assessment.reference_file_url} download={assessment.reference_file_name ?? undefined} className="ta-reffile-btn" title="Download">
+          <Download size={14} />
+        </a>
+      </div>
+    </div>
+  )
 }
 
 // Types that use file submission (no questions)
@@ -627,6 +666,8 @@ export default function TakeAssessment() {
             </div>
           </div>
 
+          <ReferenceFile assessment={assessment!} color={color} />
+
           {isFile ? (
             <div className="ta-lobby-rules" style={{ background: `${color}08`, borderColor: `${color}25` }}>
               <p className="ta-rules-title" style={{ color }}>
@@ -943,6 +984,8 @@ function FileSubmission({
               <p className="ta-sub-instructions-body">{assessment.description}</p>
             </div>
           )}
+
+          <ReferenceFile assessment={assessment} color={accentColor} />
 
           {/* Accepted formats */}
           <div className="ta-sub-formats">

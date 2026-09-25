@@ -160,6 +160,58 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* ── Reference file (teacher-attached) ─────────────────────────────────────── */
+.ta-reffile-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--surface-08);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: left;
+  max-width: 480px;
+  width: 100%;
+}
+.ta-reffile-icon { flex-shrink: 0; display: flex; }
+.ta-reffile-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.ta-reffile-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.ta-reffile-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ta-reffile-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.ta-reffile-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.ta-reffile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--surface-04);
+  border: 1px solid var(--surface-08);
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.ta-reffile-btn:hover { background: var(--surface-08); color: var(--text-primary); }
+
 .ta-lobby-rules {
   background: var(--xp-tint-weak);
   border: 1px solid var(--xp-border-soft);

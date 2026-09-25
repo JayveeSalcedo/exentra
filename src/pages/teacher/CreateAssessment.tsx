@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -7,7 +7,8 @@ import {
   ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2,
   Save, RefreshCw, BookOpen, Clock, AlignLeft,
   ToggleLeft, List, Type, ChevronDown, GripVertical,
-  AlertCircle, Eye, Calendar, Award, Upload, Layers
+  AlertCircle, Eye, Calendar, Award, Upload, Layers,
+  Paperclip, FileText
 } from 'lucide-react'
 import './CreateAssessment.css'
 import { COURSE_MODULES } from '../../lessons/course'
@@ -64,6 +65,12 @@ const QTYPE_META: Record<QuestionType, { label: string; icon: any; color: string
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
+function fmtFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 // Types that use file upload instead of question builder
 const FILE_UPLOAD_TYPES: AssessmentType[] = ['assignment', 'activity']
 
@@ -115,6 +122,12 @@ export default function CreateAssessment() {
   const [error, setError] = useState('')
   const [expandedQ, setExpandedQ] = useState<string | null>(questions[0].id)
   const [myBlocks, setMyBlocks] = useState<{ id: string; name: string }[]>([])
+
+  // Reference file (optional) — teacher-attached file students can view/download
+  const [refFile, setRefFile] = useState<{ url: string; name: string; type: string; size: number } | null>(null)
+  const [refUploading, setRefUploading] = useState(false)
+  const [refError, setRefError] = useState('')
+  const refInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!user) return
@@ -179,6 +192,41 @@ export default function CreateAssessment() {
       q.id !== qid ? q : { ...q, choices: q.choices.map(c => ({ ...c, is_correct: c.id === cid })) }
     ))
 
+  const handleRefFileSelect = async (file: File | null) => {
+    if (!file) return
+    setRefError('')
+    setRefUploading(true)
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'file'
+      const path = `assessment-refs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+
+      const { error: upErr } = await supabase.storage
+        .from('materials')
+        .upload(path, file, { upsert: false })
+      if (upErr) throw upErr
+
+      const { data: urlData } = supabase.storage.from('materials').getPublicUrl(path)
+      setRefFile({ url: urlData.publicUrl, name: file.name, type: ext, size: file.size })
+    } catch (e: any) {
+      setRefError(e.message ?? 'Failed to upload reference file.')
+    } finally {
+      setRefUploading(false)
+      if (refInputRef.current) refInputRef.current.value = ''
+    }
+  }
+
+  const removeRefFile = async () => {
+    if (!refFile) return
+    try {
+      const url = new URL(refFile.url)
+      const storagePath = url.pathname.split('/materials/')[1]
+      if (storagePath) await supabase.storage.from('materials').remove([storagePath])
+    } catch {
+      // best-effort cleanup — not worth surfacing to the teacher
+    }
+    setRefFile(null)
+  }
+
   const validateStep1 = () => {
     if (!meta.title.trim()) return 'Please enter an assessment title.'
     if (!meta.block_id) return 'Please select which block this assessment is for.'
@@ -226,6 +274,10 @@ export default function CreateAssessment() {
           is_published: publish,
           created_by: user!.id,
           block_id: meta.block_id === '__all__' ? null : meta.block_id,
+          reference_file_url: refFile?.url ?? null,
+          reference_file_name: refFile?.name ?? null,
+          reference_file_type: refFile?.type ?? null,
+          reference_file_size: refFile?.size ?? null,
         })
 
       if (aErr) throw aErr
@@ -266,6 +318,10 @@ export default function CreateAssessment() {
           is_published: publish,
           created_by: user!.id,
           block_id: meta.block_id === '__all__' ? null : meta.block_id,
+          reference_file_url: refFile?.url ?? null,
+          reference_file_name: refFile?.name ?? null,
+          reference_file_type: refFile?.type ?? null,
+          reference_file_size: refFile?.size ?? null,
         })
         .select()
         .single()
@@ -337,6 +393,40 @@ export default function CreateAssessment() {
         <div className="ca-field full">
           <label className="ca-label">Description / Instructions <span className="ca-optional">(optional)</span></label>
           <textarea className="ca-textarea" rows={3} placeholder="Brief instructions or notes for students…" value={meta.description} onChange={e => setM('description', e.target.value)} />
+        </div>
+
+        <div className="ca-field full">
+          <label className="ca-label"><Paperclip size={12} /> Reference File <span className="ca-optional">(optional)</span></label>
+          {refFile ? (
+            <div className="ca-reffile-row">
+              <FileText size={15} className="ca-reffile-icon" />
+              <div className="ca-reffile-info">
+                <span className="ca-reffile-name">{refFile.name}</span>
+                <span className="ca-reffile-meta">{refFile.type.toUpperCase()} · {fmtFileSize(refFile.size)}</span>
+              </div>
+              <button type="button" className="ca-reffile-remove" onClick={removeRefFile} title="Remove">
+                <Trash2 size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="ca-reffile-upload-btn"
+              onClick={() => refInputRef.current?.click()}
+              disabled={refUploading}
+            >
+              {refUploading ? <><RefreshCw size={13} className="ca-spin" /> Uploading…</> : <><Upload size={13} /> Attach a file</>}
+            </button>
+          )}
+          <input
+            ref={refInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.jpg,.jpeg,.png"
+            style={{ display: 'none' }}
+            onChange={e => handleRefFileSelect(e.target.files?.[0] ?? null)}
+          />
+          <p className="ca-field-hint">Students can view or download this from the assessment page — e.g. instructions, a template, or reading material.</p>
+          {refError && <p className="ca-field-hint" style={{ color: 'var(--error)' }}>{refError}</p>}
         </div>
 
         <div className="ca-field">

@@ -225,6 +225,65 @@
   margin-top: 2px;
 }
 
+/* ── Reference file ─────────────────────────────────────────────────────────── */
+.ca-reffile-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  background: var(--surface-03);
+  border: 1px dashed var(--surface-10);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ca-reffile-upload-btn:hover { color: var(--purple-light); border-color: var(--accent-border); }
+.ca-reffile-upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ca-reffile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-02);
+  border: 1px solid var(--surface-07);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.ca-reffile-icon { color: var(--purple-light); flex-shrink: 0; }
+.ca-reffile-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.ca-reffile-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ca-reffile-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.ca-reffile-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.ca-reffile-remove:hover { color: var(--error); }
+
 /* ── Assessment type / difficulty grid ──────────────────────────────────────── */
 .ca-type-grid {
   display: flex;
