@@ -53,7 +53,7 @@ export default function ArrayVisualizer({ lessonId }: Props) {
               className={`viz-cell ${highlighted === i ? 'viz-cell-flash viz-cell-highlighted' : ''}`}
               layout
               initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1, background: highlighted === i ? 'rgba(0,212,170,0.25)' : 'rgba(20,28,61,0.9)' }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.4 }}
               transition={spring}
             >

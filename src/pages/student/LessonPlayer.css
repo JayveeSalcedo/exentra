@@ -399,6 +399,10 @@
   color: #08131A;
 }
 .lp-nav-btn.primary:hover:not(:disabled) { background: var(--cyan-light); transform: translate3d(0, -1px, 0); }
+
+/* Practice button — a lighter blue instead of the teal/cyan used for other primary actions */
+.lp-nav-btn.lp-practice-btn { background: var(--purple-light); color: #fff; }
+.lp-nav-btn.lp-practice-btn:hover:not(:disabled) { background: var(--accent); transform: translate3d(0, -1px, 0); }
 .lp-nav-btn.secondary {
   background: transparent;
   border: 1px solid var(--surface-12);

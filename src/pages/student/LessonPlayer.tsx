@@ -456,7 +456,7 @@ export default function LessonPlayer() {
                 Next <ChevronRight size={14} />
               </button>
             ) : hasPractice ? (
-              <button className="lp-nav-btn primary" onClick={() => setShowPractice(true)}>
+              <button className="lp-nav-btn primary lp-practice-btn" onClick={() => setShowPractice(true)}>
                 <Code2 size={14} /> Practice
               </button>
             ) : (
