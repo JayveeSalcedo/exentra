@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
-import { getTeacherClassSentiment } from '../../lib/groq'
+import { groq, MODEL } from '../../lib/groq'
 import { useAuth } from '../../store/AuthContext'
 import {
   BarChart2, Brain, Users, TrendingUp, AlertTriangle,
@@ -206,8 +206,25 @@ export default function TeacherProgress() {
         return Math.round(all.reduce((sum, s) => sum + (s.avgScore ?? 0), 0) / all.length)
       })()
 
-      const result = await getTeacherClassSentiment({ totalStudents, avgScore, topicSummary })
-      setSentiment(result)
+      const prompt = `You are an educational analyst reviewing a class's Data Structures and Algorithms performance.
+
+Class overview:
+- Total students: ${totalStudents}
+- Class average score: ${avgScore != null ? `${avgScore}%` : 'no data yet'}
+- Topic performance:
+${topicSummary}
+
+Write a concise class-wide sentiment analysis (3-5 sentences) for the teacher.
+Identify the weakest topics (avg < 60%), highlight strong areas (avg > 80%), and give 1-2 actionable teaching recommendations.
+Write in a professional but approachable tone. No bullet points — flowing prose only.`
+
+      const resp = await groq.chat.completions.create({
+        model: MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 250,
+        temperature: 0.7,
+      })
+      setSentiment(resp.choices[0]?.message?.content ?? null)
     } catch (e) {
       console.error(e)
       setSentiment('Could not generate analysis. Please try again.')
