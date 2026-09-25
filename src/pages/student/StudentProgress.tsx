@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../store/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { groq, MODEL } from '../../lib/groq'
+import { getStudentPerformanceSentiment } from '../../lib/groq'
 import {
   Zap, CheckCircle2, AlertTriangle,
   TrendingUp, Brain, Flame, BookOpen, RefreshCw,
@@ -112,27 +112,17 @@ export default function StudentProgress() {
         return `${m.topic}: ${s ? `avg ${s.avg}% over ${s.count} assessment(s)` : 'no data yet'}`
       }).join('\n')
 
-      const prompt = `You are an educational psychologist analyzing a student's DSA (Data Structures and Algorithms) performance.
-
-Student profile:
-- XP: ${user?.xp ?? 0} | Level: ${user?.level ?? 1} | Streak: ${user?.streak ?? 0} days
-- Modules completed: ${completedModules.size} / ${TOTAL_MODULES}
-- Assessments done: ${totalDone} / ${totalAssessments}
-- Scores by topic:
-${scoreData}
-
-Write a short, warm, personalized performance sentiment (3-4 sentences). 
-Mention specific weak topics if score < 60%, strong topics if > 80%.
-Be encouraging but honest. Use a motivational coaching tone.
-Do NOT use bullet points. Just flowing, friendly prose.`
-
-      const resp = await groq.chat.completions.create({
-        model: MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200,
-        temperature: 0.75,
+      const result = await getStudentPerformanceSentiment({
+        xp: user?.xp ?? 0,
+        level: user?.level ?? 1,
+        streak: user?.streak ?? 0,
+        completedModules: completedModules.size,
+        totalModules: TOTAL_MODULES,
+        totalDone,
+        totalAssessments,
+        scoreData,
       })
-      setSentiment(resp.choices[0]?.message?.content ?? null)
+      setSentiment(result)
     } catch (err) {
       console.error(err)
       setSentiment('Could not generate analysis. Please try again.')
