@@ -108,7 +108,7 @@ export default function LoginPage() {
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
           <div className="brand-logo">
-            <img src="/exe_final.png" alt="Exentra logo" className="brand-logo-img" />
+            <img src="/ex-big.png" alt="Exentra logo" className="brand-logo-img" />
           </div>
           <h1 className="brand-name">EXENTRA</h1>
           <p className="brand-sub">DSA LEARNING SYSTEM</p>

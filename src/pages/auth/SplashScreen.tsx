@@ -108,7 +108,7 @@ export default function SplashScreen() {
                 >
                   <div className="splash-logo-inner" />
                 </motion.div>
-                <img src="/exe_final.png" alt="Exentra" className="splash-logo-img" />
+                <img src="/ex-big.png" alt="Exentra" className="splash-logo-img" />
               </div>
               <div className="splash-title-wrap">
                 <h1 className="splash-title">EXENTRA</h1>
