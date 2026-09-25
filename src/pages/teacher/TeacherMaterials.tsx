@@ -268,7 +268,7 @@ export default function TeacherMaterials() {
                   <div className="tm-card-header" onClick={() => toggleExpand(mod.id)}>
                     <div className="tm-card-left">
                       <div className="tm-mod-badge">M{mod.order_index}</div>
-                      <div>
+                      <div className="tm-mod-info">
                         <p className="tm-mod-title">{mod.title}</p>
                         <p className="tm-mod-count">
                           {mod.materials.length} file{mod.materials.length !== 1 ? 's' : ''}

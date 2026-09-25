@@ -241,6 +241,10 @@
   flex-shrink: 0;
 }
 
+.tm-mod-info {
+  min-width: 0;
+}
+
 .tm-mod-title {
   font-family: 'Syne', sans-serif;
   font-size: 14px;
