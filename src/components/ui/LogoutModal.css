@@ -1,7 +1,7 @@
 .logout-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 10000;
   background: rgba(3, 6, 16, 0.75);
   backdrop-filter: blur(6px);
   display: flex;
