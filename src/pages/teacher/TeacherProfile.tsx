@@ -7,6 +7,7 @@ import {
   Camera, Trash2, Layers, Users, ClipboardList, BookOpen,
   KeyRound, Eye, EyeOff,
 } from 'lucide-react'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import './TeacherProfile.css'
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024 // 2MB, matches storage bucket limit
@@ -21,6 +22,7 @@ export default function TeacherProfile() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [confirmRemoveAvatar, setConfirmRemoveAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -149,6 +151,7 @@ export default function TeacherProfile() {
 
   const handleAvatarRemove = async () => {
     if (!user || uploadingAvatar) return
+    setConfirmRemoveAvatar(false)
     setUploadingAvatar(true)
     try {
       const { error: dbErr } = await supabase
@@ -278,7 +281,7 @@ export default function TeacherProfile() {
               <button
                 type="button"
                 className="tpf-avatar-remove"
-                onClick={handleAvatarRemove}
+                onClick={() => setConfirmRemoveAvatar(true)}
                 disabled={uploadingAvatar}
                 title="Remove profile picture"
               >
@@ -286,6 +289,16 @@ export default function TeacherProfile() {
               </button>
             )}
           </div>
+
+          <ConfirmModal
+            isOpen={confirmRemoveAvatar}
+            icon={<Trash2 size={24} strokeWidth={1.8} />}
+            title="Remove profile picture?"
+            description="You can always upload a new one later."
+            confirmLabel="Remove"
+            onConfirm={handleAvatarRemove}
+            onCancel={() => setConfirmRemoveAvatar(false)}
+          />
 
           {/* Identity */}
           <div className="tpf-header-info">

@@ -6,6 +6,7 @@ import {
   User, Zap, Flame, Edit3, Save, X,
   CheckCircle2, AlertTriangle, BookOpen, Target, Camera, Trash2
 } from 'lucide-react'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import './StudentProfile.css'
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024 // 2MB, matches storage bucket limit
@@ -28,6 +29,7 @@ export default function StudentProfile() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [confirmRemoveAvatar, setConfirmRemoveAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -161,6 +163,7 @@ export default function StudentProfile() {
 
   const handleAvatarRemove = async () => {
     if (!user || uploadingAvatar) return
+    setConfirmRemoveAvatar(false)
     setUploadingAvatar(true)
     try {
       const { error: dbErr } = await supabase
@@ -239,7 +242,7 @@ export default function StudentProfile() {
               <button
                 type="button"
                 className="spf-avatar-remove"
-                onClick={handleAvatarRemove}
+                onClick={() => setConfirmRemoveAvatar(true)}
                 disabled={uploadingAvatar}
                 title="Remove profile picture"
               >
@@ -248,6 +251,16 @@ export default function StudentProfile() {
             )}
             <div className="spf-avatar-level">Lv {level}</div>
           </div>
+
+          <ConfirmModal
+            isOpen={confirmRemoveAvatar}
+            icon={<Trash2 size={24} strokeWidth={1.8} />}
+            title="Remove profile picture?"
+            description="You can always upload a new one later."
+            confirmLabel="Remove"
+            onConfirm={handleAvatarRemove}
+            onCancel={() => setConfirmRemoveAvatar(false)}
+          />
 
           {/* Identity */}
           <div className="spf-header-info">
