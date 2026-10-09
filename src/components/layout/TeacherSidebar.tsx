@@ -15,9 +15,9 @@ const NAV_ITEMS = [
   { to: '/teacher/blocks',                 icon: Layers,           label: 'Blocks'         },
   { to: '/teacher/materials',              icon: BookOpen,         label: 'Materials'      },
   { to: '/teacher/assessments',            icon: ClipboardList,    label: 'Assessments'    },
-  { to: '/teacher/assessments/generate',   icon: Sparkles,         label: 'Generate Quiz', sub: true },
+  { to: '/teacher/assessments/generate',   icon: Sparkles,         label: 'Generate Quiz', sub: true, ai: true },
   { to: '/teacher/students',               icon: Users,            label: 'Students'       },
-  { to: '/teacher/analytics',              icon: LineChart,        label: 'Analytics'      },
+  { to: '/teacher/analytics',              icon: LineChart,        label: 'Analytics', sub: true },
   { to: '/teacher/activity-log',           icon: ScrollText,       label: 'Activity Log'   },
   { to: '/teacher/profile',                icon: User,             label: 'Profile'        },
 ]
@@ -116,7 +116,7 @@ export default function TeacherSidebar({ collapsed, onToggle, mobileOpen = false
 
         {/* Nav items */}
         <nav className="sidebar-nav">
-          {NAV_ITEMS.map(({ to, icon: Icon, label, sub }) => (
+          {NAV_ITEMS.map(({ to, icon: Icon, label, sub, ai }) => (
             <NavLink
               key={to}
               to={to}
@@ -139,7 +139,7 @@ export default function TeacherSidebar({ collapsed, onToggle, mobileOpen = false
                     transition={{ duration: 0.15 }}
                   >
                     {label}
-                    {sub && !collapsedView && (
+                    {ai && !collapsedView && (
                       <span style={{
                         marginLeft: 6,
                         fontSize: 9,
