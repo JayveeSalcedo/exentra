@@ -14,7 +14,7 @@ const MODULES = COURSE_MODULES.map(m => ({ topic: m.topic, label: m.topic, color
 
 const QUICK_ACTIONS = [
   {
-    label: 'Generate AI Quiz',
+    label: 'Generate Quiz',
     sub: 'Create assessments from your lessons with AI',
     icon: Sparkles,
     color: '#6C8EF5',
