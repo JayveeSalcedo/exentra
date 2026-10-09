@@ -320,7 +320,6 @@ export default function StudentProfile() {
             { label: 'Year & Course', val: form.yearCourse || '—' },
             { label: 'Block / Section', val: blockName ?? 'Not yet assigned' },
             { label: 'Average Score', val: stats.avgScore ? `${stats.avgScore}%` : '—' },
-            { label: 'Leaderboard Rank', val: stats.rank ? `#${stats.rank}` : '—' },
           ].map((row, i) => (
             <div key={i} className="spf-info-row">
               <span className="spf-info-label">{row.label}</span>
