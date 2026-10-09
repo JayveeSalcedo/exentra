@@ -567,11 +567,6 @@ export default function LearningMaterials() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              <div className="lm-detail-reward">
-                <Zap size={14} color="#FFB830" />
-                <span>Earn <strong>30 XP</strong> for each lesson you complete</span>
-              </div>
             </motion.div>
           ) : (
             <div className="lm-detail-empty">
