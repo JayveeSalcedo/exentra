@@ -5,7 +5,7 @@ import { useAuth } from '../../store/AuthContext'
 import {
   Users, Search, BookOpen,
   ChevronDown, ChevronUp, ChevronsUpDown,
-  TrendingUp
+  TrendingUp, UserPlus, Loader2
 } from 'lucide-react'
 import { TOTAL_MODULES } from '../../lessons/course'
 import { computeCourseProgress, completedLessonSet } from '../../lessons/progress'
@@ -49,6 +49,8 @@ export default function TeacherStudents() {
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [blocks, setBlocks] = useState<BlockOption[]>([])
   const [blockFilter, setBlockFilter] = useState<string>('all') // 'all' | 'unassigned' | block id
+  const [assigningId, setAssigningId] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   useEffect(() => { fetchStudents() }, [])
 
@@ -134,6 +136,31 @@ export default function TeacherStudents() {
       console.error(e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAssign = async (studentId: string, blockId: string) => {
+    setBusyId(studentId)
+    try {
+      const { error } = await supabase
+        .from('block_enrollments')
+        .upsert(
+          {
+            block_id: blockId,
+            student_id: studentId,
+            status: 'active',
+            removed_at: null,
+            enrolled_at: new Date().toISOString(),
+          },
+          { onConflict: 'block_id,student_id' }
+        )
+      if (error) throw error
+      setAssigningId(null)
+      await fetchStudents()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setBusyId(null)
     }
   }
 
@@ -256,6 +283,7 @@ export default function TeacherStudents() {
           {colBtn('last_name', 'Name')}
           {colBtn('modulesCompleted', 'Modules')}
           {colBtn('avgScore', 'Avg Score')}
+          <div />
         </div>
 
         {loading ? (
@@ -305,6 +333,33 @@ export default function TeacherStudents() {
                   <span className="ts-avg-score" style={{ color: scoreColor }}>
                     {s.avgScore != null ? `${s.avgScore}%` : '—'}
                   </span>
+
+                  {/* Assign to block — unassigned students only */}
+                  <div className="ts-assign-col">
+                    {s.blockId ? null : busyId === s.id ? (
+                      <Loader2 size={14} className="ts-spin" color="var(--text-muted)" />
+                    ) : assigningId === s.id ? (
+                      <select
+                        className="ts-assign-select"
+                        autoFocus
+                        defaultValue=""
+                        onChange={e => { if (e.target.value) handleAssign(s.id, e.target.value) }}
+                        onBlur={() => setAssigningId(null)}
+                      >
+                        <option value="" disabled>Choose block…</option>
+                        {blocks.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                      </select>
+                    ) : (
+                      <button
+                        className="ts-assign-btn"
+                        onClick={() => setAssigningId(s.id)}
+                        disabled={blocks.length === 0}
+                        title={blocks.length === 0 ? 'Create a block first' : 'Assign to a block'}
+                      >
+                        <UserPlus size={12} /> <span>Assign</span>
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               )
             })}
