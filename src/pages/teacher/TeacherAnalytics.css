@@ -183,12 +183,9 @@
 .tan-dot.green { background: #0ca30c; }
 .tan-dot.blue { background: #3987e5; }
 .tan-dot.red { background: #d03b3b; }
-.tan-dot.orange { background: #f08c2e; }
-.tan-dot.yellow { background: #e0b020; }
 .tan-dot.violet { background: #8b5cf6; }
 
 .tan-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-.tan-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 
 .tan-empty { margin: 0; padding: 32px 0; text-align: center; font-size: 13px; color: var(--text-muted); }
 .tan-empty.small { padding: 12px 0; font-size: 12px; }
@@ -238,27 +235,6 @@
 .tan-tile-value.tone-green { color: #0ca30c; }
 .tan-tile-value.tone-red { color: #d03b3b; }
 
-/* Compact label/value rows */
-.tan-figures { display: flex; flex-direction: column; }
-.tan-figure {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--surface-04);
-  min-width: 0;
-}
-.tan-figure:last-child { border-bottom: none; padding-bottom: 0; }
-.tan-figure:first-child { padding-top: 0; }
-.tan-figure span { order: -1; font-size: 12px; color: var(--text-secondary); }
-.tan-figure strong {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 .tan-ok { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
 .tan-ok svg { color: #0ca30c; }
 .tan-weak { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -283,15 +259,12 @@
 .tan-recent-side em { display: inline-flex; align-items: center; gap: 3px; }
 
 /* ── Responsive ───────────────────────────────────── */
-@media (max-width: 1280px) {
-  .tan-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 1024px) {
   .tan-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tan-grid-2 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
-  .tan-tiles, .tan-grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .tan-tiles { grid-template-columns: minmax(0, 1fr); }
   .tan-report-hero { padding: 20px; }
   .tan-progress-list li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }

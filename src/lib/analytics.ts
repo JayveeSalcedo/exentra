@@ -49,9 +49,6 @@ export interface LearnerReport extends StudentSummary {
   improvement: number | null
   completionPct: number
   courseProgress: ModuleProgress[]
-  games: { available: boolean; sessions: number; bestScore: number | null; accuracy: number | null }
-  challenges: { available: boolean; attempts: number; correct: number }
-  practice: { problems: number; solved: number; decks: number }
   weakAreas: { title: string; detail: string }[]
 }
 
@@ -148,16 +145,13 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
     .maybeSingle()
   if (!profile) return null
 
-  const [subsRes, progressRes, gamesRes, challengesRes, problemsRes, decksRes, blocks] = await Promise.all([
+  const [subsRes, progressRes, gamesRes, blocks] = await Promise.all([
     supabase.from('submissions')
       .select('id, percentage, submitted_at, assessments(title, type, module_topic)')
       .eq('student_id', studentId).eq('is_submitted', true).not('percentage', 'is', null)
       .order('submitted_at', { ascending: true }),
     supabase.from('student_progress').select('lesson_id, completed').eq('student_id', studentId),
     supabase.from('game_sessions').select('score, correct, total_rounds').eq('student_id', studentId),
-    supabase.from('challenge_attempts').select('is_correct').eq('student_id', studentId),
-    supabase.from('student_problems').select('is_solved').eq('student_id', studentId),
-    supabase.from('student_decks').select('id').eq('student_id', studentId),
     blockNames([studentId]),
   ])
 
@@ -186,8 +180,6 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
   const games = (gamesRes.data ?? []) as Row[]
   const totalRounds = games.reduce((n, g) => n + Number(g.total_rounds ?? 0), 0)
   const correctRounds = games.reduce((n, g) => n + Number(g.correct ?? 0), 0)
-  const challenges = (challengesRes.data ?? []) as Row[]
-  const problems = (problemsRes.data ?? []) as Row[]
 
   const firstScore = attempts.length ? attempts[0].percentage : null
   const latestScore = attempts.length ? attempts[attempts.length - 1].percentage : null
@@ -221,22 +213,6 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
     improvement: firstScore !== null && latestScore !== null && attempts.length > 1 ? Math.round((latestScore - firstScore) * 10) / 10 : null,
     completionPct: Math.round((lessonsDone / TOTAL_LESSONS) * 100),
     courseProgress,
-    games: {
-      available: !gamesRes.error,
-      sessions: games.length,
-      bestScore: games.length ? Math.max(...games.map(g => Number(g.score ?? 0))) : null,
-      accuracy: totalRounds ? Math.round((correctRounds / totalRounds) * 1000) / 10 : null,
-    },
-    challenges: {
-      available: !challengesRes.error,
-      attempts: challenges.length,
-      correct: challenges.filter(c => c.is_correct).length,
-    },
-    practice: {
-      problems: problems.length,
-      solved: problems.filter(p => p.is_solved).length,
-      decks: (decksRes.data ?? []).length,
-    },
     weakAreas,
   }
 }

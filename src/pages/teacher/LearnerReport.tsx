@@ -136,57 +136,24 @@ export default function LearnerReport() {
         </motion.section>
       </div>
 
-      <div className="tan-grid-4">
-        <motion.section className="tan-card" {...stagger(4)}>
-          <header className="tan-card-head"><h2><i className="tan-dot orange" /> Games</h2></header>
-          {r.games.available ? (
-            <div className="tan-figures">
-              <Figure value={r.games.sessions.toLocaleString()} label="Games played" />
-              <Figure value={r.games.bestScore === null ? '—' : r.games.bestScore.toLocaleString()} label="Best score" />
-              <Figure value={r.games.accuracy === null ? '—' : `${r.games.accuracy}%`} label="Rounds solved" />
-            </div>
-          ) : <p className="tan-empty small">Game data isn’t available.</p>}
-        </motion.section>
-
-        <motion.section className="tan-card" {...stagger(5)}>
-          <header className="tan-card-head"><h2><i className="tan-dot yellow" /> Daily Challenges</h2></header>
-          {r.challenges.available ? (
-            <div className="tan-figures">
-              <Figure value={r.challenges.attempts.toLocaleString()} label="Attempted" />
-              <Figure value={r.challenges.correct.toLocaleString()} label="Correct" />
-              <Figure value={r.challenges.attempts ? `${Math.round(r.challenges.correct / r.challenges.attempts * 100)}%` : '—'} label="Accuracy" />
-            </div>
-          ) : <p className="tan-empty small">Challenge data isn’t available.</p>}
-        </motion.section>
-
-        <motion.section className="tan-card" {...stagger(6)}>
-          <header className="tan-card-head"><h2><i className="tan-dot violet" /> Problem Bank</h2></header>
-          <div className="tan-figures">
-            <Figure value={r.practice.problems.toLocaleString()} label="Problems" />
-            <Figure value={r.practice.solved.toLocaleString()} label="Solved" />
-            <Figure value={r.practice.decks.toLocaleString()} label="Decks" />
-          </div>
-        </motion.section>
-
-        <motion.section className="tan-card" {...stagger(7)}>
-          <header className="tan-card-head"><h2><i className="tan-dot red" /> Weak Areas</h2></header>
-          {r.weakAreas.length === 0 ? (
-            <p className="tan-ok"><CheckCircle2 size={14} /> No weak areas detected</p>
-          ) : (
-            <ul className="tan-weak">
-              {r.weakAreas.map(w => (
-                <li key={w.title}>
-                  <AlertTriangle size={13} />
-                  <span><strong>{w.title}</strong><em>{w.detail}</em></span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </motion.section>
-      </div>
+      <motion.section className="tan-card" {...stagger(4)}>
+        <header className="tan-card-head"><h2><i className="tan-dot red" /> Weak Areas</h2></header>
+        {r.weakAreas.length === 0 ? (
+          <p className="tan-ok"><CheckCircle2 size={14} /> No weak areas detected</p>
+        ) : (
+          <ul className="tan-weak">
+            {r.weakAreas.map(w => (
+              <li key={w.title}>
+                <AlertTriangle size={13} />
+                <span><strong>{w.title}</strong><em>{w.detail}</em></span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </motion.section>
 
       <div className="tan-grid-2">
-        <motion.section className="tan-card" {...stagger(8)}>
+        <motion.section className="tan-card" {...stagger(5)}>
           <header className="tan-card-head">
             <h2><i className="tan-dot green" /> Lesson Progress</h2>
             <p>Lessons completed in each study guide module</p>
@@ -210,7 +177,7 @@ export default function LearnerReport() {
           </ul>
         </motion.section>
 
-        <motion.section className="tan-card" {...stagger(9)}>
+        <motion.section className="tan-card" {...stagger(6)}>
           <header className="tan-card-head">
             <h2><i className="tan-dot blue" /> Recent Submissions</h2>
             <p>Latest 5 graded assessments</p>
@@ -235,15 +202,6 @@ export default function LearnerReport() {
           )}
         </motion.section>
       </div>
-    </div>
-  )
-}
-
-function Figure({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="tan-figure">
-      <strong>{value}</strong>
-      <span>{label}</span>
     </div>
   )
 }
