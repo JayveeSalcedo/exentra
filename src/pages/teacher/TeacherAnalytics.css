@@ -102,8 +102,23 @@
   font-size: 13px;
 }
 .tan-select { padding: 0 12px; min-width: 180px; }
-.tan-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; flex: 1; min-width: 200px; max-width: 420px; color: var(--text-muted); }
-.tan-search input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; color: var(--text-primary); font-size: 13px; }
+.tan-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(57, 135, 229, 0.35);
+  background: rgba(57, 135, 229, 0.1);
+  color: #3987e5;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: auto;
+}
+.tan-export:hover:not(:disabled) { background: rgba(57, 135, 229, 0.18); }
+.tan-export:disabled { opacity: 0.4; cursor: not-allowed; }
 .tan-refresh {
   width: 38px;
   height: 38px;
@@ -175,19 +190,6 @@
 .tan-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .tan-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 
-.tan-sort { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; }
-.tan-sort button {
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--surface-10);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.tan-sort button.active { background: rgba(57, 135, 229, 0.14); border-color: rgba(57, 135, 229, 0.4); color: var(--text-primary); }
-
 .tan-empty { margin: 0; padding: 32px 0; text-align: center; font-size: 13px; color: var(--text-muted); }
 .tan-empty.small { padding: 12px 0; font-size: 12px; }
 
@@ -213,21 +215,6 @@
 .tan-student { display: flex; align-items: center; gap: 10px; }
 .tan-student strong { display: block; font-weight: 600; }
 .tan-student em { font-style: normal; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-.tan-avatar {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--tan-series) 16%, transparent);
-  color: var(--tan-series);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.tan-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
 .tan-score {
   display: inline-block;
@@ -246,20 +233,6 @@
 .tan-meter-track { flex: 1; height: 6px; border-radius: 4px; background: var(--surface-06); overflow: hidden; }
 .tan-meter-fill { height: 100%; border-radius: 4px; background: var(--tan-series); transition: width 0.5s ease; }
 .tan-meter span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); min-width: 34px; text-align: right; }
-
-.tan-flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  background: rgba(208, 59, 59, 0.12);
-  color: var(--text-primary);
-}
-.tan-flag svg { color: #d03b3b; }
-.tan-chevron { color: var(--text-muted); width: 24px; }
 
 /* ── Learner report cards ─────────────────────────── */
 .tan-tile-value.tone-green { color: #0ca30c; }
@@ -320,6 +293,31 @@
 @media (max-width: 640px) {
   .tan-tiles, .tan-grid-4 { grid-template-columns: minmax(0, 1fr); }
   .tan-report-hero { padding: 20px; }
-  .tan-sort { margin-left: 0; }
   .tan-progress-list li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }
+
+/* ── Class record grid ────────────────────────────── */
+.tan-record { border-collapse: separate; border-spacing: 0; }
+.tan-record .tan-group-head {
+  text-align: center;
+  background: var(--surface-02);
+  border-bottom: 1px solid var(--surface-06);
+}
+.tan-sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-card);
+  min-width: 160px;
+  box-shadow: 1px 0 0 var(--surface-06);
+}
+.tan-record thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-02); }
+.tan-record thead th.tan-sticky-col { z-index: 3; }
+.tan-record tfoot td {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-top: 2px solid var(--surface-10);
+  border-bottom: none;
+}
+.tan-record tfoot td.tan-sticky-col { background: var(--bg-card); }

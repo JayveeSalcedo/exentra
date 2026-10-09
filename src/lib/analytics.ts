@@ -241,4 +241,78 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
   }
 }
 
+/* ── Class record (gradebook) ─────────────────────────────────────────── */
+
+export interface ClassRecordAssessment {
+  id: string
+  title: string
+  type: string
+  totalPoints: number
+  dueDate: string | null
+}
+
+export interface ClassRecordStudent {
+  id: string
+  schoolId: string
+  firstName: string
+  lastName: string
+}
+
+export interface ClassRecordData {
+  blockName: string
+  students: ClassRecordStudent[]
+  assessments: ClassRecordAssessment[]
+  /** scores[studentId][assessmentId] = percentage, absent if not submitted */
+  scores: Record<string, Record<string, number>>
+}
+
+export async function fetchClassRecord(teacherId: string, blockId: string): Promise<ClassRecordData> {
+  const [{ data: block }, { data: enrollments }, { data: assessmentRows }] = await Promise.all([
+    supabase.from('blocks').select('name').eq('id', blockId).eq('teacher_id', teacherId).maybeSingle(),
+    supabase.from('block_enrollments')
+      .select('student_id, profiles(id, school_id, first_name, last_name)')
+      .eq('block_id', blockId).eq('status', 'active'),
+    supabase.from('assessments')
+      .select('id, title, type, total_points, due_date')
+      .eq('block_id', blockId).eq('is_archived', false).eq('is_published', true)
+      .order('due_date'),
+  ])
+
+  const students: ClassRecordStudent[] = ((enrollments ?? []) as Row[])
+    .map(e => {
+      const raw = e.profiles as Row | Row[] | null
+      const p = (Array.isArray(raw) ? raw[0] : raw) ?? {}
+      return {
+        id: (p.id as string) ?? (e.student_id as string),
+        schoolId: (p.school_id as string) ?? '',
+        firstName: (p.first_name as string) ?? '',
+        lastName: (p.last_name as string) ?? '',
+      }
+    })
+    .sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName))
+
+  const assessments: ClassRecordAssessment[] = ((assessmentRows ?? []) as Row[]).map(a => ({
+    id: a.id as string,
+    title: a.title as string,
+    type: (a.type as string) ?? 'quiz',
+    totalPoints: Number(a.total_points ?? 0),
+    dueDate: (a.due_date as string | null) ?? null,
+  }))
+
+  const scores: Record<string, Record<string, number>> = {}
+  if (assessments.length) {
+    const { data: subs } = await supabase
+      .from('submissions')
+      .select('student_id, assessment_id, percentage')
+      .eq('is_submitted', true).not('percentage', 'is', null)
+      .in('assessment_id', assessments.map(a => a.id))
+    for (const s of (subs ?? []) as Row[]) {
+      const studentId = s.student_id as string
+      ;(scores[studentId] ??= {})[s.assessment_id as string] = Number(s.percentage)
+    }
+  }
+
+  return { blockName: block?.name ?? 'Block', students, assessments, scores }
+}
+
 export { TOTAL_MODULES, TOTAL_LESSONS }
