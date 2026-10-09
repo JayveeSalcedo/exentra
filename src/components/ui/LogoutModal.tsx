@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import './LogoutModal.css'
 
 interface LogoutModalProps {
@@ -9,7 +10,7 @@ interface LogoutModalProps {
 }
 
 export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModalProps) {
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -68,6 +69,7 @@ export default function LogoutModal({ isOpen, onConfirm, onCancel }: LogoutModal
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
