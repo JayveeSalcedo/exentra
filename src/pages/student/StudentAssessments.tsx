@@ -186,33 +186,9 @@ export default function StudentAssessments() {
         </div>
       </motion.div>
 
-      {/* Stats row */}
-      <motion.div className="sa-stats" {...stagger(1)}>
-        {[
-          { label: 'Total',     value: stats.total,   icon: ClipboardList, color: '#6C8EF5' },
-          { label: 'Pending',   value: stats.pending,  icon: Clock,         color: '#FFB830' },
-          { label: 'Done',      value: stats.done,     icon: CheckCircle2,  color: '#00D4AA' },
-          { label: 'Missed',    value: stats.missed,   icon: XCircle,       color: '#FF6B8A' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div
-            key={label}
-            className={`sa-stat-card ${label === 'Missed' && stats.missed > 0 ? 'sa-stat-card--alert' : ''}`}
-            style={{ '--tile-accent': color, ...(label === 'Missed' && stats.missed > 0 ? { borderColor: `${color}40` } : {}) } as React.CSSProperties}
-          >
-            <div className="sa-stat-icon" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
-              <Icon size={16} color={color} />
-            </div>
-            <div>
-              <p className="sa-stat-value" style={label === 'Missed' && stats.missed > 0 ? { color } : {}}>{value}</p>
-              <p className="sa-stat-label">{label}</p>
-            </div>
-          </div>
-        ))}
-      </motion.div>
-
       {/* Missed banner — shown only when there are missed assessments */}
       {stats.missed > 0 && (
-        <motion.div className="sa-missed-banner" {...stagger(2)}>
+        <motion.div className="sa-missed-banner" {...stagger(1)}>
           <XCircle size={15} color="#FF6B8A" />
           <span>
             You have <strong>{stats.missed}</strong> missed assessment{stats.missed > 1 ? 's' : ''}.
@@ -222,22 +198,21 @@ export default function StudentAssessments() {
       )}
 
       {/* Filters */}
-      <motion.div className="sa-filters" {...stagger(stats.missed > 0 ? 3 : 2)}>
+      <motion.div className="sa-filters" {...stagger(stats.missed > 0 ? 2 : 1)}>
         <div className="sa-filter-group">
-          {(['all', 'quiz', 'activity', 'assignment', 'exam'] as const).map(t => (
+          {(['quiz', 'activity', 'assignment', 'exam'] as const).map(t => (
             <button
               key={t}
               className={`sa-filter-btn ${filter === t ? 'active' : ''}`}
-              style={filter === t && t !== 'all' ? { borderColor: TYPE_COLOR[t], color: TYPE_COLOR[t] } : {}}
+              style={filter === t ? { borderColor: TYPE_COLOR[t], color: TYPE_COLOR[t] } : {}}
               onClick={() => setFilter(t)}
             >
-              {t === 'all' ? 'All Types' : TYPE_LABEL[t]}
+              {TYPE_LABEL[t]}
             </button>
           ))}
         </div>
         <div className="sa-filter-group">
           {([
-            { key: 'all',     label: 'All Status' },
             { key: 'pending', label: 'Pending'    },
             { key: 'done',    label: 'Done'       },
             { key: 'missed',  label: `Missed${stats.missed > 0 ? ` (${stats.missed})` : ''}` },
@@ -261,7 +236,7 @@ export default function StudentAssessments() {
           <p>Loading assessments…</p>
         </div>
       ) : filtered.length === 0 ? (
-        <motion.div className="sa-empty" {...stagger(4)}>
+        <motion.div className="sa-empty" {...stagger(3)}>
           <div className="sa-empty-icon">
             <ClipboardList size={32} color="var(--text-muted)" />
           </div>
@@ -296,7 +271,7 @@ export default function StudentAssessments() {
                 <motion.div
                   key={a.id}
                   className={`sa-card ${done ? 'done' : ''} ${missed ? 'missed' : ''}`}
-                  {...stagger(i + 4)}
+                  {...stagger(i + 3)}
                   exit={{ opacity: 0, x: -20 }}
                   onClick={() => !locked && !missed && !archivedLocked && navigate(`/student/assessments/${a.id}`)}
                   style={{ cursor: locked || missed || archivedLocked ? 'default' : 'pointer' }}
