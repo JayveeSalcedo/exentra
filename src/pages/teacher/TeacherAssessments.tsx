@@ -690,13 +690,13 @@ export default function TeacherAssessments() {
 
           {/* Filters */}
           <motion.div className="ta2-filters" {...stagger(3)}>
-            {(['all', 'published', 'draft', 'archived'] as const).map(f => (
+            {(['published', 'draft', 'archived'] as const).map(f => (
               <button
                 key={f}
                 className={`ta2-filter-btn ${filter === f ? 'active' : ''}`}
                 onClick={() => setFilter(f)}
               >
-                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
             <button className="ta2-refresh-btn" onClick={fetchAssessments} title="Refresh">

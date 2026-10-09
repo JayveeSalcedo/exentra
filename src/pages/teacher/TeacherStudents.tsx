@@ -190,7 +190,6 @@ export default function TeacherStudents() {
   })()
 
   const BLOCK_FILTERS: { key: string; label: string; count: number }[] = [
-    { key: 'all',         label: 'All Blocks',  count: students.length },
     { key: 'unassigned',  label: 'Unassigned',  count: students.filter(s => !s.blockId).length },
     ...blocks.map(b => ({ key: b.id, label: b.name, count: students.filter(s => s.blockId === b.id).length })),
   ]

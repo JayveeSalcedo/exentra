@@ -358,13 +358,13 @@ export default function Leaderboard() {
 
         {/* Filter pills */}
         <div className="lb-filters">
-          {(['all', 'top10'] as FilterKey[]).map(f => (
+          {(['top10'] as FilterKey[]).map(f => (
             <button
               key={f}
               className={`lb-filter-pill ${filter === f && !search ? 'active' : ''}`}
               onClick={() => { setFilter(f); setSearch('') }}
             >
-              {f === 'all' ? 'All Students' : 'Top 10'}
+              Top 10
             </button>
           ))}
         </div>
