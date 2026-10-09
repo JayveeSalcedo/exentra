@@ -154,7 +154,7 @@ export default function ActivityLog() {
       }}>
         <div>
           <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: 2, color: '#6C8EF5', margin: '0 0 6px', textTransform: 'uppercase' }}>
-            Teacher View
+            Professor View
           </p>
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 6px' }}>
             Activity Log

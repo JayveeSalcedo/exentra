@@ -272,7 +272,7 @@ Write in a professional but approachable tone. No bullet points — flowing pros
       {/* Header */}
       <motion.div className="tp-header" {...stagger(0)}>
         <div>
-          <p className="tp-header-label">TEACHER VIEW</p>
+          <p className="tp-header-label">PROFESSOR VIEW</p>
           <h1 className="tp-header-title">Class Progress</h1>
           <p className="tp-header-sub">Track how the class is performing across all DSA topics</p>
         </div>

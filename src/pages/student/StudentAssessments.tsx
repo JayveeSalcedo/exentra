@@ -182,7 +182,7 @@ export default function StudentAssessments() {
         <div>
           <p className="sa-header-label">MY ASSESSMENTS</p>
           <h1 className="sa-header-title">Assessments</h1>
-          <p className="sa-header-sub">Quizzes, activities, and assignments from your teacher</p>
+          <p className="sa-header-sub">Quizzes, activities, and assignments from your professor</p>
         </div>
       </motion.div>
 
@@ -216,7 +216,7 @@ export default function StudentAssessments() {
           <XCircle size={15} color="#FF6B8A" />
           <span>
             You have <strong>{stats.missed}</strong> missed assessment{stats.missed > 1 ? 's' : ''}.
-            These are past their due date and were not submitted. Contact your teacher if needed.
+            These are past their due date and were not submitted. Contact your professor if needed.
           </span>
         </motion.div>
       )}
@@ -272,7 +272,7 @@ export default function StudentAssessments() {
           </p>
           <p className="sa-empty-sub">
             {assessments.length === 0
-              ? "Your teacher hasn't published any assessments yet. Check back later."
+              ? "Your professor hasn't published any assessments yet. Check back later."
               : statusFilter === 'missed'
               ? "Great job! You haven't missed any assessments."
               : 'Try changing your filter options.'}
@@ -385,7 +385,7 @@ export default function StudentAssessments() {
                     {missed && (
                       <div className="sa-missed-notice">
                         <XCircle size={11} color="#FF6B8A" />
-                        Not submitted — deadline has passed. Contact your teacher if you need an extension.
+                        Not submitted — deadline has passed. Contact your professor if you need an extension.
                       </div>
                     )}
 
@@ -393,7 +393,7 @@ export default function StudentAssessments() {
                     {archivedLocked && (
                       <div className="sa-missed-notice">
                         <Archive size={11} color="#FFB830" />
-                        This section has been archived by your teacher — new submissions are closed.
+                        This section has been archived by your professor — new submissions are closed.
                       </div>
                     )}
 
@@ -401,7 +401,7 @@ export default function StudentAssessments() {
                     {pendingGrade && (
                       <div className="sa-pending-grade">
                         <Clock size={11} color="#FFB830" />
-                        Submitted — awaiting grade from teacher
+                        Submitted — awaiting grade from professor
                       </div>
                     )}
 

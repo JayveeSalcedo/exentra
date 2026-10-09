@@ -138,7 +138,7 @@ export default function LoginPage() {
                   </div>
                   <h2 className="locked-title">Account Locked</h2>
                   <p className="locked-desc">
-                    Too many failed attempts. Please contact your teacher or admin to unlock your account.
+                    Too many failed attempts. Please contact your professor or admin to unlock your account.
                   </p>
                   <div className="locked-badge">3 / 3 attempts used</div>
                 </motion.div>

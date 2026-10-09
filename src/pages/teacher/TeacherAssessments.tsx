@@ -596,7 +596,7 @@ export default function TeacherAssessments() {
       {/* Header */}
       <motion.div className="ta2-header" {...stagger(0)}>
         <div>
-          <p className="ta2-label">TEACHER PANEL</p>
+          <p className="ta2-label">PROFESSOR PANEL</p>
           <h1 className="ta2-title">Assessments</h1>
           <p className="ta2-sub">
             {selectedTarget

@@ -200,7 +200,7 @@ export default function TeacherStudents() {
       {/* Header */}
       <motion.div className="ts-header" {...stagger(0)}>
         <div>
-          <p className="ts-header-label">TEACHER VIEW</p>
+          <p className="ts-header-label">PROFESSOR VIEW</p>
           <h1 className="ts-header-title">Student Roster</h1>
           <p className="ts-header-sub">Performance overview of all enrolled students</p>
         </div>

@@ -1132,7 +1132,7 @@ function AlreadyDone({ assessment, score, total, pct, xpEarned, submittedFileNam
       <h1 className="ta-lobby-title">Already Submitted</h1>
       <p className="ta-lobby-desc">
         {isFile
-          ? 'Your submission has been turned in. Grades will be posted by your teacher.'
+          ? 'Your submission has been turned in. Grades will be posted by your professor.'
           : "You've already completed this assessment."}
       </p>
 
@@ -1180,7 +1180,7 @@ function Results({ assessment, questions, answers, score, total, pct, xpEarned, 
         </div>
         <h2 className="ta-results-title">Turned In!</h2>
         <p className="ta-lobby-desc" style={{ marginTop: 0 }}>
-          Your files have been received. Your teacher will review and post your grade.
+          Your files have been received. Your professor will review and post your grade.
         </p>
 
         {submittedFileNames?.length > 0 && (

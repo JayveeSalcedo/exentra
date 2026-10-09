@@ -507,7 +507,7 @@ export default function CreateAssessment() {
           <div className="ca-field">
             <label className="ca-label"><Award size={12} /> Total Points</label>
             <input className="ca-input" type="number" min={1} placeholder="100" value={meta.total_points} onChange={e => setM('total_points', e.target.value)} />
-            <p className="ca-field-hint">Teacher assigns actual score after reviewing the submission.</p>
+            <p className="ca-field-hint">Professor assigns actual score after reviewing the submission.</p>
           </div>
         )}
 
@@ -733,7 +733,7 @@ export default function CreateAssessment() {
                           <div className="ca-field">
                             <div className="ca-essay-note">
                               <AlignLeft size={14} color="#FF6B8A" />
-                              <p>Essay questions are manually graded by the teacher. Students will see a text area to write their response. Points are awarded after review.</p>
+                              <p>Essay questions are manually graded by the professor. Students will see a text area to write their response. Points are awarded after review.</p>
                             </div>
                           </div>
                         )}

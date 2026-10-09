@@ -295,7 +295,7 @@ export default function TeacherProfile() {
               <span className="tpf-dot">·</span>
               <span>{user?.schoolId}</span>
               <span className="tpf-dot">·</span>
-              <span className="tpf-role-tag">Teacher</span>
+              <span className="tpf-role-tag">Professor</span>
             </p>
           </div>
 
@@ -331,7 +331,7 @@ export default function TeacherProfile() {
           {[
             { label: 'Login Email', val: `${user?.schoolId}@psu.edu.ph` },
             { label: 'Contact Email', val: form.contactEmail || '—' },
-            { label: 'Role', val: 'Teacher' },
+            { label: 'Role', val: 'Professor' },
             { label: 'Blocks Handled', val: String(stats.blocks) },
           ].map((row, i) => (
             <div key={i} className="tpf-info-row">

@@ -196,7 +196,7 @@ export default function TeacherMaterials() {
       {/* Header */}
       <motion.div className="tm-header" {...stagger(0)}>
         <div>
-          <p className="tm-label">TEACHER PANEL</p>
+          <p className="tm-label">PROFESSOR PANEL</p>
           <h1 className="tm-title">Materials</h1>
           <p className="tm-sub">
             {selectedTarget

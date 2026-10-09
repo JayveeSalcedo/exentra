@@ -342,7 +342,7 @@ export default function TeacherBlocks() {
       {/* Header */}
       <motion.div className="blk-header" {...stagger(0)}>
         <div>
-          <p className="blk-header-label">TEACHER VIEW</p>
+          <p className="blk-header-label">PROFESSOR VIEW</p>
           <h1 className="blk-header-title">Blocks &amp; Sections</h1>
           <p className="blk-header-sub">Create sections and manage which students belong to each one.</p>
         </div>
