@@ -6,6 +6,9 @@ import { completedLessonSet, computeCourseProgress, type ModuleProgress } from '
 /** Score at or above this is passing; below it is flagged as a weak area */
 export const PASSING_SCORE = 60
 
+/** Score at or above this is flagged as a strong area */
+export const STRONG_SCORE = 80
+
 export interface StudentSummary {
   id: string
   schoolId: string
@@ -50,6 +53,7 @@ export interface LearnerReport extends StudentSummary {
   completionPct: number
   courseProgress: ModuleProgress[]
   weakAreas: { title: string; detail: string }[]
+  strongAreas: { title: string; detail: string }[]
 }
 
 type Row = Record<string, unknown>
@@ -191,6 +195,10 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
     weakAreas.push({ title: 'Game rounds', detail: `${Math.round(correctRounds / totalRounds * 100)}% of rounds solved` })
   }
 
+  const strongAreas: { title: string; detail: string }[] = moduleScores
+    .filter(m => m.avg !== null && m.avg >= STRONG_SCORE)
+    .map(m => ({ title: m.title, detail: `Assessment average ${m.avg}% over ${m.count} attempt${m.count === 1 ? '' : 's'}` }))
+
   return {
     id: profile.id,
     schoolId: profile.school_id,
@@ -214,6 +222,7 @@ export async function fetchLearnerReport(studentId: string): Promise<LearnerRepo
     completionPct: Math.round((lessonsDone / TOTAL_LESSONS) * 100),
     courseProgress,
     weakAreas,
+    strongAreas,
   }
 }
 

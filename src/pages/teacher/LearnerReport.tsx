@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   ArrowLeft, ClipboardCheck, Flag, TrendingUp, TrendingDown, Target,
-  AlertTriangle, CheckCircle2, BookOpen, Clock, Lock,
+  AlertTriangle, CheckCircle2, Star, BookOpen, Clock, Lock,
 } from 'lucide-react'
 import { PASSING_SCORE, TOTAL_LESSONS, TOTAL_MODULES, fetchLearnerReport, type LearnerReport as Report } from '../../lib/analytics'
 import ScoreBarChart from '../../components/charts/ScoreBarChart'
@@ -136,24 +136,42 @@ export default function LearnerReport() {
         </motion.section>
       </div>
 
-      <motion.section className="tan-card" {...stagger(4)}>
-        <header className="tan-card-head"><h2><i className="tan-dot red" /> Weak Areas</h2></header>
-        {r.weakAreas.length === 0 ? (
-          <p className="tan-ok"><CheckCircle2 size={14} /> No weak areas detected</p>
-        ) : (
-          <ul className="tan-weak">
-            {r.weakAreas.map(w => (
-              <li key={w.title}>
-                <AlertTriangle size={13} />
-                <span><strong>{w.title}</strong><em>{w.detail}</em></span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </motion.section>
+      <div className="tan-grid-2">
+        <motion.section className="tan-card" {...stagger(4)}>
+          <header className="tan-card-head"><h2><i className="tan-dot red" /> Weak Areas</h2></header>
+          {r.weakAreas.length === 0 ? (
+            <p className="tan-ok"><CheckCircle2 size={14} /> No weak areas detected</p>
+          ) : (
+            <ul className="tan-weak">
+              {r.weakAreas.map(w => (
+                <li key={w.title}>
+                  <AlertTriangle size={13} />
+                  <span><strong>{w.title}</strong><em>{w.detail}</em></span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </motion.section>
+
+        <motion.section className="tan-card" {...stagger(5)}>
+          <header className="tan-card-head"><h2><i className="tan-dot green" /> Strong Areas</h2></header>
+          {r.strongAreas.length === 0 ? (
+            <p className="tan-empty small">No strong areas identified yet.</p>
+          ) : (
+            <ul className="tan-strong">
+              {r.strongAreas.map(w => (
+                <li key={w.title}>
+                  <Star size={13} />
+                  <span><strong>{w.title}</strong><em>{w.detail}</em></span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </motion.section>
+      </div>
 
       <div className="tan-grid-2">
-        <motion.section className="tan-card" {...stagger(5)}>
+        <motion.section className="tan-card" {...stagger(6)}>
           <header className="tan-card-head">
             <h2><i className="tan-dot green" /> Lesson Progress</h2>
             <p>Lessons completed in each study guide module</p>
@@ -177,7 +195,7 @@ export default function LearnerReport() {
           </ul>
         </motion.section>
 
-        <motion.section className="tan-card" {...stagger(6)}>
+        <motion.section className="tan-card" {...stagger(7)}>
           <header className="tan-card-head">
             <h2><i className="tan-dot blue" /> Recent Submissions</h2>
             <p>Latest 5 graded assessments</p>
