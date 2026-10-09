@@ -424,13 +424,6 @@ export default function LearningMaterials() {
                       <Clock size={10} /> {expanded.nextLesson.durationMinutes} min
                     </span>
                   </div>
-                  <button
-                    className="lm-detail-cta-btn"
-                    onClick={() => handleStartLesson(expanded.module.order, expanded.nextLesson!, 'active')}
-                  >
-                    <Play size={13} /> {expanded.completedCount > 0 ? 'Continue' : 'Start'}
-                    <ArrowRight size={13} />
-                  </button>
                 </motion.div>
               )}
 
