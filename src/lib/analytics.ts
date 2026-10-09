@@ -247,7 +247,7 @@ export interface ClassRecordData {
   blockName: string
   students: ClassRecordStudent[]
   assessments: ClassRecordAssessment[]
-  /** scores[studentId][assessmentId] = percentage, absent if not submitted */
+  /** scores[studentId][assessmentId] = raw score earned (out of the assessment's totalPoints), absent if not submitted */
   scores: Record<string, Record<string, number>>
 }
 
@@ -288,12 +288,12 @@ export async function fetchClassRecord(teacherId: string, blockId: string): Prom
   if (assessments.length) {
     const { data: subs } = await supabase
       .from('submissions')
-      .select('student_id, assessment_id, percentage')
-      .eq('is_submitted', true).not('percentage', 'is', null)
+      .select('student_id, assessment_id, score')
+      .eq('is_submitted', true).not('score', 'is', null)
       .in('assessment_id', assessments.map(a => a.id))
     for (const s of (subs ?? []) as Row[]) {
       const studentId = s.student_id as string
-      ;(scores[studentId] ??= {})[s.assessment_id as string] = Number(s.percentage)
+      ;(scores[studentId] ??= {})[s.assessment_id as string] = Number(s.score)
     }
   }
 

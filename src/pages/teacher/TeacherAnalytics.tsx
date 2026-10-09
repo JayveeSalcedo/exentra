@@ -17,6 +17,7 @@ const stagger = (i: number) => ({
 })
 
 const avg = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
+const pctOf = (earned: number, possible: number) => (possible > 0 ? (earned / possible) * 100 : 0)
 
 const csvField = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
 
@@ -62,38 +63,48 @@ export default function TeacherAnalytics() {
     return [...ordered, ...rest]
   }, [data])
 
-  const rowAvg = (studentId: string) => {
+  /** Total earned / total possible across every assessment this student has a submission for */
+  const rowTotals = (studentId: string): { earned: number; possible: number } | null => {
     if (!data) return null
-    const vals = data.assessments.map(a => data.scores[studentId]?.[a.id]).filter((v): v is number => v != null)
-    return avg(vals)
+    let earned = 0, possible = 0, any = false
+    for (const a of data.assessments) {
+      const v = data.scores[studentId]?.[a.id]
+      if (v != null) { earned += v; possible += a.totalPoints; any = true }
+    }
+    return any ? { earned, possible } : null
   }
-  const colAvg = (assessmentId: string) => {
+  /** Average score (out of totalPoints) across students who submitted this assessment */
+  const colAvgScore = (assessmentId: string): number | null => {
     if (!data) return null
     const vals = data.students.map(s => data.scores[s.id]?.[assessmentId]).filter((v): v is number => v != null)
     return avg(vals)
   }
-  const overallAvg = useMemo(() => {
+  const overallTotals = useMemo((): { earned: number; possible: number } | null => {
     if (!data) return null
-    const vals: number[] = []
+    let earned = 0, possible = 0, any = false
     for (const s of data.students) for (const a of data.assessments) {
       const v = data.scores[s.id]?.[a.id]
-      if (v != null) vals.push(v)
+      if (v != null) { earned += v; possible += a.totalPoints; any = true }
     }
-    return avg(vals)
+    return any ? { earned, possible } : null
   }, [data])
 
   const exportCSV = () => {
     if (!data) return
-    const header = ['Student', ...data.assessments.map(a => a.title), 'Average'].map(csvField).join(',')
+    const header = ['Student', ...data.assessments.map(a => a.title), 'Total'].map(csvField).join(',')
     const rows = data.students.map(s => {
       const cells = data.assessments.map(a => {
         const v = data.scores[s.id]?.[a.id]
-        return v == null ? '' : String(v)
+        return v == null ? '' : `${v}/${a.totalPoints}`
       })
-      const rAvg = rowAvg(s.id)
-      return [`${s.firstName} ${s.lastName}`, ...cells, rAvg == null ? '' : String(rAvg)].map(csvField).join(',')
+      const totals = rowTotals(s.id)
+      return [`${s.firstName} ${s.lastName}`, ...cells, totals == null ? '' : `${totals.earned}/${totals.possible}`].map(csvField).join(',')
     })
-    const footer = ['Class Average', ...data.assessments.map(a => { const v = colAvg(a.id); return v == null ? '' : String(v) }), overallAvg == null ? '' : String(overallAvg)].map(csvField).join(',')
+    const footer = [
+      'Class Average',
+      ...data.assessments.map(a => { const v = colAvgScore(a.id); return v == null ? '' : `${v}/${a.totalPoints}` }),
+      overallTotals == null ? '' : `${overallTotals.earned}/${overallTotals.possible}`,
+    ].map(csvField).join(',')
     const csv = [header, ...rows, footer].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -157,7 +168,7 @@ export default function TeacherAnalytics() {
                         {(data?.assessments ?? []).map(a => (
                           <th key={a.id} className="num" title={a.title}>{a.title.length > 14 ? `${a.title.slice(0, 13)}…` : a.title}</th>
                         ))}
-                        <th className="num">Average</th>
+                        <th className="num">Total</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -166,7 +177,7 @@ export default function TeacherAnalytics() {
                           <td className="tan-sticky-col muted" colSpan={(data?.assessments.length ?? 0) + 2}>No students enrolled in this block yet.</td>
                         </tr>
                       ) : data.students.map(s => {
-                        const rAvg = rowAvg(s.id)
+                        const totals = rowTotals(s.id)
                         return (
                           <tr key={s.id} className="tan-row" onClick={() => navigate(`/teacher/analytics/${s.id}`)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate(`/teacher/analytics/${s.id}`)}>
                             <td className="tan-sticky-col">
@@ -178,12 +189,12 @@ export default function TeacherAnalytics() {
                               const v = data.scores[s.id]?.[a.id]
                               return (
                                 <td key={a.id} className="num">
-                                  {v == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${v >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}%</span>}
+                                  {v == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${pctOf(v, a.totalPoints) >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}/{a.totalPoints}</span>}
                                 </td>
                               )
                             })}
                             <td className="num">
-                              {rAvg == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${rAvg >= PASSING_SCORE ? 'pass' : 'fail'}`}>{rAvg}%</span>}
+                              {totals == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${pctOf(totals.earned, totals.possible) >= PASSING_SCORE ? 'pass' : 'fail'}`}>{totals.earned}/{totals.possible}</span>}
                             </td>
                           </tr>
                         )
@@ -193,10 +204,10 @@ export default function TeacherAnalytics() {
                       <tr>
                         <td className="tan-sticky-col">Class Average</td>
                         {(data?.assessments ?? []).map(a => {
-                          const v = colAvg(a.id)
-                          return <td key={a.id} className="num">{v == null ? '—' : `${v}%`}</td>
+                          const v = colAvgScore(a.id)
+                          return <td key={a.id} className="num">{v == null ? '—' : `${v}/${a.totalPoints}`}</td>
                         })}
-                        <td className="num">{overallAvg == null ? '—' : `${overallAvg}%`}</td>
+                        <td className="num">{overallTotals == null ? '—' : `${overallTotals.earned}/${overallTotals.possible}`}</td>
                       </tr>
                     </tfoot>
                   </table>
