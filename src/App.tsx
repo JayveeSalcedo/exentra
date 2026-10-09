@@ -36,7 +36,6 @@ import GenerateQuiz from './pages/teacher/GenerateQuiz'
 import CreateAssessment from './pages/teacher/CreateAssessment'
 import ActivityLog from './pages/teacher/ActivityLog'
 import TeacherStudents from './pages/teacher/TeacherStudents'
-import TeacherProgress from './pages/teacher/TeacherProgress'
 import TeacherProfile from './pages/teacher/TeacherProfile'
 import TeacherAnalytics from './pages/teacher/TeacherAnalytics'
 import LearnerReport from './pages/teacher/LearnerReport'
@@ -108,7 +107,6 @@ function App() {
               <Route path="assessments/create" element={<CreateAssessment />} />
               <Route path="activity-log" element={<ActivityLog />} />
               <Route path="students" element={<TeacherStudents />} />
-              <Route path="progress" element={<TeacherProgress />} />
               <Route path="analytics" element={<TeacherAnalytics />} />
               <Route path="analytics/:studentId" element={<LearnerReport />} />
               <Route path="profile" element={<TeacherProfile />} />

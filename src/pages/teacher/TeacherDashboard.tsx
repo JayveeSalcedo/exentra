@@ -24,7 +24,6 @@ const QUICK_ACTIONS = [
   { label: 'Blocks',      sub: 'Manage sections & rosters',     icon: Layers,        color: '#4FC3F7', to: '/teacher/blocks' },
   { label: 'Assessments', sub: 'View & manage all assessments', icon: ClipboardList, color: '#00D4AA', to: '/teacher/assessments' },
   { label: 'Students',    sub: 'View student roster',           icon: Users,         color: '#FFB830', to: '/teacher/students' },
-  { label: 'Progress',    sub: 'Class performance overview',    icon: BarChart2,     color: '#FF6B8A', to: '/teacher/progress' },
   { label: 'Materials',   sub: 'Manage DSA learning content',   icon: BookOpen,      color: '#4FC3F7', to: '/teacher/materials' },
 ]
 
@@ -198,9 +197,6 @@ export default function TeacherDashboard() {
         <motion.div className="td-widget" {...stagger(8)}>
           <div className="td-widget-header">
             <h3 className="td-widget-title"><TrendingUp size={14} /> Class Performance</h3>
-            <button className="td-widget-link" onClick={() => navigate('/teacher/progress')}>
-              View all <ArrowRight size={11} />
-            </button>
           </div>
 
           {loading ? (

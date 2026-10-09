@@ -13,7 +13,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/teacher/assessments/generate': 'Generate Quiz',
   '/teacher/assessments/create':   'Create Assessment',
   '/teacher/students':             'Student Roster',
-  '/teacher/progress':             'Class Progress',
   '/teacher/analytics':            'Analytics',
   '/teacher/activity-log':         'Activity Log',
   '/teacher/profile':              'Profile',
