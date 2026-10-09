@@ -137,66 +137,71 @@ export default function TeacherAnalytics() {
           <motion.section className="tan-card" {...stagger(2)}>
             {loading && !data ? (
               <p className="tan-empty">Loading class record…</p>
-            ) : !data || data.students.length === 0 ? (
-              <p className="tan-empty">No students enrolled in this block yet.</p>
-            ) : data.assessments.length === 0 ? (
-              <p className="tan-empty">No published assessments for this block yet.</p>
             ) : (
-              <div className="tan-table-wrap">
-                <table className="tan-table tan-record">
-                  <thead>
-                    <tr>
-                      <th className="tan-sticky-col" />
-                      {groups.map(([type, items]) => (
-                        <th key={type} className="tan-group-head" colSpan={items.length}>{TYPE_LABEL[type] ?? type}</th>
-                      ))}
-                      <th />
-                    </tr>
-                    <tr>
-                      <th className="tan-sticky-col">Student</th>
-                      {data.assessments.map(a => (
-                        <th key={a.id} className="num" title={a.title}>{a.title.length > 14 ? `${a.title.slice(0, 13)}…` : a.title}</th>
-                      ))}
-                      <th className="num">Average</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.students.map(s => {
-                      const rAvg = rowAvg(s.id)
-                      return (
-                        <tr key={s.id} className="tan-row" onClick={() => navigate(`/teacher/analytics/${s.id}`)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate(`/teacher/analytics/${s.id}`)}>
-                          <td className="tan-sticky-col">
-                            <div className="tan-student">
-                              <span><strong>{s.firstName} {s.lastName}</strong><em>{s.schoolId}</em></span>
-                            </div>
-                          </td>
-                          {data.assessments.map(a => {
-                            const v = data.scores[s.id]?.[a.id]
-                            return (
-                              <td key={a.id} className="num">
-                                {v == null ? <span className="muted">—</span> : <span className={`tan-score ${v >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}%</span>}
-                              </td>
-                            )
-                          })}
-                          <td className="num">
-                            {rAvg == null ? <span className="muted">—</span> : <span className={`tan-score ${rAvg >= PASSING_SCORE ? 'pass' : 'fail'}`}>{rAvg}%</span>}
-                          </td>
+              <>
+                {data && data.assessments.length === 0 && (
+                  <p className="tan-empty small">No published assessments for this block yet — columns will appear here once you add some.</p>
+                )}
+                <div className="tan-table-wrap">
+                  <table className="tan-table tan-record">
+                    <thead>
+                      <tr>
+                        <th className="tan-sticky-col" />
+                        {groups.map(([type, items]) => (
+                          <th key={type} className="tan-group-head" colSpan={items.length}>{TYPE_LABEL[type] ?? type}</th>
+                        ))}
+                        <th />
+                      </tr>
+                      <tr>
+                        <th className="tan-sticky-col">Student</th>
+                        {(data?.assessments ?? []).map(a => (
+                          <th key={a.id} className="num" title={a.title}>{a.title.length > 14 ? `${a.title.slice(0, 13)}…` : a.title}</th>
+                        ))}
+                        <th className="num">Average</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {!data || data.students.length === 0 ? (
+                        <tr>
+                          <td className="tan-sticky-col muted" colSpan={(data?.assessments.length ?? 0) + 2}>No students enrolled in this block yet.</td>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td className="tan-sticky-col">Class Average</td>
-                      {data.assessments.map(a => {
-                        const v = colAvg(a.id)
-                        return <td key={a.id} className="num">{v == null ? '—' : `${v}%`}</td>
+                      ) : data.students.map(s => {
+                        const rAvg = rowAvg(s.id)
+                        return (
+                          <tr key={s.id} className="tan-row" onClick={() => navigate(`/teacher/analytics/${s.id}`)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && navigate(`/teacher/analytics/${s.id}`)}>
+                            <td className="tan-sticky-col">
+                              <div className="tan-student">
+                                <span><strong>{s.firstName} {s.lastName}</strong><em>{s.schoolId}</em></span>
+                              </div>
+                            </td>
+                            {data.assessments.map(a => {
+                              const v = data.scores[s.id]?.[a.id]
+                              return (
+                                <td key={a.id} className="num">
+                                  {v == null ? <span className="muted">—</span> : <span className={`tan-score ${v >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}%</span>}
+                                </td>
+                              )
+                            })}
+                            <td className="num">
+                              {rAvg == null ? <span className="muted">—</span> : <span className={`tan-score ${rAvg >= PASSING_SCORE ? 'pass' : 'fail'}`}>{rAvg}%</span>}
+                            </td>
+                          </tr>
+                        )
                       })}
-                      <td className="num">{overallAvg == null ? '—' : `${overallAvg}%`}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td className="tan-sticky-col">Class Average</td>
+                        {(data?.assessments ?? []).map(a => {
+                          const v = colAvg(a.id)
+                          return <td key={a.id} className="num">{v == null ? '—' : `${v}%`}</td>
+                        })}
+                        <td className="num">{overallAvg == null ? '—' : `${overallAvg}%`}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </>
             )}
           </motion.section>
         </>
