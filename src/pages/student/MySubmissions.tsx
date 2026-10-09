@@ -253,7 +253,6 @@ export default function MySubmissions() {
           {[
             { label: 'Total',   value: stats.total,   color: '#6C8EF5', icon: Paperclip },
             { label: 'Graded',  value: stats.graded,  color: '#00D4AA', icon: CheckCircle2 },
-            { label: 'Pending', value: stats.pending, color: '#FFB830', icon: Clock },
           ].map(({ label, value, color, icon: Icon }) => (
             <div key={label} className="msub-stat">
               <div className="msub-stat-icon" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
