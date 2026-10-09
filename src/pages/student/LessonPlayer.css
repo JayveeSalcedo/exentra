@@ -869,11 +869,11 @@
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1100px) {
-  .lp-header { grid-template-columns: auto 1fr; }
+  .lp-header { grid-template-columns: auto minmax(0, 1fr); }
   .lp-header-right { grid-column: 1 / -1; flex-direction: row; align-items: center; }
-  .lp-grid { grid-template-columns: 1fr; }
+  .lp-grid { grid-template-columns: minmax(0, 1fr); }
   .lp-viz-col { position: static; min-height: 360px; }
-  .lp-practice-grid { grid-template-columns: 1fr; }
+  .lp-practice-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
   .lp-tabs { gap: 3px; }
