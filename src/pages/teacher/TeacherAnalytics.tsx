@@ -178,12 +178,12 @@ export default function TeacherAnalytics() {
                               const v = data.scores[s.id]?.[a.id]
                               return (
                                 <td key={a.id} className="num">
-                                  {v == null ? <span className="muted">—</span> : <span className={`tan-score ${v >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}%</span>}
+                                  {v == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${v >= PASSING_SCORE ? 'pass' : 'fail'}`}>{v}%</span>}
                                 </td>
                               )
                             })}
                             <td className="num">
-                              {rAvg == null ? <span className="muted">—</span> : <span className={`tan-score ${rAvg >= PASSING_SCORE ? 'pass' : 'fail'}`}>{rAvg}%</span>}
+                              {rAvg == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${rAvg >= PASSING_SCORE ? 'pass' : 'fail'}`}>{rAvg}%</span>}
                             </td>
                           </tr>
                         )

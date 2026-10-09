@@ -225,6 +225,10 @@
 .tan-score.pass { background: color-mix(in srgb, var(--tan-good) 14%, transparent); box-shadow: inset 3px 0 0 var(--tan-good); }
 .tan-score.fail { background: color-mix(in srgb, var(--tan-critical) 14%, transparent); box-shadow: inset 3px 0 0 var(--tan-critical); }
 
+.tan-cell-score { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+.tan-cell-score.pass { color: var(--tan-good); }
+.tan-cell-score.fail { color: var(--tan-critical); }
+
 .tan-meter { display: flex; align-items: center; gap: 8px; min-width: 120px; }
 .tan-meter.wide { min-width: 0; }
 .tan-meter-track { flex: 1; height: 6px; border-radius: 4px; background: var(--surface-06); overflow: hidden; }
