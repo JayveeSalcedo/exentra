@@ -39,29 +39,6 @@
   margin: 0;
 }
 
-.tm-header-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.tm-header-stat-val {
-  font-family: 'Orbitron', monospace;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.tm-header-stat-lbl {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
-
 /* Block picker grid */
 .tm-block-grid {
   display: grid;

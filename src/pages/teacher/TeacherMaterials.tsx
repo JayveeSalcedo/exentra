@@ -199,11 +199,6 @@ export default function TeacherMaterials() {
     }
   }
 
-  // Sum of the visible cards, not allMaterials.length directly — a file
-  // attached to an archived block is still "yours" (uploaded_by matches) but
-  // has no card to open it from, so it shouldn't count toward this total.
-  const totalMaterials = cards.reduce((sum, c) => sum + c.count, 0)
-
   return (
     <div className="tm-root">
       {/* Header */}
@@ -216,10 +211,6 @@ export default function TeacherMaterials() {
               ? 'Upload files per module for this block'
               : 'Pick a block to manage its materials'}
           </p>
-        </div>
-        <div className="tm-header-stat">
-          <span className="tm-header-stat-val">{totalMaterials}</span>
-          <span className="tm-header-stat-lbl">Total Files</span>
         </div>
       </motion.div>
 
