@@ -115,19 +115,19 @@ export default function TeacherAnalytics() {
 
   const exportCSV = () => {
     if (!data) return
-    const header = ['Student', ...data.assessments.map(a => a.title), 'Total'].map(csvField).join(',')
+    const header = ['Student', ...data.assessments.map(a => a.title), 'Average'].map(csvField).join(',')
     const rows = data.students.map(s => {
       const cells = data.assessments.map(a => {
         const v = data.scores[s.id]?.[a.id]
         return v == null ? '' : `${v}/${a.totalPoints}`
       })
       const totals = rowTotals(s.id)
-      return [`${s.firstName} ${s.lastName}`, ...cells, totals == null ? '' : `${totals.earned}/${totals.possible}`].map(csvField).join(',')
+      return [`${s.firstName} ${s.lastName}`, ...cells, totals == null ? '' : `${Math.round(pctOf(totals.earned, totals.possible))}%`].map(csvField).join(',')
     })
     const footer = [
       'Class Average',
-      ...data.assessments.map(a => { const v = colAvgScore(a.id); return v == null ? '' : `${v}/${a.totalPoints}` }),
-      overallTotals == null ? '' : `${overallTotals.earned}/${overallTotals.possible}`,
+      ...data.assessments.map(a => { const v = colAvgScore(a.id); return v == null ? '' : `${Math.round(pctOf(v, a.totalPoints))}%` }),
+      overallTotals == null ? '' : `${Math.round(pctOf(overallTotals.earned, overallTotals.possible))}%`,
     ].map(csvField).join(',')
     const csv = [header, ...rows, footer].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -206,7 +206,7 @@ export default function TeacherAnalytics() {
                         {(data?.assessments ?? []).map(a => (
                           <th key={a.id} className="num" title={a.title}>{a.title.length > 14 ? `${a.title.slice(0, 13)}…` : a.title}</th>
                         ))}
-                        <th className="num">Total</th>
+                        <th className="num">Average</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -232,7 +232,7 @@ export default function TeacherAnalytics() {
                               )
                             })}
                             <td className="num">
-                              {totals == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${pctOf(totals.earned, totals.possible) >= PASSING_SCORE ? 'pass' : 'fail'}`}>{totals.earned}/{totals.possible}</span>}
+                              {totals == null ? <span className="muted">—</span> : <span className={`tan-cell-score ${pctOf(totals.earned, totals.possible) >= PASSING_SCORE ? 'pass' : 'fail'}`}>{Math.round(pctOf(totals.earned, totals.possible))}%</span>}
                             </td>
                           </tr>
                         )
@@ -243,9 +243,9 @@ export default function TeacherAnalytics() {
                         <td className="tan-sticky-col">Class Average</td>
                         {(data?.assessments ?? []).map(a => {
                           const v = colAvgScore(a.id)
-                          return <td key={a.id} className="num">{v == null ? '—' : `${v}/${a.totalPoints}`}</td>
+                          return <td key={a.id} className="num">{v == null ? '—' : `${Math.round(pctOf(v, a.totalPoints))}%`}</td>
                         })}
-                        <td className="num">{overallTotals == null ? '—' : `${overallTotals.earned}/${overallTotals.possible}`}</td>
+                        <td className="num">{overallTotals == null ? '—' : `${Math.round(pctOf(overallTotals.earned, overallTotals.possible))}%`}</td>
                       </tr>
                     </tfoot>
                   </table>
