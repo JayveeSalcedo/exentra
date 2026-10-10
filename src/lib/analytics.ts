@@ -234,6 +234,7 @@ export interface ClassRecordAssessment {
   type: string
   totalPoints: number
   dueDate: string | null
+  moduleTopic: string | null
 }
 
 export interface ClassRecordStudent {
@@ -258,7 +259,7 @@ export async function fetchClassRecord(teacherId: string, blockId: string): Prom
       .select('student_id, profiles(id, school_id, first_name, last_name)')
       .eq('block_id', blockId).eq('status', 'active'),
     supabase.from('assessments')
-      .select('id, title, type, total_points, due_date')
+      .select('id, title, type, total_points, due_date, module_topic')
       .eq('block_id', blockId).eq('is_archived', false).eq('is_published', true)
       .order('due_date'),
   ])
@@ -282,6 +283,7 @@ export async function fetchClassRecord(teacherId: string, blockId: string): Prom
     type: (a.type as string) ?? 'quiz',
     totalPoints: Number(a.total_points ?? 0),
     dueDate: (a.due_date as string | null) ?? null,
+    moduleTopic: (a.module_topic as string | null) ?? null,
   }))
 
   const scores: Record<string, Record<string, number>> = {}

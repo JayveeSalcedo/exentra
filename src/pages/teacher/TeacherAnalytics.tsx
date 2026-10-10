@@ -5,6 +5,8 @@ import { ClipboardList, Download, RefreshCw, Layers } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
 import { PASSING_SCORE, fetchClassRecord, type ClassRecordData, type ClassRecordAssessment } from '../../lib/analytics'
+import { COURSE_MODULES, moduleForTopic } from '../../lessons/course'
+import ScoreBarChart from '../../components/charts/ScoreBarChart'
 import './TeacherAnalytics.css'
 
 const TYPE_LABEL: Record<string, string> = { quiz: 'Quiz', activity: 'Activity', assignment: 'Assignment', exam: 'Exam' }
@@ -61,6 +63,28 @@ export default function TeacherAnalytics() {
     const ordered = TYPE_ORDER.filter(t => byType.has(t)).map(t => [t, byType.get(t)!] as [string, ClassRecordAssessment[]])
     const rest = Array.from(byType.entries()).filter(([t]) => !TYPE_ORDER.includes(t))
     return [...ordered, ...rest]
+  }, [data])
+
+  /** Average score per course module, across every student in this block */
+  const moduleBars = useMemo(() => {
+    if (!data) return []
+    return COURSE_MODULES.map(m => {
+      const scores: number[] = []
+      for (const a of data.assessments) {
+        if (moduleForTopic(a.moduleTopic)?.order !== m.order) continue
+        for (const s of data.students) {
+          const v = data.scores[s.id]?.[a.id]
+          if (v != null) scores.push(pctOf(v, a.totalPoints))
+        }
+      }
+      return {
+        key: String(m.order),
+        label: `M${m.order}`,
+        name: `Module ${m.order} – ${m.title}`,
+        value: avg(scores),
+        detail: scores.length ? `${scores.length} submission${scores.length === 1 ? '' : 's'}` : 'No submissions yet',
+      }
+    })
   }, [data])
 
   /** Total earned / total possible across every assessment this student has a submission for */
@@ -146,6 +170,20 @@ export default function TeacherAnalytics() {
           </motion.div>
 
           <motion.section className="tan-card" {...stagger(2)}>
+            <header className="tan-card-head">
+              <h2><i className="tan-dot green" /> Class Performance per Module</h2>
+              <p>Average score per module, across every student in this block</p>
+            </header>
+            <ScoreBarChart
+              bars={moduleBars}
+              colorMode="status"
+              threshold={PASSING_SCORE}
+              ariaLabel="Class average score per module"
+              emptyText="No graded assessments for this block yet."
+            />
+          </motion.section>
+
+          <motion.section className="tan-card" {...stagger(3)}>
             {loading && !data ? (
               <p className="tan-empty">Loading class record…</p>
             ) : (
