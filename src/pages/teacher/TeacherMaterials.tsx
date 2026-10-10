@@ -63,7 +63,7 @@ export default function TeacherMaterials() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => { if (user) fetchAll() }, [user])
 
   useEffect(() => {
     if (!user) return
@@ -82,6 +82,7 @@ export default function TeacherMaterials() {
   }
 
   const fetchAll = async () => {
+    if (!user) return
     setLoading(true)
     try {
       const { data: mods, error: modErr } = await supabase
@@ -90,9 +91,12 @@ export default function TeacherMaterials() {
         .order('order_index')
       if (modErr) throw modErr
 
+      // Scoped to this teacher's own uploads — otherwise the total/card counts
+      // include every teacher's materials across the whole database.
       const { data: mats, error: matErr } = await supabase
         .from('materials')
         .select('id, module_id, title, file_url, file_type, file_size, created_at, block_id')
+        .eq('uploaded_by', user.id)
         .order('created_at', { ascending: false })
       if (matErr) throw matErr
 
@@ -189,7 +193,10 @@ export default function TeacherMaterials() {
     }
   }
 
-  const totalMaterials = allMaterials.length
+  // Sum of the visible cards, not allMaterials.length directly — a file
+  // attached to an archived block is still "yours" (uploaded_by matches) but
+  // has no card to open it from, so it shouldn't count toward this total.
+  const totalMaterials = cards.reduce((sum, c) => sum + c.count, 0)
 
   return (
     <div className="tm-root">
