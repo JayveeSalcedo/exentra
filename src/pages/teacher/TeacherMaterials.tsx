@@ -109,13 +109,19 @@ export default function TeacherMaterials() {
     }
   }
 
+  // A material applies to a block if it's that block's own upload, or it was
+  // uploaded under "All Students" (block_id null) — students see both, per
+  // LearningMaterials.tsx's `!mat.block_id || mat.block_id === myBlockId`.
+  const appliesToTarget = (mat: Material, targetId: string | null) =>
+    targetId === null ? !mat.block_id : (mat.block_id === targetId || !mat.block_id)
+
   // ── Block cards (incl. "All Students") ─────────────────────────────────
   const cards = useMemo(() => {
-    const allCount = allMaterials.filter(m => !m.block_id).length
+    const allCount = allMaterials.filter(m => appliesToTarget(m, null)).length
     const blockCards = myBlocks.map(b => ({
       id: b.id,
       name: b.name,
-      count: allMaterials.filter(m => m.block_id === b.id).length,
+      count: allMaterials.filter(m => appliesToTarget(m, b.id)).length,
     }))
     return [{ id: null as string | null, name: 'All Students', count: allCount }, ...blockCards]
   }, [allMaterials, myBlocks])
@@ -125,7 +131,7 @@ export default function TeacherMaterials() {
     if (!selectedTarget) return []
     return modules.map(m => ({
       ...m,
-      materials: allMaterials.filter(mat => mat.module_id === m.id && mat.block_id === selectedTarget.id),
+      materials: allMaterials.filter(mat => mat.module_id === m.id && appliesToTarget(mat, selectedTarget.id)),
     }))
   }, [modules, allMaterials, selectedTarget])
 
@@ -332,7 +338,12 @@ export default function TeacherMaterials() {
                               >
                                 <div className="tm-file-icon">{fileIcon(mat.file_type)}</div>
                                 <div className="tm-file-info">
-                                  <p className="tm-file-title">{mat.title}</p>
+                                  <div className="tm-file-title-row">
+                                    <p className="tm-file-title">{mat.title}</p>
+                                    {selectedTarget?.id !== null && !mat.block_id && (
+                                      <span className="tm-file-all-badge" title="Uploaded for All Students — deleting it removes it from every block">All Students</span>
+                                    )}
+                                  </div>
                                   <p className="tm-file-meta">
                                     {mat.file_type.toUpperCase()}
                                     {mat.file_size ? ` · ${fmtSize(mat.file_size)}` : ''}
