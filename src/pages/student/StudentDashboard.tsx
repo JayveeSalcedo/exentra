@@ -7,7 +7,7 @@ import { getTodayChallenge, getTodayAttempt, submitChallengeAttempt, type DailyC
 import {
   Zap, Trophy, Flame, CheckCircle2, ChevronRight,
   BookOpen, Brain, Target, TrendingUp, Star, Play, Lock,
-  Lightbulb, Send, RefreshCw, Layers, XCircle, Clock, X, User
+  Lightbulb, Send, RefreshCw, Layers, XCircle, Clock, X
 } from 'lucide-react'
 import { TOTAL_MODULES } from '../../lessons/course'
 import { computeCourseProgress, completedLessonSet, type ModuleProgress } from '../../lessons/progress'
@@ -63,7 +63,6 @@ export default function StudentDashboard() {
   const [courseProgress, setCourseProgress] = useState<ModuleProgress[]>(() => computeCourseProgress(new Set()))
   const [loading, setLoading] = useState(true)
   const [blockName, setBlockName] = useState<string | null>(null)
-  const [instructorName, setInstructorName] = useState<string | null>(null)
   const [blockArchived, setBlockArchived] = useState(false)
   const [blockSchedule, setBlockSchedule] = useState<string | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
@@ -122,21 +121,12 @@ export default function StudentDashboard() {
         if (enrollment?.block_id) {
           const { data: block } = await supabase
             .from('blocks')
-            .select('name, is_archived, schedule, teacher_id')
+            .select('name, is_archived, schedule')
             .eq('id', enrollment.block_id)
             .single()
           setBlockName(block?.name ?? null)
           setBlockArchived(!!block?.is_archived)
           setBlockSchedule(block?.schedule ?? null)
-
-          if (block?.teacher_id) {
-            const { data: teacher } = await supabase
-              .from('profiles')
-              .select('first_name, last_name')
-              .eq('id', block.teacher_id)
-              .single()
-            if (teacher) setInstructorName(`${teacher.first_name} ${teacher.last_name}`.trim())
-          }
         }
       }
 
@@ -282,18 +272,6 @@ export default function StudentDashboard() {
           >
             <Clock size={12} />
             {blockSchedule}
-          </motion.div>
-        )}
-
-        {blockName && instructorName && (
-          <motion.div
-            className="sd-block-instructor"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.08 }}
-          >
-            <User size={12} />
-            {instructorName}
           </motion.div>
         )}
       </div>

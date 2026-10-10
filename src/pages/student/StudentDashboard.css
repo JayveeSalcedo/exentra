@@ -1036,22 +1036,6 @@
   letter-spacing: 0.3px;
 }
 
-.sd-block-instructor {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  width: fit-content;
-  background: rgba(155,126,212,0.08);
-  border: 1px solid rgba(155,126,212,0.22);
-  border-radius: 99px;
-  padding: 6px 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--purple-light, #9B7ED4);
-  letter-spacing: 0.3px;
-}
-
 .sd-block-meta-row {
   display: flex;
   flex-wrap: wrap;
