@@ -130,7 +130,7 @@ export default function CreateDeck() {
         </div>
       </div>
 
-      <div className="pb-create-layout" style={{ gridTemplateColumns: 'minmax(280px, 320px) 1fr' }}>
+      <div className="pb-create-layout">
         {/* Left config panel */}
         <div className="pb-config-panel" style={{ gap: 14 }}>
           <p className="pb-panel-title">Deck Settings</p>

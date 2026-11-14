@@ -332,7 +332,7 @@
 
 .pb-create-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: minmax(280px, 320px) 1fr;
   gap: 16px;
   align-items: flex-start;
 }
