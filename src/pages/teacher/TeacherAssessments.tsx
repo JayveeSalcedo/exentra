@@ -1157,7 +1157,7 @@ export default function TeacherAssessments() {
                                                 <div className="ta2-student-avatar">
                                                   {(sub.studentName ?? 'U')[0].toUpperCase()}
                                                 </div>
-                                                <div>
+                                                <div className="ta2-student-namewrap">
                                                   <p className="ta2-student-name">{sub.studentName ?? 'Loading…'}</p>
                                                   {sub.studentUsername && (
                                                     <p className="ta2-student-username">@{sub.studentUsername}</p>
