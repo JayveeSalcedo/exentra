@@ -39,6 +39,28 @@ alter table public.notifications add constraint notifications_type_check
     'student_submitted'
   ));
 
+-- Link every assessment-related notification back to the assessment row it's
+-- about, with ON DELETE CASCADE. Without this, deleting an assessment left
+-- its notifications behind as orphans pointing at a dead link — clicking one
+-- would just mark it read and silently do nothing, since the deep-link
+-- handler on the target page can never find a matching assessment.
+alter table public.notifications
+  add column if not exists assessment_id uuid references public.assessments(id) on delete cascade;
+
+create index if not exists idx_notifications_assessment
+  on public.notifications (assessment_id);
+
+-- One-time backfill for rows inserted before this column existed: pull the
+-- trailing uuid out of the link and only attach it when that assessment
+-- still exists (an already-orphaned row with a dead id is left as-is — it
+-- has no assessment to cascade from anyway, so it's harmless).
+update public.notifications n
+set assessment_id = a.id
+from public.assessments a
+where n.assessment_id is null
+  and n.link ~ '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and a.id::text = substring(n.link from '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$');
+
 -- -- 2. RLS -----------------------------------------------------------------------
 alter table public.notifications enable row level security;
 
@@ -76,19 +98,21 @@ begin
   end if;
 
   if new.block_id is null then
-    insert into public.notifications (user_id, type, title, body, link)
+    insert into public.notifications (user_id, type, title, body, link, assessment_id)
     select p.id, 'assessment_posted',
            'New ' || new.type || ' posted',
            new.title || ' is now available.',
-           '/student/assessments/' || new.id
+           '/student/assessments/' || new.id,
+           new.id
     from public.profiles p
     where p.role = 'student';
   else
-    insert into public.notifications (user_id, type, title, body, link)
+    insert into public.notifications (user_id, type, title, body, link, assessment_id)
     select be.student_id, 'assessment_posted',
            'New ' || new.type || ' posted',
            new.title || ' is now available.',
-           '/student/assessments/' || new.id
+           '/student/assessments/' || new.id,
+           new.id
     from public.block_enrollments be
     where be.block_id = new.block_id;
   end if;
@@ -145,12 +169,13 @@ create or replace function public.notify_grade_released()
 returns trigger as $$
 begin
   if new.graded_at is not null and old.graded_at is null then
-    insert into public.notifications (user_id, type, title, body, link)
+    insert into public.notifications (user_id, type, title, body, link, assessment_id)
     values (
       new.student_id, 'grade_released',
       'Grade released',
       'Your submission has been graded.',
-      '/student/assessments/' || new.assessment_id
+      '/student/assessments/' || new.assessment_id,
+      new.assessment_id
     );
   end if;
   return new;
@@ -170,13 +195,14 @@ create trigger trg_notify_grade_released
 create or replace function public.send_due_soon_reminders()
 returns void as $$
 begin
-  insert into public.notifications (user_id, type, title, body, link)
+  insert into public.notifications (user_id, type, title, body, link, assessment_id)
   select
     target.user_id,
     'due_soon',
     a.title || ' is due soon',
     'Due ' || to_char(a.due_date, 'Mon DD, HH12:MI AM') || '.',
-    '/student/assessments/' || a.id
+    '/student/assessments/' || a.id,
+    a.id
   from public.assessments a
   cross join lateral (
     select be.student_id as user_id
@@ -254,7 +280,7 @@ begin
 
   v_needs_grading := v_assessment_type in ('activity', 'assignment');
 
-  insert into public.notifications (user_id, type, title, body, link)
+  insert into public.notifications (user_id, type, title, body, link, assessment_id)
   values (
     v_teacher_id,
     'student_submitted',
@@ -263,7 +289,8 @@ begin
       when v_needs_grading then 'Needs grading.'
       else 'Auto-graded: ' || coalesce(round(new.percentage)::text, '0') || '%.'
     end,
-    '/teacher/assessments?open=' || new.assessment_id
+    '/teacher/assessments?open=' || new.assessment_id,
+    new.assessment_id
   );
 
   return new;
