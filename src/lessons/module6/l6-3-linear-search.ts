@@ -83,6 +83,7 @@ public class Linear_Search {
   ],
   durationMinutes: 20,
   source: { guide: 6, pages: '11–14' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=P3UZwESFQbA',
   visualizerType: 'array',
   starterCode: `public class Main {
   // Returns the 1-based location of item, or -1 if not found

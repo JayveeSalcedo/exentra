@@ -86,6 +86,7 @@ o2.prev.prev = o5;`,
   ],
   durationMinutes: 25,
   source: { guide: 2, pages: '19–22' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=ZlNKNSz88Nk',
   visualizerType: 'doubly-linked-list',
   starterCode: `public class Main {
   static class Node {

@@ -107,6 +107,7 @@ class Graph {
   ],
   durationMinutes: 30,
   source: { guide: 3, pages: '23–26' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=NX1_etRg078',
   visualizerType: 'none',
   starterCode: `import java.util.*;
 

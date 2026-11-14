@@ -48,6 +48,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 20,
   source: { guide: 5, pages: '4–6' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=XHyn7SpsOmU',
   visualizerType: 'graph-directed',
   hints: [
     'Row 1 has edges to 2 and 4, so vertex 1 has outdegree 2.',

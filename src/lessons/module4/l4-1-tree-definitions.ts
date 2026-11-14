@@ -67,6 +67,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 25,
   source: { guide: 4, pages: '1–6' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=oI0QhFzBSRo',
   visualizerType: 'binary-tree',
   hints: [
     'Null links = n(k − 1) + 1. For n = 12, k = 4: 12·3 + 1 = 37 out of 48 links.',

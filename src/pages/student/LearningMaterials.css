@@ -670,6 +670,27 @@
   background: var(--success-tint);
 }
 
+/* ── Watch on YouTube button (per-lesson) ─────────────────────────────────── */
+.lm-lesson-yt-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 0, 0, 0.08);
+  border: 1px solid rgba(255, 0, 0, 0.25);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF4D4D;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.lm-lesson-yt-btn:hover {
+  background: rgba(255, 0, 0, 0.16);
+  border-color: rgba(255, 0, 0, 0.4);
+}
+
 /* Video links */
 .lm-video-item {
   display: flex;

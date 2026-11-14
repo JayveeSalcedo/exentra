@@ -66,6 +66,7 @@ void bfs(int start) {
   ],
   durationMinutes: 25,
   source: { guide: 5, pages: '7–10' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=uXWReXfeK48',
   visualizerType: 'bfs-dfs',
   hints: [
     'When there is a choice between neighbours, pick the smallest-numbered vertex first to get a consistent answer.',

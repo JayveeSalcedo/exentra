@@ -71,4 +71,6 @@ export interface Lesson {
   hints: string[]
   /** Time-complexity note shown as a header badge, e.g. "Access O(1) · Search O(n)" */
   complexityNote?: string
+  /** A short, relevant YouTube video explaining this topic */
+  youtubeUrl?: string
 }

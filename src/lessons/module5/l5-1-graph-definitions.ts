@@ -44,6 +44,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 20,
   source: { guide: 5, pages: '1–4' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=4IZ80K72OXo',
   visualizerType: 'graph-undirected',
   hints: [
     'Look for the word that matches each description: weighted, undirected, complete, complete directed, simple cycle.',

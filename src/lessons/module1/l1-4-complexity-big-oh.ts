@@ -95,6 +95,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 35,
   source: { guide: 1, pages: '7–13' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=ddsP7NecEBk',
   visualizerType: 'none',
   hints: [
     'For 5n + 3 <= cn, divide both sides by n: 5 + 3/n <= c. Pick n₀ = 3 and c = 6.',

@@ -55,6 +55,7 @@ Result:   1   20   21   3   40   410   411` },
   ],
   durationMinutes: 25,
   source: { guide: 7, pages: '11–14' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=1aaQx8v2x2s',
   visualizerType: 'none',
   hints: [
     'Start with addresses 0 and 1 (one leftmost digit) pointing to two buckets.',

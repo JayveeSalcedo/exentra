@@ -87,6 +87,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 30,
   source: { guide: 2, pages: '14–19' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=HB7TcYklBHY',
   visualizerType: 'linked-list',
   starterCode: `public class Main {
   static class Node {

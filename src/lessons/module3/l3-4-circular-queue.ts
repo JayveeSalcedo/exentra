@@ -68,6 +68,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 25,
   source: { guide: 3, pages: '20–23' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=KqTJ5MAUj80',
   visualizerType: 'circular-queue',
   starterCode: `public class Main {
   static final int SIZE = 5;

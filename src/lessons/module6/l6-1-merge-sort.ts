@@ -163,6 +163,7 @@ Step 6: Exit` },
   ],
   durationMinutes: 35,
   source: { guide: 6, pages: '1–10' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=mB5HXBb_HY8',
   visualizerType: 'merge-sort',
   starterCode: `public class Main {
   static void merge(int[] arr, int beg, int mid, int end) {

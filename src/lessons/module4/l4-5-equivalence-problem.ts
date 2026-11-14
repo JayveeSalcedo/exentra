@@ -116,6 +116,7 @@ if (i != j) FATHER[i] = j;             /* merge the two trees */` },
   ],
   durationMinutes: 35,
   source: { guide: 4, pages: '27–36' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=1sl3hNi3E4k',
   visualizerType: 'none',
   starterCode: `public class Main {
   static int[] FATHER = new int[14];   // elements 1..13, FATHER[0] unused

@@ -214,6 +214,7 @@ boolean delete(int k) {
   ],
   durationMinutes: 40,
   source: { guide: 4, pages: '36–46' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=mz5JzAHVtmA',
   visualizerType: 'bst',
   starterCode: `public class Main {
   static class BSTNode {

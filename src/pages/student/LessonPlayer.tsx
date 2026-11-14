@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, BookOpen, Lightbulb, Code2, FileText, Target, Clock,
-  CheckCircle2, Play, Zap, ChevronRight, ChevronLeft, Send, Loader2, XCircle, CircleDot, CircleHelp,
+  CheckCircle2, Play, Zap, ChevronRight, ChevronLeft, Send, Loader2, XCircle, CircleDot, CircleHelp, Video,
 } from 'lucide-react'
 import CodeEditor from '../../components/ui/CodeEditor'
 import ConceptVisualizer from '../../components/visualizers/ConceptVisualizer'
@@ -295,6 +295,11 @@ export default function LessonPlayer() {
                       {hasPractice && <span><Code2 size={12} /> Java practice</span>}
                       {courseModule && (
                         <a href={courseModule.pdf} target="_blank" rel="noopener noreferrer">Open PDF</a>
+                      )}
+                      {lesson.youtubeUrl && (
+                        <a href={lesson.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                          <Video size={12} /> Watch on YouTube
+                        </a>
                       )}
                     </div>
                   </>

@@ -40,6 +40,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 20,
   source: { guide: 1, pages: '3–6' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=P_kbm0smTGc',
   visualizerType: 'none',
   hints: [
     'Start every algorithm with START and end it with STOP.',

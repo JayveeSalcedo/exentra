@@ -139,6 +139,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 35,
   source: { guide: 3, pages: '1–10' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=XSdXSmwb550',
   visualizerType: 'stack',
   starterCode: `public class Main {
   static char[] S = new char[100];

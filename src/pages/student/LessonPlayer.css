@@ -585,7 +585,7 @@
   color: var(--lesson-muted);
 }
 .lp-source-row span { display: inline-flex; align-items: center; gap: 5px; }
-.lp-source-row a { color: var(--lesson-accent); text-decoration: none; }
+.lp-source-row a { display: inline-flex; align-items: center; gap: 4px; color: var(--lesson-accent); text-decoration: none; }
 .lp-source-row a:hover { text-decoration: underline; }
 
 .lp-reading { display: flex; flex-direction: column; gap: 12px; }

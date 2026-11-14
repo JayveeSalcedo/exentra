@@ -82,6 +82,7 @@ k = 4:  A(1,3) = min(∞, A(1,4) + A(4,3)) = min(∞, 9 + 1) = 10    PATH(1,3) =
   ],
   durationMinutes: 40,
   source: { guide: 5, pages: '12–18' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=JrDH225RylA',
   visualizerType: 'none',
   hints: [
     'Dijkstra: make a table with columns for each vertex and rows for each iteration, listing value/class/path.',

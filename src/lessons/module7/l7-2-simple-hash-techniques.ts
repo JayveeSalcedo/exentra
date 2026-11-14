@@ -69,6 +69,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 25,
   source: { guide: 7, pages: '2–4, 10–11' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=U1aEQvhcA9s',
   visualizerType: 'hash-table',
   starterCode: `public class Main {
   // Shift folding in half.

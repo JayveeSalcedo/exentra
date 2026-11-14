@@ -87,6 +87,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 25,
   source: { guide: 4, pages: '6–12' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=IbudcjpNzeA',
   visualizerType: 'binary-tree',
   hints: [
     'Level i holds at most 2ⁱ nodes, so level 4 holds 16.',

@@ -137,6 +137,7 @@ BinaryTree convert() {
   ],
   durationMinutes: 40,
   source: { guide: 4, pages: '18–27' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=pWD7QUjnA8E',
   visualizerType: 'binary-tree',
   hints: [
     'In a preorder listing with weights, a node with weight w is followed by exactly its w descendants.',

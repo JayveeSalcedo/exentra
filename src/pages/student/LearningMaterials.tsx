@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   BookOpen, ChevronDown, Play, Download,
   Lock, CheckCircle2, Clock, FileText, Paperclip,
-  Zap, Search, ExternalLink, ArrowRight, Target, User, ListChecks,
+  Zap, Search, ExternalLink, ArrowRight, Target, User, ListChecks, Video,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../store/AuthContext'
@@ -476,6 +476,17 @@ export default function LearningMaterials() {
                           </div>
                         </div>
                         <div className="lm-detail-lesson-right">
+                          {lesson.youtubeUrl && (
+                            <a
+                              href={lesson.youtubeUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="lm-lesson-yt-btn"
+                              title="Watch on YouTube"
+                            >
+                              <Video size={14} />
+                            </a>
+                          )}
                           {ls === 'done' && (
                             <button
                               className="lm-detail-review-btn"

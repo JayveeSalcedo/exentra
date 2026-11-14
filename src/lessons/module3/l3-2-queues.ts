@@ -197,6 +197,7 @@ public class Test {
   ],
   durationMinutes: 30,
   source: { guide: 3, pages: '10–17' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=XuCbpw6Bj1U',
   visualizerType: 'queue',
   starterCode: `public class Main {
   static class QNode {

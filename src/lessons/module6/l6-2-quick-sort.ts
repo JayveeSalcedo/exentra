@@ -138,6 +138,7 @@ Step 8: END` },
   ],
   durationMinutes: 35,
   source: { guide: 6, pages: '6–11' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=7h1s2SojIRw',
   visualizerType: 'none',
   starterCode: `public class Main {
   static void quickSort(int[] array, int startIdx, int endIdx) {

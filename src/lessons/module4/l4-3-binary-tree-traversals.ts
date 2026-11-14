@@ -102,6 +102,7 @@ boolean equivalent(BinaryTree t2) {
   ],
   durationMinutes: 30,
   source: { guide: 4, pages: '12–18' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=87-lAYP9KCA',
   visualizerType: 'binary-tree',
   starterCode: `public class Main {
   static class BTNode {

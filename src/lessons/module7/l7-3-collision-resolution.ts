@@ -86,6 +86,7 @@ Insert 458:  h1(458) = 3 → stored at address 3` },
   ],
   durationMinutes: 35,
   source: { guide: 7, pages: '4–10' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=bgGePSkuwds',
   visualizerType: 'hash-table',
   starterCode: `public class Main {
   static final int M = 13;

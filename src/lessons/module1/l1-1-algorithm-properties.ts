@@ -60,6 +60,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 15,
   source: { guide: 1, pages: '1–3' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=h9LtX_R-7uA',
   visualizerType: 'none',
   hints: [
     'Finiteness: does the for loop always stop?',

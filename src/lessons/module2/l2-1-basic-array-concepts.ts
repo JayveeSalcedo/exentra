@@ -90,6 +90,7 @@ SAMPLE OUTPUT
   ],
   durationMinutes: 25,
   source: { guide: 2, pages: '1–4' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=uqVDrdBScUE',
   visualizerType: 'array',
   starterCode: `public class Main {
   public static void main(String[] args) {

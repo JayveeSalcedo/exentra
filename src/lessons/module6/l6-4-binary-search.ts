@@ -106,6 +106,7 @@ public class BinarySearch {
   ],
   durationMinutes: 30,
   source: { guide: 6, pages: '14–19' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=IzzMZ7DuniU',
   visualizerType: 'binary-search',
   starterCode: `public class Main {
   // Iterative binary search — returns the 1-based location, or -1

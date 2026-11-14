@@ -40,6 +40,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 15,
   source: { guide: 7, pages: '1–2' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=MfhjkfocRR0',
   visualizerType: 'hash-table',
   hints: [
     'k mod 10 is just the last digit of k.',

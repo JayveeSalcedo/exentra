@@ -50,6 +50,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 25,
   source: { guide: 5, pages: '10–12' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=peRQhzzUYL0',
   visualizerType: 'none',
   hints: [
     "For Kruskal, list every edge sorted by cost before you start.",

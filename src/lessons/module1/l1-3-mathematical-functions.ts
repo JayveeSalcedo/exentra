@@ -42,6 +42,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 15,
   source: { guide: 1, pages: '6–7' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=lmSpZ0bjCyQ',
   visualizerType: 'none',
   hints: [
     'For negative numbers, floor moves away from zero: ⌊-5.3⌋ = -6.',

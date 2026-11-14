@@ -63,6 +63,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 35,
   source: { guide: 4, pages: '46–51' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=zP2xbKerIds',
   visualizerType: 'avl-tree',
   hints: [
     'For 1, 6, 7: node 1 gets balance -2 with 7 in the right subtree of its right child — a simple left rotation makes 6 the root.',

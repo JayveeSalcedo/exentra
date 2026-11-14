@@ -163,6 +163,7 @@ for (String str : al)
   ],
   durationMinutes: 30,
   source: { guide: 2, pages: '4–14' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=8cLIk16rTZk',
   visualizerType: 'array',
   starterCode: `import java.util.*;
 

@@ -85,6 +85,7 @@ const lesson: Lesson = {
   ],
   durationMinutes: 30,
   source: { guide: 3, pages: '18–20' },
+  youtubeUrl: 'https://www.youtube.com/watch?v=Ue3VrbsTw9M',
   visualizerType: 'stack',
   hints: [
     'Write three columns — incoming symbol, stack, output — and fill one row per token.',
