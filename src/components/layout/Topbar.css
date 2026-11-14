@@ -296,7 +296,11 @@
 
 @media (max-width: 768px) {
   .notif-panel {
-    width: min(88vw, 340px);
+    position: fixed;
+    top: 72px;
+    right: 12px;
+    left: 12px;
+    width: auto;
   }
 }
 
