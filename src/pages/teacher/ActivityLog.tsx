@@ -5,6 +5,7 @@ import {
   GraduationCap, Search, RefreshCw, Download,
   ChevronDown, ChevronUp, ChevronsUpDown, Clock, Users
 } from 'lucide-react'
+import './ActivityLog.css'
 
 interface StudentEntry {
   id: string
@@ -246,8 +247,7 @@ export default function ActivityLog() {
         borderRadius: 16, overflow: 'hidden',
       }}>
         {/* Header row */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '48px 180px 1fr 200px',
+        <div className="al-table-head" style={{
           padding: '12px 20px', gap: 0,
           borderBottom: '1px solid rgba(255,255,255,0.05)',
           background: 'var(--surface-02)',
@@ -279,9 +279,9 @@ export default function ActivityLog() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18, delay: i * 0.025 }}
+                className="al-row"
                 style={{
-                  display: 'grid', gridTemplateColumns: '48px 180px 1fr 200px',
-                  alignItems: 'center', padding: '13px 20px',
+                  padding: '13px 20px',
                   borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
                   transition: 'background 0.15s',
                 }}
@@ -311,7 +311,7 @@ export default function ActivityLog() {
                 </span>
 
                 {/* Name */}
-                <span style={{
+                <span className="al-name-cell" style={{
                   fontFamily: 'Syne, sans-serif', fontSize: 13,
                   fontWeight: 600, color: 'var(--text-primary)',
                 }}>
