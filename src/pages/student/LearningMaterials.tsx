@@ -12,6 +12,7 @@ import { COURSE_MODULES, COURSE_NAME, TOTAL_MODULES } from '../../lessons/course
 import { TOTAL_LESSONS } from '../../lessons/index'
 import { computeCourseProgress, completedLessonSet, type UnlockState } from '../../lessons/progress'
 import type { Lesson } from '../../lessons/types'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import './LearningMaterials.css'
 
 interface Material {
@@ -43,6 +44,7 @@ export default function LearningMaterials() {
   const [activeTab, setActiveTab] = useState<DetailTab>('lessons')
   const [search, setSearch] = useState('')
   const [instructorName, setInstructorName] = useState<string | null>(null)
+  const [pendingYoutubeUrl, setPendingYoutubeUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -477,15 +479,14 @@ export default function LearningMaterials() {
                         </div>
                         <div className="lm-detail-lesson-right">
                           {lesson.youtubeUrl && (
-                            <a
-                              href={lesson.youtubeUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              type="button"
                               className="lm-lesson-yt-btn"
                               title="Watch on YouTube"
+                              onClick={() => setPendingYoutubeUrl(lesson.youtubeUrl!)}
                             >
                               <Video size={14} />
-                            </a>
+                            </button>
                           )}
                           {ls === 'done' && (
                             <button
@@ -580,6 +581,19 @@ export default function LearningMaterials() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!pendingYoutubeUrl}
+        icon={<Video size={24} strokeWidth={1.8} />}
+        title="Leave Exentra?"
+        description="This will open YouTube in a new tab."
+        confirmLabel="Continue to YouTube"
+        onConfirm={() => {
+          if (pendingYoutubeUrl) window.open(pendingYoutubeUrl, '_blank', 'noopener,noreferrer')
+          setPendingYoutubeUrl(null)
+        }}
+        onCancel={() => setPendingYoutubeUrl(null)}
+      />
     </div>
   )
 }

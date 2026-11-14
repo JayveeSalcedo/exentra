@@ -681,6 +681,7 @@
   align-items: center;
   justify-content: center;
   color: #FF4D4D;
+  cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
   margin-right: 8px;

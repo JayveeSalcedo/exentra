@@ -6,6 +6,7 @@ import {
   CheckCircle2, Play, Zap, ChevronRight, ChevronLeft, Send, Loader2, XCircle, CircleDot, CircleHelp, Video,
 } from 'lucide-react'
 import CodeEditor from '../../components/ui/CodeEditor'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import ConceptVisualizer from '../../components/visualizers/ConceptVisualizer'
 import ContentBlocks from '../../components/lesson/ContentBlocks'
 import CodeBlock from '../../components/lesson/CodeBlock'
@@ -108,6 +109,7 @@ export default function LessonPlayer() {
   const [showHints, setShowHints] = useState(false)
   const [completed, setCompleted] = useState<Set<string> | null>(null)
   const [saving, setSaving] = useState(false)
+  const [pendingYoutubeUrl, setPendingYoutubeUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!lesson) return
@@ -297,9 +299,13 @@ export default function LessonPlayer() {
                         <a href={courseModule.pdf} target="_blank" rel="noopener noreferrer">Open PDF</a>
                       )}
                       {lesson.youtubeUrl && (
-                        <a href={lesson.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                        <button
+                          type="button"
+                          className="lp-yt-link"
+                          onClick={() => setPendingYoutubeUrl(lesson.youtubeUrl!)}
+                        >
                           <Video size={12} /> Watch on YouTube
-                        </a>
+                        </button>
                       )}
                     </div>
                   </>
@@ -581,6 +587,19 @@ export default function LessonPlayer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={!!pendingYoutubeUrl}
+        icon={<Video size={24} strokeWidth={1.8} />}
+        title="Leave Exentra?"
+        description="This will open YouTube in a new tab."
+        confirmLabel="Continue to YouTube"
+        onConfirm={() => {
+          if (pendingYoutubeUrl) window.open(pendingYoutubeUrl, '_blank', 'noopener,noreferrer')
+          setPendingYoutubeUrl(null)
+        }}
+        onCancel={() => setPendingYoutubeUrl(null)}
+      />
     </div>
   )
 }
